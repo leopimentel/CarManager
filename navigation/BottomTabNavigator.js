@@ -1,49 +1,77 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as React from 'react';
 
-import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
-
+import { MaterialCommunityIcons, Entypo, Foundation } from '@expo/vector-icons';
+import { t } from '../locales/index'
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Home';
+import Colors from '../constants/Colors';
 
 function BottomTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
   // currently active tab. Learn more in the documentation:
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
   navigation.setOptions({ headerTitle: getHeaderTitle(route) });
+  const iconSize = 30
 
   return (
     <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
       <BottomTab.Screen
-        name="Home"
+        name="Fuel"
         component={HomeScreen}
         options={{
-          title: 'Get Started',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-code-working" />,
+          title: t('fuel'),
+          tabBarIcon: ({ focused }) => <MaterialCommunityIcons
+          style={{ color: getFocusedColor(focused) }}
+          name="gas-station" size={iconSize}  />,
         }}
       />
       <BottomTab.Screen
-        name="Links"
+        name="Consumption"
         component={LinksScreen}
         options={{
-          title: 'Resources',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-book" />,
+          title: t('consumption'),
+          tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="Spending"
+        component={LinksScreen}
+        options={{
+          title: t('spending'),
+          tabBarIcon: ({ focused }) => <Foundation name="dollar" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="Report"
+        component={LinksScreen}
+        options={{
+          title: t('report'),
+          tabBarIcon: ({ focused }) => <Foundation name="list-number" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
     </BottomTab.Navigator>
   );
 }
 
+function getFocusedColor(focused) {
+  return focused ? Colors.tabIconSelected : Colors.tabIconDefault
+}
+
 function getHeaderTitle(route) {
   const routeName = route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
 
   switch (routeName) {
-    case 'Home':
-      return 'How to get started';
-    case 'Links':
-      return 'Links to learn more';
+    case 'Fuel':
+      return t('fuel');
+    case 'Consumption':
+      return t('consumption');
+    case 'Spending':
+      return t('spending');
+    case 'Report':
+      return t('report');
   }
 }
 

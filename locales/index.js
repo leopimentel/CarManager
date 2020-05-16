@@ -32,10 +32,13 @@ const setLanguageToI18n = () => {
 
 setLanguageToI18n();
 
-function translate(key) {
+function t(key) {
   return I18n.t(key);
 }
 
+/**
+ * Based on https://medium.com/reactbrasil/internacionaliza%C3%A7%C3%A3o-em-react-native-77fb1a56f8e9
+ */
 export {
-  translate
+  t
 }

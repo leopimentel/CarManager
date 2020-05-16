@@ -1,3 +1,6 @@
 export default {
-  fuel: 'Abastecer_leo',
+  fuel: 'Abastecer',
+  consumption: 'Consumo',
+  spending: 'Gasto',
+  report: 'Relatório'
 };
