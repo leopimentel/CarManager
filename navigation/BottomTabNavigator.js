@@ -8,7 +8,7 @@ import LinksScreen from '../screens/LinksScreen';
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Home';
 
-export default function BottomTabNavigator({ navigation, route }) {
+function BottomTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
   // currently active tab. Learn more in the documentation:
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
@@ -46,3 +46,5 @@ function getHeaderTitle(route) {
       return 'Links to learn more';
   }
 }
+
+export default BottomTabNavigator

@@ -6,8 +6,17 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
-
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 const Stack = createStackNavigator();
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: 'tomato',
+    accent: 'yellow',
+  },
+};
 
 export default function App(props) {
   const isLoadingComplete = useCachedResources();
@@ -16,14 +25,16 @@ export default function App(props) {
     return null;
   } else {
     return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
-        <NavigationContainer linking={LinkingConfiguration}>
-          <Stack.Navigator>
-            <Stack.Screen name="Root" component={BottomTabNavigator} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </View>
+      <PaperProvider theme={theme}>
+        <View style={styles.container}>
+          {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
+          <NavigationContainer linking={LinkingConfiguration}>
+            <Stack.Navigator>
+              <Stack.Screen name="Root" component={BottomTabNavigator} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </PaperProvider>
     );
   }
 }
