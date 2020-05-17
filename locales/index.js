@@ -32,8 +32,8 @@ const setLanguageToI18n = () => {
 
 setLanguageToI18n();
 
-function t(key) {
-  return I18n.t(key);
+function t(key, params) {
+  return I18n.t(key, params);
 }
 
 /**
