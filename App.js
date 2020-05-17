@@ -14,7 +14,7 @@ const theme = {
   colors: {
     ...DefaultTheme.colors,
     primary: 'tomato',
-    accent: 'yellow',
+    accent: 'blue',
   },
 };
 
@@ -30,7 +30,7 @@ export default function App(props) {
           {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
           <NavigationContainer linking={LinkingConfiguration}>
             <Stack.Navigator>
-              <Stack.Screen name="Root" component={BottomTabNavigator} />
+              <Stack.Screen name="Abastecimento" component={BottomTabNavigator} />
             </Stack.Navigator>
           </NavigationContainer>
         </View>

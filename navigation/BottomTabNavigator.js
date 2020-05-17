@@ -4,7 +4,7 @@ import * as React from 'react';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import { MaterialCommunityIcons, Entypo, Foundation } from '@expo/vector-icons';
-import { t } from '../locales/index'
+import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Home';
 import Colors from '../constants/Colors';
@@ -22,7 +22,7 @@ function BottomTabNavigator({ navigation, route }) {
         name="Fuel"
         component={HomeScreen}
         options={{
-          title: t('fuel'),
+          title: t('fueling'),
           tabBarIcon: ({ focused }) => <MaterialCommunityIcons
           style={{ color: getFocusedColor(focused) }}
           name="gas-station" size={iconSize}  />,
@@ -64,8 +64,8 @@ function getHeaderTitle(route) {
   const routeName = route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
 
   switch (routeName) {
-    case 'Fuel':
-      return t('fuel');
+    case 'Fueling':
+      return t('fueling');
     case 'Consumption':
       return t('consumption');
     case 'Spending':
