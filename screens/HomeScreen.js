@@ -1,5 +1,5 @@
 import * as WebBrowser from 'expo-web-browser';
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { MonoText } from '../components/StyledText';
@@ -14,21 +14,44 @@ import { t } from '../locales'
 import { TextInput } from 'react-native-paper';
 import { Checkbox } from 'react-native-paper';
 import { getStyles } from './style'
-
+import { execute, migrateUp, useTestData } from '../database'
+  
 function HomeScreen({ theme }) {
   const styles = getStyles(theme)
-  const [fillingDate, setFillingDate] = React.useState(moment().format(t('dateFormat')))
-  const [totalFuel, setTotalFuel] = React.useState()
-  const [pricePerUnit, setPricePerUnit] = React.useState()
-  const [observation, setObservation] = React.useState()
-  const [isFullTank, setFullTank] = React.useState(true)
+  const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
+  const [totalFuel, setTotalFuel] = useState()
+  const [pricePerUnit, setPricePerUnit] = useState()
+  const [observation, setObservation] = useState()
+  const [isFullTank, setFullTank] = useState(true)
   const vehicles = [{
     value: 'Meu'
   }];
-  const fuels = [{value: t('alcohol')}, {value: t('diesel')}, {value: t('gas')}, {value: 'naturalGas'}];
+  const fuels = [{value: t('gas')}, {value: t('alcohol')}, {value: t('diesel')}, {value: 'naturalGas'}, {value: 'leadedGas'}];
+  const [combustiveis, setCombustiveis] = useState()
   const saveFilling = () => {
+    console.log('aqui')
+    // execute(
+    //   `select * from Combustivel`, [], (_, { rows }) =>
+    //     console.log(JSON.stringify(rows))
+    //   , (error) => console.log(error))
 
+    execute(
+      `select * from Gasto`,
+      [],
+      (_, { rows: { _array } }) => {
+        console.log('leo', _array)
+        setCombustiveis(_array)
+      },
+      (a, error) => {
+        console.log('leo2', a, error)
+      }
+    );
   }
+
+  useEffect(() => {
+    migrateUp();
+    useTestData();
+  }, []);
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container} >
@@ -104,6 +127,8 @@ function HomeScreen({ theme }) {
             placeholder={t('fillingObservation')}
             style={{ marginTop: 15 }}
           />
+
+        <Text>{JSON.stringify(combustiveis)}</Text>
 
         <Button style={{ marginTop: 15, padding: 5 }} labelStyle={{fontSize: 25}}
         uppercase={false} icon="content-save" mode="contained" onPress={() => saveFilling()}>

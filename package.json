@@ -23,6 +23,7 @@
     "expo-font": "~8.1.0",
     "expo-linking": "^1.0.1",
     "expo-splash-screen": "^0.2.3",
+    "expo-sqlite": "~8.1.0",
     "expo-web-browser": "~8.2.0",
     "i18n-js": "^3.5.1",
     "moment": "^2.25.3",

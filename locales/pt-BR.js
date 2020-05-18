@@ -7,6 +7,7 @@ export default {
   alcohol: 'Álcool',
   diesel: 'Diesel',
   gas: 'Gasolina',
+  leadedGas: 'Gasolina aditivada',
   naturalGas: 'Gás natural',
   fillingDate: 'Data do Abastecimento',
   save: 'Salvar',
@@ -17,6 +18,6 @@ export default {
   pricePerUnit: 'Preço por litro',
   fillingTotal: 'Total do Abastecimento',
   observation: 'Observação',
-  fillingObservation: 'Posto Décio Parada Perfeita'
-
+  fillingObservation: 'Posto Décio Parada Perfeita',
+  
 };
