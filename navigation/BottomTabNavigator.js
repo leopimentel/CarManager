@@ -36,7 +36,7 @@ function BottomTabNavigator({ navigation, route }) {
           tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Spending"
         component={LinksScreen}
         options={{
@@ -51,7 +51,7 @@ function BottomTabNavigator({ navigation, route }) {
           title: t('report'),
           tabBarIcon: ({ focused }) => <Foundation name="list-number" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
-      />
+      /> */}
     </BottomTab.Navigator>
   );
 }

@@ -1,20 +1,14 @@
-import * as WebBrowser from 'expo-web-browser';
 import React, { useState, useEffect } from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { MonoText } from '../components/StyledText';
-import { withTheme } from 'react-native-paper';
-import { Button } from 'react-native-paper';
+import { withTheme, Button, TextInput, Checkbox } from 'react-native-paper';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
 import moment from 'moment';
-// import { Foundation } from '@expo/vector-icons';
 import { t } from '../locales'
-// import Constants from 'expo-constants';
-import { TextInput } from 'react-native-paper';
-import { Checkbox } from 'react-native-paper';
 import { getStyles } from './style'
-import { execute, migrateUp, useTestData } from '../database'
+import { db } from '../database'
+import { vehicles as v, fuels as f} from '../constants/fuel'
   
 function HomeScreen({ theme }) {
   const styles = getStyles(theme)
@@ -22,39 +16,43 @@ function HomeScreen({ theme }) {
   const [totalFuel, setTotalFuel] = useState()
   const [pricePerUnit, setPricePerUnit] = useState()
   const [observation, setObservation] = useState()
+  const [fuelType, setFuelType] = useState(2)
+  const [km, setKm] = useState()
   const [isFullTank, setFullTank] = useState(true)
-  const vehicles = [{
-    value: 'Meu'
-  }];
-  const fuels = [{value: t('gas')}, {value: t('alcohol')}, {value: t('diesel')}, {value: 'naturalGas'}, {value: 'leadedGas'}];
-  const [combustiveis, setCombustiveis] = useState()
-  const saveFilling = () => {
-    console.log('aqui')
-    // execute(
-    //   `select * from Combustivel`, [], (_, { rows }) =>
-    //     console.log(JSON.stringify(rows))
-    //   , (error) => console.log(error))
+  const vehicles = v;
+  const fuels = f;
 
-    execute(
-      `select * from Gasto`,
-      [],
-      (_, { rows: { _array } }) => {
-        console.log('leo', _array)
-        setCombustiveis(_array)
-      },
-      (a, error) => {
-        console.log('leo2', a, error)
-      }
-    );
+  const saveFilling = () => {
+    // @todo data validation
+
+    db.transaction(function(tx) {
+      tx.executeSql(
+        `INSERT INTO Abastecimento (CodVeiculo, Data_Cadastro, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES (?, ?, ?, ?, ?, ?)`,
+        [1, fillingDate, fillingDate, km, observation, isFullTank],
+        function(tx, res) {
+          const insertId = res.insertId
+          tx.executeSql(
+            'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
+            [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel],
+            function(tx) {
+              console.log('inseriu Abastecimento_Combustivel')
+              tx.executeSql(
+                `INSERT INTO Gasto (CodVeiculo, Data_Cadastro, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [1, fillingDate, fillingDate, 1, totalFuel, observation, insertId],
+                function(tx, res) {                
+                  // @todo clear form + display success message
+                }
+              )
+            }
+          );
+        }
+      );
+    });
   }
 
-  useEffect(() => {
-    migrateUp();
-    useTestData();
-  }, []);
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.container} >
+      <ScrollView style={styles.container}>
         <View style={styles.splitRow}>
           <View style={{ flex: 1 }}>
             <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/>
@@ -78,16 +76,16 @@ function HomeScreen({ theme }) {
                 }
               }}
               onDateChange={(date) => {setFillingDate(date)}}
-            />            
+            />
           </View>
         </View>
 
         <View style={styles.splitRow}>
           <View style={{ flex: 1 }}>
-            <Dropdown label={t('fuel')} data={fuels} value={t('alcohol')} />
+            <Dropdown label={t('fuel')} data={fuels} value={t('alcohol')} onChangeText={(value, index) => setFuelType(index) }/>
           </View>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={styles.fullTank}> Tanque Cheio </Text>
+            <Text style={styles.fullTank}> {t('fullTank')} </Text>
             <Checkbox
               status={isFullTank ? 'checked' : 'unchecked'}
               onPress={() => { setFullTank(!isFullTank); }}
@@ -97,28 +95,40 @@ function HomeScreen({ theme }) {
           </View>
         </View>
 
-        <View style={styles.splitRow}>
+        <View style={{...styles.splitRow, marginTop: 10 }}>
           <TextInput
             label={t('pricePerUnit')}
             value={pricePerUnit}
             onChangeText={text => setPricePerUnit(text)}
             mode='outlined'
-            style={{ paddingTop: 5, flex: 8 }}
+            style={{ flex: 1, marginRight: 5 }}
             placeholder={t('pricePerUnit')}
             dense={true}
             keyboardType={'numeric'}
           />
-          <View style={{flex: 1}}></View>
+          
           <TextInput
             label={t('fillingTotal')}
             value={totalFuel}
             onChangeText={text => setTotalFuel(text)}
             mode='outlined'
-            style={{ paddingTop: 5, flex: 8 }}
+            style={{ flex: 1 }}
             dense={true}
             keyboardType={'numeric'}
           />
         </View>
+
+        <TextInput
+            label='KM'
+            value={km}
+            onChangeText={text => setKm(text)}
+            mode='outlined'
+            style={{ flex: 1 }}
+            placeholder={t('pricePerUnit')}
+            dense={true}
+            keyboardType={'numeric'}
+            style={{ marginTop: 15 }}
+          />
 
         <TextInput label={t('observation')}
             value={observation}
@@ -127,8 +137,6 @@ function HomeScreen({ theme }) {
             placeholder={t('fillingObservation')}
             style={{ marginTop: 15 }}
           />
-
-        <Text>{JSON.stringify(combustiveis)}</Text>
 
         <Button style={{ marginTop: 15, padding: 5 }} labelStyle={{fontSize: 25}}
         uppercase={false} icon="content-save" mode="contained" onPress={() => saveFilling()}>

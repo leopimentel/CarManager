@@ -2,7 +2,12 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase('carManager.db');
 
-const migrateUp = () => {
+const migrateUp = (useMock) => {
+    let testData = ''
+    if (useMock) {
+        testData = mock()
+    }
+
     const migrations = `
         create table if not exists Abastecimento
         (
@@ -76,9 +81,19 @@ const migrateUp = () => {
 
         INSERT OR IGNORE INTO Veiculo (CodVeiculo, Placa, Descricao) VALUES
         (1, null, 'meu');
+
+        ${testData}
     `.split(';');
 
-    execute(migrations);
+    db.transaction(tx => {
+        migrations.map(migration => {
+            const migrationAux = migration.trim()
+            if (migrationAux) {
+                console.log('statement', migrationAux)
+                tx.executeSql(migrationAux);    
+            }
+        });
+    })
 }
 
 const migrateDown = () => {
@@ -97,11 +112,13 @@ const migrateDown = () => {
         DROP TABLE IF EXISTS Veiculo;
     `.split(';');
 
-    execute(migrations);
+    db.transaction(tx => {
+        execute(tx, migrations);
+    })
 }
 
-const useTestData = () => {
-    const migrations = `
+const mock = () => {
+    return `
     INSERT OR IGNORE INTO Abastecimento (CodAbastecimento, CodVeiculo, Data_Cadastro, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES 
     (1, 1, '2017-02-06 22:17:30', '2017-02-06', 128729, 'posto Goiânia ', 1),
     (2, 1, '2017-02-06 22:19:37', '2017-02-06', 128329, 'início ', 1),
@@ -584,33 +601,34 @@ const useTestData = () => {
     (225, 1, '2020-04-19 21:54:17', '2020-03-31', 1, 70.43, 'alcool ipiranga perto de casa ', 148),
     (227, 1, '2020-04-26 11:44:22', '2020-04-24', 1, 28.5, 'ipiranga assai ', 152),
     (228, 1, '2020-05-03 19:12:21', '2020-03-15', 3, 105.78, 'taxa de licenciamento ', null);
-    `.split(';');
-
-    execute(migrations);
+    `;
 }
 
-const execute = (statement, args, callbackSuccess, callbackFailure) => {
-    db.transaction(tx => {
-        if (Array.isArray(statement)) {
-            statement.map((migration) => {
-                migration = migration.trim()
-                if (migration) {
-                    console.log('statement', migration)
+const execute = (tx, statement, args, callbackSuccess, callbackFailure) => {
+    if (Array.isArray(statement)) {
+        statement.map((migration, idx, arr) => {
+            migration = migration.trim()
+            if (migration) {
+                console.log('statement', migration)
+                if (idx === arr.length - 1) {
                     tx.executeSql(migration, args, callbackSuccess, callbackFailure);
+                } else {
+                    tx.executeSql(migration, args);
                 }
-            });
-        } else {
-            statement = statement.trim()
-            if (statement) {
-                console.log('statement', statement)
-                tx.executeSql(statement.trim(), args, callbackSuccess, callbackFailure);
+            } else if (idx === arr.length - 1) {
+                callbackSuccess()
             }
+        });
+    } else {
+        statement = statement.trim()
+        if (statement) {
+            console.log('statement', statement)
+            tx.executeSql(statement.trim(), args, callbackSuccess, callbackFailure);
         }
-    });
+    }
 }
 export {
     migrateUp,
     migrateDown,
-    execute,
-    useTestData
+    db
 }

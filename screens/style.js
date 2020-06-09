@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 function getStyles(theme) {
     const { colors } = theme;
@@ -99,7 +99,11 @@ function getStyles(theme) {
         },
         dateLabel: { color: colors.placeholder, fontSize: 12, paddingTop: 5 },
         fullTank: { color: colors.placeholder, paddingTop: 5 },
-        splitRow: {flexDirection: 'row', justifyContent:'space-between'}
+        splitRow: {flexDirection: 'row', justifyContent:'space-between'},
+        header: { height: 50, backgroundColor: '#537791' },
+        text: { textAlign: 'center', fontWeight: '100' },
+        dataWrapper: { marginTop: -1 },
+        row: { height: 50, backgroundColor: '#E7E6E1' }
     });
 }
 

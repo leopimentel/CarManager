@@ -1,12 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { migrateUp } from './database'
+
 const Stack = createStackNavigator();
 
 const theme = {
@@ -20,6 +22,10 @@ const theme = {
 
 export default function App(props) {
   const isLoadingComplete = useCachedResources();
+
+  useEffect(() => {
+    if (__DEV__) migrateUp(true);
+  }, []);
 
   if (!isLoadingComplete) {
     return null;

@@ -19,5 +19,11 @@ export default {
   fillingTotal: 'Total do Abastecimento',
   observation: 'Observação',
   fillingObservation: 'Posto Décio Parada Perfeita',
-  
+  fullTank: 'Tanque cheio',
+  startDate: 'Data inicial',
+  endDate: 'Data final',
+  previousMonth: 'Mês anterior',
+  currentMonth: 'Mês atual',
+  previousYear: 'Ano anterior',
+  currentYear: 'Ano atual',
 };
