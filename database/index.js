@@ -4,11 +4,15 @@ const db = SQLite.openDatabase('carManager.db');
 
 const migrateUp = (useMock) => {
     let testData = ''
+    let dropTablesStr = ''
     if (useMock) {
         testData = mock()
+        dropTablesStr = dropTables()
     }
 
     const migrations = `
+        ${dropTablesStr}
+
         create table if not exists Abastecimento
         (
             CodAbastecimento INTEGER
@@ -89,16 +93,17 @@ const migrateUp = (useMock) => {
         migrations.map(migration => {
             const migrationAux = migration.trim()
             if (migrationAux) {
-                console.log('statement', migrationAux)
-                tx.executeSql(migrationAux);    
+                tx.executeSql(migrationAux, [], () => {
+                    console.log('statement success', migrationAux)
+                }, () => {
+                    console.log('statement error', migrationAux)
+                });    
             }
         });
     })
 }
-
-const migrateDown = () => {
-    console.log('migrateDown')
-    const migrations = `
+const dropTables = () => {
+    return `
         DROP TABLE IF EXISTS Abastecimento;
 
         DROP TABLE IF EXISTS Abastecimento_Combustivel;
@@ -110,11 +115,7 @@ const migrateDown = () => {
         DROP TABLE IF EXISTS GastoTipo;
 
         DROP TABLE IF EXISTS Veiculo;
-    `.split(';');
-
-    db.transaction(tx => {
-        execute(tx, migrations);
-    })
+    `;
 }
 
 const mock = () => {
@@ -604,31 +605,7 @@ const mock = () => {
     `;
 }
 
-const execute = (tx, statement, args, callbackSuccess, callbackFailure) => {
-    if (Array.isArray(statement)) {
-        statement.map((migration, idx, arr) => {
-            migration = migration.trim()
-            if (migration) {
-                console.log('statement', migration)
-                if (idx === arr.length - 1) {
-                    tx.executeSql(migration, args, callbackSuccess, callbackFailure);
-                } else {
-                    tx.executeSql(migration, args);
-                }
-            } else if (idx === arr.length - 1) {
-                callbackSuccess()
-            }
-        });
-    } else {
-        statement = statement.trim()
-        if (statement) {
-            console.log('statement', statement)
-            tx.executeSql(statement.trim(), args, callbackSuccess, callbackFailure);
-        }
-    }
-}
 export {
     migrateUp,
-    migrateDown,
     db
 }

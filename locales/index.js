@@ -26,7 +26,7 @@ const setLanguageToI18n = () => {
   const translateNormalize = normalizeTranslate[language];
   const iHaveThisLanguage = I18n.translations.hasOwnProperty(translateNormalize);
   iHaveThisLanguage
-    ? I18n.locale = translateNormalize
+    ? I18n.locale = 'pt_BR' //@todo change to choose language automatically
     : I18n.defaultLocale = 'en_US';
 };
 

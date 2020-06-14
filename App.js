@@ -15,8 +15,8 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'tomato',
-    accent: 'blue',
+    primary: '#4b80ab',
+    accent: '#4b80ab',
   },
 };
 
@@ -24,7 +24,7 @@ export default function App(props) {
   const isLoadingComplete = useCachedResources();
 
   useEffect(() => {
-    if (__DEV__) migrateUp(true);
+    __DEV__ ? migrateUp(true) : migrateUp();
   }, []);
 
   if (!isLoadingComplete) {

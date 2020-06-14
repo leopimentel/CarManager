@@ -1,4 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
+import { Colors } from 'react-native-paper';
 
 function getStyles(theme) {
     const { colors } = theme;
@@ -100,10 +101,10 @@ function getStyles(theme) {
         dateLabel: { color: colors.placeholder, fontSize: 12, paddingTop: 5 },
         fullTank: { color: colors.placeholder, paddingTop: 5 },
         splitRow: {flexDirection: 'row', justifyContent:'space-between'},
-        header: { height: 50, backgroundColor: '#537791' },
+        header: { height: 50, backgroundColor: '#4b80ab' },
         text: { textAlign: 'center', fontWeight: '100' },
         dataWrapper: { marginTop: -1 },
-        row: { height: 50, backgroundColor: '#E7E6E1' }
+        row: { height: 50, backgroundColor: Colors.grey200}
     });
 }
 

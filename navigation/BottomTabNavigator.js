@@ -1,9 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as React from 'react';
 
-import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
-import { MaterialCommunityIcons, Entypo, Foundation } from '@expo/vector-icons';
+import FillingScreen from '../screens/FillingScreen';
+import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
+import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Home';
@@ -20,7 +20,7 @@ function BottomTabNavigator({ navigation, route }) {
     <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
       <BottomTab.Screen
         name="Fuel"
-        component={HomeScreen}
+        component={FillingScreen}
         options={{
           title: t('fueling'),
           tabBarIcon: ({ focused }) => <MaterialCommunityIcons
@@ -30,7 +30,7 @@ function BottomTabNavigator({ navigation, route }) {
       />
       <BottomTab.Screen
         name="Consumption"
-        component={LinksScreen}
+        component={FuelConsumptionScreen}
         options={{
           title: t('consumption'),
           tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
