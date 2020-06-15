@@ -9,8 +9,9 @@ import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
 import { vehicles as v, fuels as f} from '../constants/fuel'
-import { ActivityIndicator, Colors, HelperText } from 'react-native-paper';
+import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase } from '../utils/date'
+import { Loading } from '../components/Loading'
 
 function FillingScreen({ theme }) {
   const styles = getStyles(theme)
@@ -90,7 +91,7 @@ function FillingScreen({ theme }) {
 
   return (
     <View style={styles.container}>
-      {loading && <ActivityIndicator animating={true} color={Colors.red800} style={{ backgroundColor: Colors.grey100, height: '100%'}}/>}
+      <Loading loading={loading} />
 
       <Portal>
         <Dialog visible={visibleDialog}

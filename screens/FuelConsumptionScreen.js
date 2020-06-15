@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
-import { withTheme, ActivityIndicator, Colors } from 'react-native-paper';
+import { withTheme } from 'react-native-paper';
 import { vehicles as v, fuels as f, timeFilter} from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
@@ -12,6 +12,7 @@ import { Table, Row } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { Loading } from '../components/Loading'
 
 function FuelConsumptionScreen({ theme }) {
   const styles = getStyles(theme)
@@ -90,84 +91,60 @@ function FuelConsumptionScreen({ theme }) {
 
     db.transaction(function(tx) {
       tx.executeSql(`
-        SELECT * FROM
-        (
-          SELECT A.CodAbastecimento,
-          A.Data_Abastecimento,
-          A.KM,
-          A.Observacao,
-          A.TanqueCheio,
-          AC.CodCombustivel,
-          AC.Litros,
-          AC.Valor_Litro,
-          AC.Total
-          FROM Abastecimento A
-          INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-          WHERE A.CodVeiculo = 1
-          AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
-          ORDER BY A.KM DESC
-        )
-        UNION ALL
-        SELECT * FROM
-        (
-          SELECT A.CodAbastecimento,
-          A.Data_Abastecimento,
-          A.KM,
-          A.Observacao,
-          A.TanqueCheio,
-          AC.CodCombustivel,
-          AC.Litros,
-          AC.Valor_Litro,
-          AC.Total
-          FROM Abastecimento A
-          INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-          WHERE A.CodVeiculo = 1
-          ORDER BY A.KM DESC
-          LIMIT 1
-        )
+        SELECT A.CodAbastecimento,
+        A.Data_Abastecimento,
+        A.KM,
+        A.Observacao,
+        A.TanqueCheio,
+        AC.CodCombustivel,
+        AC.Litros,
+        AC.Valor_Litro,
+        AC.Total
+        FROM Abastecimento A
+        INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+        WHERE A.CodVeiculo = 1
+        AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
+        ORDER BY A.KM DESC
       `,
       [fromUserDateToDatabase(fillingPeriod.startFillingDate), fromUserDateToDatabase(fillingPeriod.endFillingDate)],
       function(tx, results) {
-        const callback = (previousFillingKM) => {
+        const callback = (nextFilling) => {
           const temp = [];
           let totalSumAcc = 0
           let totalAverageAcc = 0
           let totalCount = 0
-          for (let i = 0; i < results.rows.length - 1; i++) {
-            const lastFillingCodAbastecimento = results.rows.item(results.rows.length - 1).CodAbastecimento
+          for (let i = 0; i < results.rows.length; i++) {
             const filling = results.rows.item(i)
             if (filling.CodCombustivel !== fuelType && fuelType !== 0) {
               continue
             }
-            let accomplishedKm = 0
-            let average = 0
-            if (i < results.rows.length - 2) {
-              const previousFilling = results.rows.item(i+1)
-              accomplishedKm = filling.KM - previousFilling.KM
-              average = filling.CodAbastecimento === lastFillingCodAbastecimento ? 0 : accomplishedKm / filling.Litros
-            } else if (typeof previousFillingKM !== 'undefined') {
-              accomplishedKm = filling.KM - previousFillingKM
-              average = filling.CodAbastecimento === lastFillingCodAbastecimento ? 0 : accomplishedKm / filling.Litros
+
+            let accomplishedKm
+            let average
+            nextFilling = i === 0 ? nextFilling : results.rows.item(i - 1)
+            if (nextFilling) {
+              accomplishedKm = nextFilling.KM - filling.KM
+              average = accomplishedKm / nextFilling.Litros
             }
 
             temp.push([
               fromDatabaseToUserDate(filling.Data_Abastecimento),
               fuels[filling.CodCombustivel].value,
-              filling.Litros,
+              filling.Litros.toFixed(2),
               filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
               filling.Valor_Litro,
               filling.Total,
-              average ? average.toFixed(2) : '?',
+              average ? average.toFixed(2) : '',
               filling.TanqueCheio ? t('yes'): t('no'),
               accomplishedKm,
-              (filling.Total / accomplishedKm).toFixed(2),
+              accomplishedKm ? (filling.Total / accomplishedKm).toFixed(2) : '',
               t('no'),
               filling.Observacao,
             ]);
 
             totalSumAcc += filling.Total
-            totalAverageAcc += average
-            if (filling.CodAbastecimento !== lastFillingCodAbastecimento) {
+            if (average) {
+              totalAverageAcc += average
               totalCount++
             }
           }
@@ -177,20 +154,24 @@ function FuelConsumptionScreen({ theme }) {
           setLoading(false)
         }
 
-        if (results.rows.length > 1) {
+        if (results.rows.length) {
           tx.executeSql(`
-            SELECT A.KM
+            SELECT A.KM, AC.Litros
             FROM Abastecimento A
+            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
             WHERE A.CodVeiculo = 1
-            AND A.KM < ?
-            ORDER BY A.KM DESC
-            LIMIT 1`,
-            [results.rows.item(results.rows.length - 2).KM],
-            (tx, previousFilling) => {
-              for (let i = 0; i < previousFilling.rows.length; i++) {
-                return callback(previousFilling.rows.item(i).KM)
+            AND A.KM > ?
+            ORDER BY A.KM
+            LIMIT 1
+          `,
+            [results.rows.item(0).KM],
+            (tx, fillings) => {
+              let nextFilling
+              if (fillings.rows.length) {
+                nextFilling = fillings.rows.item(0)
               }
-              return callback()
+
+              return callback(nextFilling)
             }, function(_, error) {
               console.log(error)
               setLoading(false)
@@ -210,7 +191,7 @@ function FuelConsumptionScreen({ theme }) {
 
   return (
     <View style={styles.container}>
-      {loading && <ActivityIndicator animating={true} color={Colors.red800} style={{backgroundColor: Colors.grey100}}/>}
+      <Loading loading={loading} />
       <ScrollView>
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 8 }}>
@@ -277,7 +258,7 @@ function FuelConsumptionScreen({ theme }) {
                     <Row
                       key={index}
                       data={rowData}
-                      style={[styles.row, index%2 && {backgroundColor: 'none'}]}
+                      style={[styles.row, index%2 && {backgroundColor: 'transparent'}]}
                       textStyle={styles.text}
                       widthArr={tableHead.map(row => row.width)}
                     />
