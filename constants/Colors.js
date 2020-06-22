@@ -19,6 +19,7 @@ export default {
   tableEvenRowColor: Colors.grey200,
   tableOddRowColor: 'transparent',
   tableHeaderColor: '#4b80ab',
+  tableHeaderTextColor: '#fff',
   loadingColor: Colors.red800,
-  loadingBackgroundColor: Colors.grey100
+  loadingBackgroundColor: Colors.grey100,
 };

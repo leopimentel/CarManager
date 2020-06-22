@@ -14,7 +14,7 @@ import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
-import { tableBorderColor } from '../constants/Colors'
+import Colors from '../constants/Colors'
 
 function FuelConsumptionScreen({ theme }) {
   const styles = getStyles(theme)
@@ -250,17 +250,17 @@ function FuelConsumptionScreen({ theme }) {
 
         <ScrollView horizontal>
           <View>
-            <Table borderStyle={{borderWidth: 1, borderColor: tableBorderColor}}>
-              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.width)} textStyle={[styles.text, {color: 'white'}]}/>
+            <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
+              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
             </Table>
             <ScrollView>
-              <Table borderStyle={{borderWidth: 1, borderColor: tableBorderColor}}>
+              <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
                 {
                   tableData.map((rowData, index) => (
                     <Row
                       key={index}
                       data={rowData}
-                      style={[styles.row, index%2 && {backgroundColor: 'transparent'}]}
+                      style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}
                       textStyle={styles.text}
                       widthArr={tableHead.map(row => row.width)}
                     />
