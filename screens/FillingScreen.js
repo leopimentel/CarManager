@@ -8,19 +8,23 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
-import { vehicles as v, fuels as f} from '../constants/fuel'
+import { vehicles as v, fuels as f, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase } from '../utils/date'
 import { Loading } from '../components/Loading'
+import NumberFormat from 'react-number-format';
 
 function FillingScreen({ theme }) {
   const styles = getStyles(theme)
   const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
   const [totalFuel, setTotalFuel] = useState()
+  const [totalFuelView, setTotalFuelView] = useState()
   const [pricePerUnit, setPricePerUnit] = useState()
+  const [pricePerUnitView, setPricePerUnitView] = useState()
   const [observation, setObservation] = useState()
   const [fuelType, setFuelType] = useState(2)
   const [km, setKm] = useState()
+  const [kmView, setKmView] = useState()
   const [isFullTank, setFullTank] = useState(true)
   const [visibleDialog, setVisibleDialog] = useState(false)
   const vehicles = v;
@@ -149,50 +153,86 @@ function FillingScreen({ theme }) {
 
         <View style={styles.splitRow}>
           <View style={{flex: 1}}>
-            <TextInput
-              label={t('pricePerUnit')}
-              value={pricePerUnit}
-              onChangeText={text => setPricePerUnit(text)}
-              style={{ marginRight: 5, flex: 1 }}
-              placeholder={t('pricePerUnit')}
-              keyboardType={'numeric'}
-              mode='outlined'
+            <NumberFormat
+              value={pricePerUnitView}
+              displayType={'text'}
+              allowNegative={false}
+              decimalSeparator={decimalSeparator}
+              thousandSeparator={thousandSeparator}
+              onValueChange={text => setPricePerUnit(text.value)}
+              renderText={value => (
+                <>
+                  <TextInput
+                    label={t('pricePerUnit')}
+                    value={value}
+                    onChangeText={text => setPricePerUnitView(text)}
+                    style={{ marginRight: 5, flex: 1 }}
+                    placeholder={t('pricePerUnit')}
+                    keyboardType={'numeric'}
+                    mode='outlined'
+                  />
+
+                  {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
+                    {formErrors.pricePerUnit[1]}
+                  </HelperText>}
+                </>
+              )}
             />
-            {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
-              {formErrors.pricePerUnit[1]}
-            </HelperText>}
           </View>
 
           <View style={{flex: 1}}>
-            <TextInput
-              label={t('fillingTotal')}
-              value={totalFuel}
-              onChangeText={text => setTotalFuel(text)}
-              keyboardType={'numeric'}
-              mode='outlined'
-              style={{ flex: 1 }}
-            />
+            <NumberFormat
+              value={totalFuelView}
+              displayType={'text'}
+              allowNegative={false}
+              decimalSeparator={decimalSeparator}
+              thousandSeparator={thousandSeparator}
+              onValueChange={text => setTotalFuel(text.value)}
+              renderText={value => (
+                <>
+                  <TextInput
+                    label={t('fillingTotal')}
+                    value={value}
+                    onChangeText={text => setTotalFuelView(text)}
+                    keyboardType={'numeric'}
+                    mode='outlined'
+                    style={{ flex: 1 }}
+                  />
 
-            {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
-              {formErrors.totalFuel[1]}
-            </HelperText>}
+                  {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
+                    {formErrors.totalFuel[1]}
+                  </HelperText>}
+                </>
+              )}
+            />
           </View>
         </View>
 
         <View style={styles.splitRow}>
-          <TextInput
-            label='KM'
-            value={km}
-            onChangeText={text => setKm(text)}
-            placeholder={t('pricePerUnit')}
-            keyboardType={'numeric'}
-            mode='outlined'
-            style={{flex: 1}}
-          />
+          <NumberFormat
+            value={kmView}
+            displayType={'text'}
+            allowNegative={false}
+            decimalSeparator='none'
+            thousandSeparator={thousandSeparator}
+            onValueChange={text => setKm(text.value)}
+            renderText={value => (
+              <>
+                <TextInput
+                  label='KM'
+                  value={value}
+                  onChangeText={text => setKmView(text)}
+                  keyboardType={'numeric'}
+                  mode='outlined'
+                  style={{flex: 1}}
+                />
 
-          {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
-            {formErrors.km[1]}
-          </HelperText>}
+                {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
+                  {formErrors.km[1]}
+                </HelperText>}
+              </>
+            )}
+          />
         </View>
 
         <View style={styles.splitRow}>

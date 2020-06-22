@@ -37,8 +37,14 @@ const timeFilter = [
   }
 ]
 
+const decimalSeparator = ','
+
+const thousandSeparator = '.'
+
 export {
   fuels,
   vehicles,
   timeFilter,
+  decimalSeparator,
+  thousandSeparator
 };

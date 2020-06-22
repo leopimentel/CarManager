@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-
+import Colors from './constants/Colors'
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
@@ -15,8 +15,8 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#4b80ab',
-    accent: '#4b80ab',
+    primary: Colors.primary,
+    accent: Colors.accent,
   },
 };
 

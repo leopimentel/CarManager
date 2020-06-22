@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
 import { withTheme } from 'react-native-paper';
-import { vehicles as v, fuels as f, timeFilter} from '../constants/fuel'
+import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
@@ -13,6 +13,8 @@ import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { Loading } from '../components/Loading'
+import NumberFormat from 'react-number-format';
+import { tableBorderColor } from '../constants/Colors'
 
 function FuelConsumptionScreen({ theme }) {
   const styles = getStyles(theme)
@@ -223,7 +225,7 @@ function FuelConsumptionScreen({ theme }) {
             />
           </View>
 
-          <View  style={{ flex: 1 }}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.dateLabel}> {t('endDate')} </Text>
             <DatePicker
               style={{ flex: 1, width: 100 }}
@@ -248,11 +250,11 @@ function FuelConsumptionScreen({ theme }) {
 
         <ScrollView horizontal>
           <View>
-            <Table borderStyle={{borderWidth: 1, borderColor: '#C1C0B9'}}>
+            <Table borderStyle={{borderWidth: 1, borderColor: tableBorderColor}}>
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.width)} textStyle={[styles.text, {color: 'white'}]}/>
             </Table>
             <ScrollView>
-              <Table borderStyle={{borderWidth: 1, borderColor: '#C1C0B9'}}>
+              <Table borderStyle={{borderWidth: 1, borderColor: tableBorderColor}}>
                 {
                   tableData.map((rowData, index) => (
                     <Row
@@ -269,8 +271,10 @@ function FuelConsumptionScreen({ theme }) {
           </View>
         </ScrollView>
 
-        <Text>{t('total')}: $ {totalSum} </Text>
-        <Text>{t('averageOfAverages')}: {totalAverage} KM/L</Text>
+        <View style={{ flex: 1, marginTop: 5 }}>
+          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text>{value}</Text>)} /></Text>
+          <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text>{value}</Text>)} /></Text>
+        </View>
       </ScrollView>
     </View>
   );
