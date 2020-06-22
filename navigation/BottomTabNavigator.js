@@ -6,7 +6,7 @@ import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
 import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
-const INITIAL_ROUTE_NAME = 'Home';
+const INITIAL_ROUTE_NAME = 'Fuel';
 import Colors from '../constants/Colors';
 
 function BottomTabNavigator({ navigation, route }) {
@@ -64,7 +64,7 @@ function getHeaderTitle(route) {
   const routeName = route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
 
   switch (routeName) {
-    case 'Fueling':
+    case 'Fuel':
       return t('fueling');
     case 'Consumption':
       return t('consumption');

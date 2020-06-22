@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
@@ -8,13 +8,14 @@ import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSepara
 import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
-import { Table, Row } from 'react-native-table-component';
+import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 function FuelConsumptionScreen({ theme }) {
   const styles = getStyles(theme)
@@ -34,18 +35,19 @@ function FuelConsumptionScreen({ theme }) {
   const timeOptions = timeFilter;
   const [loading, setLoading] = useState(false)
   const tableHead = [
-    {title: t('date'), width: 80},
-    {title:t('fuel'), width: 100},
-    {title:t('volume'), width: 60},
-    {title:'KM', width: 65},
-    {title:t('value'), width: 50},
-    {title:t('total'), width: 70},
-    {title:t('average'), width: 50},
-    {title:t('fullTank'), width: 50},
-    {title:t('milleage'), width: 50},
-    {title:'$' + t('milleage'), width: 50},
-    {title:t('mixed'), width: 100},
-    {title:t('observation'), width: 500},
+    {title: t('edit'), style: {width: 50}},
+    {title: t('date'), style: {width: 80}},
+    {title:t('fuel'), style: {width: 100}},
+    {title:t('volume'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
+    {title:'KM', style: {width: 65}},
+    {title:t('value'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
+    {title:t('total'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
+    {title:t('average'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
+    {title:t('fullTank'), style: {width: 50}},
+    {title:t('milleage'), style: {width: 50}},
+    {title:'$' + t('milleage'), style: {width: 50}},
+    {title:t('mixed'), style: {width: 100}},
+    {title:t('observation'), style: {width: 500}},
   ];
 
   const isFocused = useIsFocused()
@@ -191,6 +193,17 @@ function FuelConsumptionScreen({ theme }) {
     })
   }, [isFocused, fuelType, fillingPeriod]);
 
+  const element = (data, index) => (
+    <TouchableOpacity onPress={() => {
+      // navigation.navigate('Fuel')
+    }}>
+      <View style={{...styles.btn, height: '100%'}}>
+        <Text style={styles.btnText}><MaterialCommunityIcons
+          name="gas-station" size={30}  /></Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <Loading loading={loading} />
@@ -251,29 +264,29 @@ function FuelConsumptionScreen({ theme }) {
         <ScrollView horizontal>
           <View>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
-              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
-            </Table>
-            <ScrollView>
-              <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
-                {
-                  tableData.map((rowData, index) => (
-                    <Row
-                      key={index}
-                      data={rowData}
-                      style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}
-                      textStyle={styles.text}
-                      widthArr={tableHead.map(row => row.width)}
-                    />
+              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
+
+                {tableData.map((rowData, index) => (
+                  <TableWrapper key={index} style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}>
+                  {
+                      <>
+                      <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}} key={-1} data={element('a', index)} textStyle={styles.text} style={tableHead[0].style} />
+                      {rowData.map((cellData, cellIndex) => (
+                        <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}} key={cellIndex} data={cellData} textStyle={{...styles.text, ...tableHead[cellIndex+1].textStyle}} style={tableHead[cellIndex+1].style} />
+                      ))}
+                      </>
+                  }
+                  </TableWrapper>
                   ))
                 }
-              </Table>
-            </ScrollView>
+
+            </Table>
           </View>
         </ScrollView>
 
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text>{value}</Text>)} /></Text>
-          <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text>{value}</Text>)} /></Text>
+          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
       </ScrollView>
     </View>

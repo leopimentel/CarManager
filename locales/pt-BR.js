@@ -48,4 +48,5 @@ export default {
   saved: 'Cadastro confirmado',
   savedFilling: 'Abastecimento salvo',
   close: 'Fechar',
+  edit: 'Alterar',
 };

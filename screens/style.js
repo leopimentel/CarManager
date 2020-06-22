@@ -22,7 +22,9 @@ function getStyles(theme) {
         header: { height: 50, backgroundColor: Colors.tableHeaderColor },
         text: { textAlign: 'center', fontWeight: '100' },
         dataWrapper: { marginTop: -1 },
-        row: { height: 50, backgroundColor: Colors.tableEvenRowColor }
+        row: { height: 50, backgroundColor: Colors.tableEvenRowColor, flexDirection: 'row' },
+        btn: { backgroundColor: Colors.primary,  borderRadius: 2, justifyContent: 'center' },
+        btnText: { textAlign: 'center', color: '#fff' }
     });
 }
 
