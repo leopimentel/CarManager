@@ -49,4 +49,5 @@ export default {
   savedFilling: 'Abastecimento salvo',
   close: 'Fechar',
   edit: 'Alterar',
+  delete: 'Remover',
 };

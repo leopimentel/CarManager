@@ -41,7 +41,6 @@ function FillingScreen({ theme, route }) {
 
   useEffect(() => {
     if (route.params && route.params.CodAbastecimento) {
-      setCodAbastecimento(route.params.CodAbastecimento)
       setLoading(true)
       db.transaction(function(tx) {
         tx.executeSql(
@@ -54,19 +53,22 @@ function FillingScreen({ theme, route }) {
            WHERE A.CodAbastecimento = ?`,
           [route.params.CodAbastecimento],
           function(_, results) {
-            const abastecimento = results.rows.item(0)
-            setTotalFuelView(abastecimento.Total)
-            setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').format(t('dateFormat')))
-            setPricePerUnitView(abastecimento.Valor_Litro)
-            setObservation(abastecimento.Observacao)
-            setFuelType(abastecimento.CodCombustivel)
-            setKmView(abastecimento.KM)
-            setFullTank(abastecimento.TanqueCheio)
-            setCodGasto(abastecimento.CodGasto)
-            for (let i=0; i<f.length; i++) {
-              if (f[i].index === abastecimento.CodCombustivel) {
-                setFuelTypeView(f[i].value)
-                break
+            if (results.rows.length) {
+              const abastecimento = results.rows.item(0)
+              setCodAbastecimento(route.params.CodAbastecimento)
+              setTotalFuelView(abastecimento.Total)
+              setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').format(t('dateFormat')))
+              setPricePerUnitView(abastecimento.Valor_Litro)
+              setObservation(abastecimento.Observacao)
+              setFuelType(abastecimento.CodCombustivel)
+              setKmView(abastecimento.KM)
+              setFullTank(abastecimento.TanqueCheio)
+              setCodGasto(abastecimento.CodGasto)
+              for (let i=0; i<f.length; i++) {
+                if (f[i].index === abastecimento.CodCombustivel) {
+                  setFuelTypeView(f[i].value)
+                  break
+                }
               }
             }
             setLoading(false)
@@ -76,6 +78,49 @@ function FillingScreen({ theme, route }) {
 
     }
   }, [route.params])
+
+  const removeFilling = () => {
+    setLoading(true)
+    db.transaction(function(tx) {
+      tx.executeSql(
+        `DELETE FROM Abastecimento WHERE CodAbastecimento = ?`,
+        [codAbastecimento],
+        function(tx) {
+          tx.executeSql(
+            'DELETE FROM Abastecimento_Combustivel WHERE CodAbastecimento = ?',
+            [codAbastecimento],
+            function(tx) {
+              tx.executeSql(
+                `DELETE FROM Gasto WHERE CodGasto = ?`,
+                [codGasto],
+                function() {
+                  console.log('deletou abastecimento')
+                  setVisibleDialog(true)
+                  setTotalFuelView(null)
+                  setPricePerUnitView(null)
+                  setObservation(null)
+                  setKmView(null)
+                  setLoading(false)
+                }, function (_, error) {
+                  console.log(error)
+                  setLoading(false)
+                  return true
+                }
+              )
+            }, function (_, error) {
+              console.log(error)
+              setLoading(false)
+              return true
+            }
+          );
+        }, function (_, error) {
+          console.log(error)
+          setLoading(false)
+          return true
+        }
+      );
+    })
+  }
 
   const saveFilling = () => {
     if (!totalFuel) {
@@ -232,7 +277,7 @@ function FillingScreen({ theme, route }) {
         <View style={styles.splitRow}>
           <View style={{ flex: 1 }}>
             <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
-              setFuelType(fuels.filter(fuel => fuel.value === value)[0].index) 
+              setFuelType(fuels.filter(fuel => fuel.value === value)[0].index)
             }}/>
           </View>
           <View style={{ flex: 1, alignItems: 'center' }}>
@@ -347,6 +392,15 @@ function FillingScreen({ theme, route }) {
           uppercase={false} compact icon="content-save" mode="contained" onPress={() => saveFilling()}>
           {t('confirm')}
           </Button>
+        </View>
+
+        <View style={styles.splitRow}>
+          {codAbastecimento && 
+            <Button style={{ flex: 1, marginTop: 10, backgroundColor: 'red' }} labelStyle={{fontSize: 25}}
+            uppercase={false} compact icon="delete" mode="contained" onPress={() => removeFilling()}>
+            {t('delete')}
+            </Button>
+          }
         </View>
       </ScrollView>
     </View>
