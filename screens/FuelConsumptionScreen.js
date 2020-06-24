@@ -17,7 +17,7 @@ import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function FuelConsumptionScreen({ theme }) {
+function FuelConsumptionScreen({ theme, navigation }) {
   const styles = getStyles(theme)
   const [fillingPeriod, setFillingPeriod] = useState({
     startFillingDate: moment().subtract(1, 'months').format(t('dateFormat')),
@@ -132,6 +132,7 @@ function FuelConsumptionScreen({ theme }) {
             }
 
             temp.push([
+              filling.CodAbastecimento,
               fromDatabaseToUserDate(filling.Data_Abastecimento),
               fuels[filling.CodCombustivel].value,
               filling.Litros.toFixed(2),
@@ -195,7 +196,7 @@ function FuelConsumptionScreen({ theme }) {
 
   const element = (data, index) => (
     <TouchableOpacity onPress={() => {
-      // navigation.navigate('Fuel')
+      navigation.navigate('Fuel', { CodAbastecimento: data })
     }}>
       <View style={{...styles.btn, height: '100%'}}>
         <Text style={styles.btnText}><MaterialCommunityIcons
@@ -270,9 +271,11 @@ function FuelConsumptionScreen({ theme }) {
                   <TableWrapper key={index} style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}>
                   {
                       <>
-                      <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}} key={-1} data={element('a', index)} textStyle={styles.text} style={tableHead[0].style} />
                       {rowData.map((cellData, cellIndex) => (
-                        <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}} key={cellIndex} data={cellData} textStyle={{...styles.text, ...tableHead[cellIndex+1].textStyle}} style={tableHead[cellIndex+1].style} />
+                        <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}
+                        key={cellIndex} data={cellIndex === 0 ? element(cellData, index) : cellData}
+                        textStyle={{...styles.text, ...tableHead[cellIndex].textStyle}}
+                        style={tableHead[cellIndex].style} />
                       ))}
                       </>
                   }

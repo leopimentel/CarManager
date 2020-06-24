@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Switch, Dialog, Portal, Paragraph } from 'react-native-paper';
@@ -14,7 +14,7 @@ import { fromUserDateToDatabase } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 
-function FillingScreen({ theme }) {
+function FillingScreen({ theme, route }) {
   const styles = getStyles(theme)
   const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
   const [totalFuel, setTotalFuel] = useState()
@@ -23,10 +23,13 @@ function FillingScreen({ theme }) {
   const [pricePerUnitView, setPricePerUnitView] = useState()
   const [observation, setObservation] = useState()
   const [fuelType, setFuelType] = useState(2)
+  const [fuelTypeView, setFuelTypeView] = useState(t('alcohol'))
   const [km, setKm] = useState()
   const [kmView, setKmView] = useState()
   const [isFullTank, setFullTank] = useState(true)
   const [visibleDialog, setVisibleDialog] = useState(false)
+  const [codAbastecimento, setCodAbastecimento] = useState()
+  const [codGasto, setCodGasto] = useState()
   const vehicles = v;
   const fuels = f;
   const [loading, setLoading] = useState(false)
@@ -35,6 +38,44 @@ function FillingScreen({ theme }) {
     pricePerUnit: [false, ''],
     km: [false, '']
   })
+
+  useEffect(() => {
+    if (route.params && route.params.CodAbastecimento) {
+      setCodAbastecimento(route.params.CodAbastecimento)
+      setLoading(true)
+      db.transaction(function(tx) {
+        tx.executeSql(
+          `SELECT A.Data_Abastecimento, A.KM, A.Observacao, A.TanqueCheio,
+           AC.CodCombustivel, AC.Valor_Litro, AC.Total,
+           G.CodGasto
+           FROM Abastecimento A
+           INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+           INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
+           WHERE A.CodAbastecimento = ?`,
+          [route.params.CodAbastecimento],
+          function(_, results) {
+            const abastecimento = results.rows.item(0)
+            setTotalFuelView(abastecimento.Total)
+            setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').format(t('dateFormat')))
+            setPricePerUnitView(abastecimento.Valor_Litro)
+            setObservation(abastecimento.Observacao)
+            setFuelType(abastecimento.CodCombustivel)
+            setKmView(abastecimento.KM)
+            setFullTank(abastecimento.TanqueCheio)
+            setCodGasto(abastecimento.CodGasto)
+            for (let i=0; i<f.length; i++) {
+              if (f[i].index === abastecimento.CodCombustivel) {
+                setFuelTypeView(f[i].value)
+                break
+              }
+            }
+            setLoading(false)
+          }
+        )
+      })
+
+    }
+  }, [route.params])
 
   const saveFilling = () => {
     if (!totalFuel) {
@@ -55,41 +96,91 @@ function FillingScreen({ theme }) {
     const fillingDateSqlLite = fromUserDateToDatabase(fillingDate)
     setLoading(true)
     db.transaction(function(tx) {
-      tx.executeSql(
-        `INSERT INTO Abastecimento (CodVeiculo, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES (?, ?, ?, ?, ?)`,
-        [1, fillingDateSqlLite, km, observation, isFullTank],
-        function(tx, res) {
-          const insertId = res.insertId
-          tx.executeSql(
-            'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
-            [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel],
-            function(tx) {
-              console.log('inseriu Abastecimento_Combustivel')
-              tx.executeSql(
-                `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES (?, ?, ?, ?, ?, ?)`,
-                [1, fillingDateSqlLite, 1, totalFuel, observation, insertId],
-                function() {
-                  setVisibleDialog(true)
-                  setTotalFuel(null)
-                  setPricePerUnit(null)
-                  setObservation(null)
-                  setKm(null)
-                  setLoading(false)
-                }, function (_, error) {
-                  console.log(error)
-                  setLoading(false)
-                }
-              )
-            }, function (_, error) {
-              console.log(error)
-              setLoading(false)
-            }
-          );
-        }, function (_, error) {
-          console.log(error)
-          setLoading(false)
-        }
-      );
+      if (!codAbastecimento) {
+        tx.executeSql(
+          `INSERT INTO Abastecimento (CodVeiculo, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES (?, ?, ?, ?, ?)`,
+          [1, fillingDateSqlLite, km, observation, isFullTank],
+          function(tx, res) {
+            const insertId = res.insertId
+            tx.executeSql(
+              'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
+              [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel],
+              function(tx) {
+                tx.executeSql(
+                  `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES (?, ?, ?, ?, ?, ?)`,
+                  [1, fillingDateSqlLite, 1, totalFuel, observation, insertId],
+                  function() {
+                    console.log('inseriu abastecimento')
+                    setVisibleDialog(true)
+                    setTotalFuelView(null)
+                    setPricePerUnitView(null)
+                    setObservation(null)
+                    setKmView(null)
+                    setLoading(false)
+                  }, function (_, error) {
+                    console.log(error)
+                    setLoading(false)
+                    return true
+                  }
+                )
+              }, function (_, error) {
+                console.log(error)
+                setLoading(false)
+                return true
+              }
+            );
+          }, function (_, error) {
+            console.log(error)
+            setLoading(false)
+            return true
+          }
+        );
+      } else {
+        tx.executeSql(
+          `UPDATE Abastecimento
+           SET CodVeiculo = ?, Data_Abastecimento = ?, KM = ?, Observacao = ?, TanqueCheio = ?
+           WHERE CodAbastecimento = ?`,
+          [1, fillingDateSqlLite, km, observation, isFullTank, codAbastecimento],
+          function(tx) {
+            tx.executeSql(
+              `UPDATE Abastecimento_Combustivel
+               SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?
+               WHERE CodAbastecimento = ?
+               `,
+              [fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel, codAbastecimento],
+              function(tx) {
+                tx.executeSql(
+                  `UPDATE Gasto
+                   SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?
+                   WHERE CodGasto = ?`,
+                  [1, fillingDateSqlLite, 1, totalFuel, observation, codGasto],
+                  function() {
+                    console.log('atualizou abastecimento')
+                    setVisibleDialog(true)
+                    setTotalFuelView(null)
+                    setPricePerUnitView(null)
+                    setObservation(null)
+                    setKmView(null)
+                    setLoading(false)
+                  }, function (_, error) {
+                    console.log(error)
+                    setLoading(false)
+                    return true
+                  }
+                )
+              }, function (_, error) {
+                console.log(error)
+                setLoading(false)
+                return true
+              }
+            );
+          }, function (_, error) {
+            console.log(error)
+            setLoading(false)
+            return true
+          }
+        );
+      }
     });
   }
 
@@ -140,7 +231,9 @@ function FillingScreen({ theme }) {
 
         <View style={styles.splitRow}>
           <View style={{ flex: 1 }}>
-            <Dropdown label={t('fuel')} data={fuels} value={t('alcohol')} onChangeText={(value, index) => setFuelType(index) }/>
+            <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
+              setFuelType(fuels.filter(fuel => fuel.value === value)[0].index) 
+            }}/>
           </View>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.fullTank}> {t('fullTank')} </Text>
@@ -154,6 +247,7 @@ function FillingScreen({ theme }) {
         <View style={styles.splitRow}>
           <View style={{flex: 1}}>
             <NumberFormat
+              isNumericString={true}
               value={pricePerUnitView}
               displayType={'text'}
               allowNegative={false}
@@ -182,6 +276,7 @@ function FillingScreen({ theme }) {
 
           <View style={{flex: 1}}>
             <NumberFormat
+              isNumericString={true}
               value={totalFuelView}
               displayType={'text'}
               allowNegative={false}
@@ -210,10 +305,12 @@ function FillingScreen({ theme }) {
 
         <View style={styles.splitRow}>
           <NumberFormat
+            isNumericString={true}
             value={kmView}
             displayType={'text'}
             allowNegative={false}
-            decimalSeparator='none'
+            decimalSeparator=','
+            decimalScale={0}
             thousandSeparator={thousandSeparator}
             onValueChange={text => setKm(text.value)}
             renderText={value => (
