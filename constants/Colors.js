@@ -3,8 +3,8 @@ import { Colors } from 'react-native-paper';
 const tintColor = '#2f95dc';
 
 export default {
-  primary: '#4b80ab',
-  accent: '#4b80ab',
+  primary: '#008542',
+  accent: '#fdc82f',
   tintColor,
   tabIconDefault: '#ccc',
   tabIconSelected: tintColor,
@@ -18,8 +18,10 @@ export default {
   tableBorderColor: '#C1C0B9',
   tableEvenRowColor: Colors.grey200,
   tableOddRowColor: 'transparent',
-  tableHeaderColor: '#4b80ab',
+  tableHeaderColor: '#008542',
   tableHeaderTextColor: '#fff',
+  headerTintColor: '#008542', //teal #EAEB5E
+  headerStyleBackgroundColor: '#fdc82f', //#ccc #2c30fb
   loadingColor: Colors.red800,
   loadingBackgroundColor: Colors.grey100,
 };

@@ -36,7 +36,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
   const [loading, setLoading] = useState(false)
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
-    {title: t('date'), style: {width: 80}},
+    {title: t('date'), style: {width: 90}},
     {title:t('fuel'), style: {width: 100}},
     {title:t('volume'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
     {title:'KM', style: {width: 65}},

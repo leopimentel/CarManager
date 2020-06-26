@@ -11,21 +11,18 @@ import { db } from '../database'
 import { vehicles as v, fuels as f, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase } from '../utils/date'
+import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
-import NumberFormat from 'react-number-format';
 
 function FillingScreen({ theme, route }) {
   const styles = getStyles(theme)
   const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
   const [totalFuel, setTotalFuel] = useState()
-  const [totalFuelView, setTotalFuelView] = useState()
   const [pricePerUnit, setPricePerUnit] = useState()
-  const [pricePerUnitView, setPricePerUnitView] = useState()
   const [observation, setObservation] = useState()
   const [fuelType, setFuelType] = useState(2)
   const [fuelTypeView, setFuelTypeView] = useState(t('alcohol'))
   const [km, setKm] = useState()
-  const [kmView, setKmView] = useState()
   const [isFullTank, setFullTank] = useState(true)
   const [visibleDialog, setVisibleDialog] = useState(false)
   const [codAbastecimento, setCodAbastecimento] = useState()
@@ -44,8 +41,8 @@ function FillingScreen({ theme, route }) {
       setLoading(true)
       db.transaction(function(tx) {
         tx.executeSql(
-          `SELECT A.Data_Abastecimento, A.KM, A.Observacao, A.TanqueCheio,
-           AC.CodCombustivel, AC.Valor_Litro, AC.Total,
+          `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
+           AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
            G.CodGasto
            FROM Abastecimento A
            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
@@ -56,12 +53,12 @@ function FillingScreen({ theme, route }) {
             if (results.rows.length) {
               const abastecimento = results.rows.item(0)
               setCodAbastecimento(route.params.CodAbastecimento)
-              setTotalFuelView(abastecimento.Total)
+              setTotalFuel(abastecimento.Total)
               setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').format(t('dateFormat')))
-              setPricePerUnitView(abastecimento.Valor_Litro)
+              setPricePerUnit(abastecimento.Valor_Litro)
               setObservation(abastecimento.Observacao)
               setFuelType(abastecimento.CodCombustivel)
-              setKmView(abastecimento.KM)
+              setKm(abastecimento.KM)
               setFullTank(abastecimento.TanqueCheio)
               setCodGasto(abastecimento.CodGasto)
               for (let i=0; i<f.length; i++) {
@@ -94,12 +91,11 @@ function FillingScreen({ theme, route }) {
                 `DELETE FROM Gasto WHERE CodGasto = ?`,
                 [codGasto],
                 function() {
-                  console.log('deletou abastecimento')
                   setVisibleDialog(true)
-                  setTotalFuelView(null)
-                  setPricePerUnitView(null)
+                  setTotalFuel(null)
+                  setPricePerUnit(null)
                   setObservation(null)
-                  setKmView(null)
+                  setKm(null)
                   setLoading(false)
                 }, function (_, error) {
                   console.log(error)
@@ -155,12 +151,11 @@ function FillingScreen({ theme, route }) {
                   `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES (?, ?, ?, ?, ?, ?)`,
                   [1, fillingDateSqlLite, 1, totalFuel, observation, insertId],
                   function() {
-                    console.log('inseriu abastecimento')
                     setVisibleDialog(true)
-                    setTotalFuelView(null)
-                    setPricePerUnitView(null)
+                    setTotalFuel(null)
+                    setPricePerUnit(null)
                     setObservation(null)
-                    setKmView(null)
+                    setKm(null)
                     setLoading(false)
                   }, function (_, error) {
                     console.log(error)
@@ -200,12 +195,11 @@ function FillingScreen({ theme, route }) {
                    WHERE CodGasto = ?`,
                   [1, fillingDateSqlLite, 1, totalFuel, observation, codGasto],
                   function() {
-                    console.log('atualizou abastecimento')
                     setVisibleDialog(true)
-                    setTotalFuelView(null)
-                    setPricePerUnitView(null)
+                    setTotalFuel(null)
+                    setPricePerUnit(null)
                     setObservation(null)
-                    setKmView(null)
+                    setKm(null)
                     setLoading(false)
                   }, function (_, error) {
                     console.log(error)
@@ -291,90 +285,50 @@ function FillingScreen({ theme, route }) {
 
         <View style={styles.splitRow}>
           <View style={{flex: 1}}>
-            <NumberFormat
-              isNumericString={true}
-              value={pricePerUnitView}
-              displayType={'text'}
-              allowNegative={false}
-              decimalSeparator={decimalSeparator}
-              thousandSeparator={thousandSeparator}
-              onValueChange={text => setPricePerUnit(text.value)}
-              renderText={value => (
-                <>
-                  <TextInput
-                    label={t('pricePerUnit')}
-                    value={value}
-                    onChangeText={text => setPricePerUnitView(text)}
-                    style={{ marginRight: 5, flex: 1 }}
-                    placeholder={t('pricePerUnit')}
-                    keyboardType={'numeric'}
-                    mode='outlined'
-                  />
-
-                  {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
-                    {formErrors.pricePerUnit[1]}
-                  </HelperText>}
-                </>
-              )}
+            <TextInput
+              label={t('pricePerUnit')}
+              value={pricePerUnit}
+              onChangeText={text => setPricePerUnit(databaseFloatFormat(text))}
+              style={{ marginRight: 5, flex: 1 }}
+              placeholder={t('pricePerUnit')}
+              keyboardType={'numeric'}
+              mode='outlined'
             />
+
+            {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
+              {formErrors.pricePerUnit[1]}
+            </HelperText>}
           </View>
 
           <View style={{flex: 1}}>
-            <NumberFormat
-              isNumericString={true}
-              value={totalFuelView}
-              displayType={'text'}
-              allowNegative={false}
-              decimalSeparator={decimalSeparator}
-              thousandSeparator={thousandSeparator}
-              onValueChange={text => setTotalFuel(text.value)}
-              renderText={value => (
-                <>
-                  <TextInput
-                    label={t('fillingTotal')}
-                    value={value}
-                    onChangeText={text => setTotalFuelView(text)}
-                    keyboardType={'numeric'}
-                    mode='outlined'
-                    style={{ flex: 1 }}
-                  />
-
-                  {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
-                    {formErrors.totalFuel[1]}
-                  </HelperText>}
-                </>
-              )}
+            <TextInput
+              label={t('fillingTotal')}
+              value={totalFuel}
+              onChangeText={text => setTotalFuel(databaseFloatFormat(text))}
+              keyboardType={'numeric'}
+              mode='outlined'
+              style={{ flex: 1 }}
             />
+
+            {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
+              {formErrors.totalFuel[1]}
+            </HelperText>}
           </View>
         </View>
 
         <View style={styles.splitRow}>
-          <NumberFormat
-            isNumericString={true}
-            value={kmView}
-            displayType={'text'}
-            allowNegative={false}
-            decimalSeparator=','
-            decimalScale={0}
-            thousandSeparator={thousandSeparator}
-            onValueChange={text => setKm(text.value)}
-            renderText={value => (
-              <>
-                <TextInput
-                  label='KM'
-                  value={value}
-                  onChangeText={text => setKmView(text)}
-                  keyboardType={'numeric'}
-                  mode='outlined'
-                  style={{flex: 1}}
-                />
-
-                {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
-                  {formErrors.km[1]}
-                </HelperText>}
-              </>
-            )}
+          <TextInput
+            label='KM'
+            value={km}
+            onChangeText={text => setKm(databaseIntegerFormat(text))}
+            keyboardType={'numeric'}
+            mode='outlined'
+            style={{flex: 1}}
           />
+
+          {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
+            {formErrors.km[1]}
+          </HelperText>}
         </View>
 
         <View style={styles.splitRow}>
@@ -395,7 +349,7 @@ function FillingScreen({ theme, route }) {
         </View>
 
         <View style={styles.splitRow}>
-          {codAbastecimento && 
+          {codAbastecimento &&
             <Button style={{ flex: 1, marginTop: 10, backgroundColor: 'red' }} labelStyle={{fontSize: 25}}
             uppercase={false} compact icon="delete" mode="contained" onPress={() => removeFilling()}>
             {t('delete')}
