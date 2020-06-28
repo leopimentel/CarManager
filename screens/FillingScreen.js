@@ -91,12 +91,14 @@ function FillingScreen({ theme, route }) {
                 `DELETE FROM Gasto WHERE CodGasto = ?`,
                 [codGasto],
                 function() {
+                  console.log(`Filling ${codAbastecimento} removed`)
                   setVisibleDialog(true)
                   setTotalFuel(null)
                   setPricePerUnit(null)
                   setObservation(null)
                   setKm(null)
                   setLoading(false)
+                  setCodAbastecimento(null)
                 }, function (_, error) {
                   console.log(error)
                   setLoading(false)
@@ -119,17 +121,17 @@ function FillingScreen({ theme, route }) {
   }
 
   const saveFilling = () => {
-    if (!totalFuel) {
+    if (!totalFuel || totalFuel < 0) {
       setFormErrors({...formErrors, totalFuel: [true, t('errorMessage.totalFuel')]})
       return false
     }
 
-    if (!pricePerUnit) {
+    if (!pricePerUnit || pricePerUnit < 0) {
       setFormErrors({...formErrors, pricePerUnit: [true, t('errorMessage.pricePerUnit')]})
       return false
     }
 
-    if (!km) {
+    if (!km || km < 0) {
       setFormErrors({...formErrors, km: [true, t('errorMessage.km')]})
       return false
     }
@@ -151,6 +153,7 @@ function FillingScreen({ theme, route }) {
                   `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES (?, ?, ?, ?, ?, ?)`,
                   [1, fillingDateSqlLite, 1, totalFuel, observation, insertId],
                   function() {
+                    console.log(`Filling ${insertId} inserted`)
                     setVisibleDialog(true)
                     setTotalFuel(null)
                     setPricePerUnit(null)
@@ -195,12 +198,14 @@ function FillingScreen({ theme, route }) {
                    WHERE CodGasto = ?`,
                   [1, fillingDateSqlLite, 1, totalFuel, observation, codGasto],
                   function() {
+                    console.log(`Filling ${codAbastecimento} updated`)
                     setVisibleDialog(true)
                     setTotalFuel(null)
                     setPricePerUnit(null)
                     setObservation(null)
                     setKm(null)
                     setLoading(false)
+                    setCodAbastecimento(null)
                   }, function (_, error) {
                     console.log(error)
                     setLoading(false)

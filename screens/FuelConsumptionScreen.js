@@ -194,13 +194,13 @@ function FuelConsumptionScreen({ theme, navigation }) {
     })
   }, [isFocused, fuelType, fillingPeriod]);
 
-  const element = (data, index) => (
+  const cellEditRow = (data) => (
     <TouchableOpacity onPress={() => {
       navigation.navigate('Fuel', { CodAbastecimento: data })
     }}>
       <View style={{...styles.btn, height: '100%'}}>
         <Text style={styles.btnText}><MaterialCommunityIcons
-          name="gas-station" size={30}  /></Text>
+          name="gas-station" size={30} /></Text>
       </View>
     </TouchableOpacity>
   );
@@ -273,7 +273,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
                       <>
                       {rowData.map((cellData, cellIndex) => (
                         <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}
-                        key={cellIndex} data={cellIndex === 0 ? element(cellData, index) : cellData}
+                        key={cellIndex} data={cellIndex === 0 ? cellEditRow(cellData, index) : cellData}
                         textStyle={{...styles.text, ...tableHead[cellIndex].textStyle}}
                         style={tableHead[cellIndex].style} />
                       ))}
