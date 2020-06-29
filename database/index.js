@@ -10,100 +10,142 @@ const migrateUp = (useMock) => {
         dropTablesStr = dropTables()
     }
 
-    const migrations = `
-        ${dropTablesStr}
+  /**
+   *
+   * @type {{"1": string[]}} key = version value array of statement
+   */
+  const migrations = {
+        1: `
+            ${dropTablesStr}
 
-        create table if not exists Abastecimento
-        (
-            CodAbastecimento INTEGER
-                primary key autoincrement,
-            CodVeiculo INTEGER,
-            Data_Cadastro DATETIME default CURRENT_TIMESTAMP,
-            Data_Abastecimento DATE,
-            KM BIGINT default 0,
-            Observacao VARCHAR(200),
-            TanqueCheio INTEGER default 1
-        );
+            create table if not exists Version
+            (
+                VersionId INTEGER PRIMARY KEY AUTOINCREMENT,
+                Version INTEGER,
+                Data_Cadastro DATETIME default CURRENT_TIMESTAMP
+            );
 
-        create table if not exists Abastecimento_Combustivel
-        (
-            Codigo INTEGER
-                primary key autoincrement,
-            CodAbastecimento INTEGER,
-            CodCombustivel INTEGER,
-            Litros FLOAT default 0,
-            Valor_Litro FLOAT default 0,
-            Total FLOAT default 0
-        );
+            create table if not exists Abastecimento
+            (
+                CodAbastecimento INTEGER
+                    primary key autoincrement,
+                CodVeiculo INTEGER,
+                Data_Cadastro DATETIME default CURRENT_TIMESTAMP,
+                Data_Abastecimento DATE,
+                KM BIGINT default 0,
+                Observacao VARCHAR(200),
+                TanqueCheio INTEGER default 1
+            );
 
-        create table if not exists Combustivel
-        (
-            CodCombustivel INTEGER
-                primary key,
-            Descricao VARCHAR(50)
-        );
+            create table if not exists Abastecimento_Combustivel
+            (
+                Codigo INTEGER
+                    primary key autoincrement,
+                CodAbastecimento INTEGER,
+                CodCombustivel INTEGER,
+                Litros FLOAT default 0,
+                Valor_Litro FLOAT default 0,
+                Total FLOAT default 0
+            );
 
-        INSERT OR IGNORE INTO Combustivel (CodCombustivel, Descricao) VALUES
-        (1, 'Gasolina'),
-        (2, 'Álcool'),
-        (3, 'Diesel'),
-        (4, 'Gás Natural'),
-        (5, 'Gasolina Aditivada');
+            create table if not exists Combustivel
+            (
+                CodCombustivel INTEGER
+                    primary key,
+                Descricao VARCHAR(50)
+            );
 
-        create table if not exists Gasto
-        (
-            CodGasto INTEGER
-                primary key autoincrement,
-            CodVeiculo INTEGER,
-            Data_Cadastro DATETIME default CURRENT_TIMESTAMP,
-            Data DATE,
-            CodGastoTipo INTEGER,
-            Valor FLOAT default 0,
-            Observacao VARCHAR(200),
-            CodAbastecimento INTEGER
-        );
+            INSERT OR IGNORE INTO Combustivel (CodCombustivel, Descricao) VALUES
+            (1, 'Gasolina'),
+            (2, 'Álcool'),
+            (3, 'Diesel'),
+            (4, 'Gás Natural'),
+            (5, 'Gasolina Aditivada');
 
-        create table if not exists GastoTipo
-        (
-            CodGastoTipo INTEGER
-                primary key,
-            Descricao VARCHAR(50)
-        );
+            create table if not exists Gasto
+            (
+                CodGasto INTEGER
+                    primary key autoincrement,
+                CodVeiculo INTEGER,
+                Data_Cadastro DATETIME default CURRENT_TIMESTAMP,
+                Data DATE,
+                CodGastoTipo INTEGER,
+                Valor FLOAT default 0,
+                Observacao VARCHAR(200),
+                CodAbastecimento INTEGER
+            );
 
-        INSERT OR IGNORE INTO GastoTipo (CodGastoTipo, Descricao) VALUES
-        (1, 'Combustível')
-        (2, 'Óleo')
-        (3, 'Manutenção');
-    
-        create table if not exists Veiculo
-        (
-            CodVeiculo INTEGER
-                primary key autoincrement,
-            Placa VARCHAR(7),
-            Descricao VARCHAR(15)
-        );
+            create table if not exists GastoTipo
+            (
+                CodGastoTipo INTEGER
+                    primary key,
+                Descricao VARCHAR(50)
+            );
 
-        INSERT OR IGNORE INTO Veiculo (CodVeiculo, Placa, Descricao) VALUES
-        (1, null, 'meu');
+            INSERT OR IGNORE INTO GastoTipo (CodGastoTipo, Descricao) VALUES
+            (1, 'Combustível'),
+            (2, 'Óleo'),
+            (3, 'Manutenção');
 
-        ${testData}
-    `.split(';');
+            create table if not exists Veiculo
+            (
+                CodVeiculo INTEGER
+                    primary key autoincrement,
+                Placa VARCHAR(7),
+                Descricao VARCHAR(15)
+            );
+
+            INSERT OR IGNORE INTO Veiculo (CodVeiculo, Placa, Descricao) VALUES
+            (1, null, 'meu');
+
+            ${testData}`.split(';').map(statement => statement.trim()).filter(Boolean),
+        // 2: `DROP TABLE IF EXISTS XPTO6;`.split(';').map(statement => statement.trim()).filter(Boolean),
+        // 3: `DROP TABLE IF EXISTS ABCD;`.split(';').map(statement => statement.trim()).filter(Boolean)
+    }
+
+    const migrateVersions = (tx, versionsToMigrate) => {
+        versionsToMigrate.sort().map((version, idx) => {
+            let success = true
+            for (let j = 0; j < migrations[version].length; j++) {
+                tx.executeSql(migrations[version][j], [], () => {
+                    console.log('statement success', migrations[version][j])
+                }, (_, error) => {
+                    console.log('statement error', migrations[version][j], error)
+                    success = false
+                    return true
+                });
+            }
+
+            if (success && idx === versionsToMigrate.length - 1) {
+                console.log('inserindo versao', version)
+                tx.executeSql('INSERT INTO Version (Version) VALUES (?)', [version], (_, rows) => {
+                    console.log('Database version updated to ' + version, rows.insertId)
+                }, (_, error) => {
+                    console.log('Failed to update database version to ', version, error)
+                });
+            }
+        })
+        if (!versionsToMigrate.length) {
+            console.log('No database versions to update ')
+        }
+    }
 
     db.transaction(tx => {
-        migrations.map(migration => {
-            const migrationAux = migration.trim()
-            if (migrationAux) {
-                tx.executeSql(migrationAux, [], () => {
-                    console.log('statement success', migrationAux)
-                }, () => {
-                    console.log('statement error', migrationAux)
-                });    
-            }
+        tx.executeSql('SELECT Version FROM Version ORDER BY Version DESC LIMIT 1', [], (_, results) => {
+            const dbVersion = useMock ? 0 : results.rows.item(0).Version
+            console.log("Current database version is: " + dbVersion);
+            const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
+            migrateVersions(tx, versionsToMigrate)
+        }, () => {
+            const versionsToMigrate = Object.keys(migrations)
+            migrateVersions(tx, versionsToMigrate)
         });
     })
 }
 const dropTables = () => {
     return `
+        DROP TABLE IF EXISTS Version;
+
         DROP TABLE IF EXISTS Abastecimento;
 
         DROP TABLE IF EXISTS Abastecimento_Combustivel;
@@ -120,7 +162,7 @@ const dropTables = () => {
 
 const mock = () => {
     return `
-    INSERT OR IGNORE INTO Abastecimento (CodAbastecimento, CodVeiculo, Data_Cadastro, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES 
+    INSERT OR IGNORE INTO Abastecimento (CodAbastecimento, CodVeiculo, Data_Cadastro, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES
     (1, 1, '2017-02-06 22:17:30', '2017-02-06', 128729, 'posto Goiânia ', 1),
     (2, 1, '2017-02-06 22:19:37', '2017-02-06', 128329, 'início ', 1),
     (3, 1, '2017-02-16 21:59:08', '2017-02-16', 129052, 'posto Goiania ', 1),
@@ -273,7 +315,7 @@ const mock = () => {
     (150, 1, '2020-04-19 21:52:38', '2020-04-17', 164609, 'decio buriti ', 1),
     (152, 1, '2020-04-26 11:44:22', '2020-04-24', 164719, 'ipiranga assai ', 1);
 
-    INSERT OR IGNORE INTO Abastecimento_Combustivel (Codigo, CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES 
+    INSERT OR IGNORE INTO Abastecimento_Combustivel (Codigo, CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES
     (3, 3, 2, 39.773, 2.64, 105),
     (9, 4, 2, 41.108, 2.59, 106.47),
     (10, 1, 1, 41.06, 2.68, 110.04),
@@ -426,7 +468,7 @@ const mock = () => {
     (201, 148, 5, 17.481, 4.029, 70.43),
     (203, 152, 2, 11.88, 2.399, 28.5);
 
-    INSERT OR IGNORE INTO Gasto (CodGasto, CodVeiculo, Data_Cadastro, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES 
+    INSERT OR IGNORE INTO Gasto (CodGasto, CodVeiculo, Data_Cadastro, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento) VALUES
     (3, 1, '2017-02-16 21:59:08', '2017-02-16', 1, 105, 'posto Goiania ', 3),
     (9, 1, '2017-02-25 15:51:59', '2017-02-25', 1, 106.47, 'posto espigão ', 4),
     (10, 1, '2017-02-26 23:41:08', '2017-02-06', 1, 110.04, 'posto Goiânia ', 1),
