@@ -2,7 +2,7 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase('carManager.db');
 
-const migrateUp = (useMock) => {
+const migrateUp = (useMock = __DEV__) => {
     let testData = ''
     let dropTablesStr = ''
     if (useMock) {
@@ -18,10 +18,9 @@ const migrateUp = (useMock) => {
         1: `
             ${dropTablesStr}
 
-            create table if not exists Version
+            create table if not exists Versao
             (
-                VersionId INTEGER PRIMARY KEY AUTOINCREMENT,
-                Version INTEGER,
+                Versao INTEGER PRIMARY KEY,
                 Data_Cadastro DATETIME default CURRENT_TIMESTAMP
             );
 
@@ -98,7 +97,9 @@ const migrateUp = (useMock) => {
             INSERT OR IGNORE INTO Veiculo (CodVeiculo, Placa, Descricao) VALUES
             (1, null, 'meu');
 
-            ${testData}`.split(';').map(statement => statement.trim()).filter(Boolean),
+            ${testData}
+
+            `.split(';').map(statement => statement.trim()).filter(Boolean),
         // 2: `DROP TABLE IF EXISTS XPTO6;`.split(';').map(statement => statement.trim()).filter(Boolean),
         // 3: `DROP TABLE IF EXISTS ABCD;`.split(';').map(statement => statement.trim()).filter(Boolean)
     }
@@ -117,8 +118,8 @@ const migrateUp = (useMock) => {
             }
 
             if (success && idx === versionsToMigrate.length - 1) {
-                console.log('inserindo versao', version)
-                tx.executeSql('INSERT INTO Version (Version) VALUES (?)', [version], (_, rows) => {
+                console.log('registering new version', version)
+                tx.executeSql('INSERT OR IGNORE INTO Versao (Versao) VALUES (?)', [version], (_, rows) => {
                     console.log('Database version updated to ' + version, rows.insertId)
                 }, (_, error) => {
                     console.log('Failed to update database version to ', version, error)
@@ -131,8 +132,8 @@ const migrateUp = (useMock) => {
     }
 
     db.transaction(tx => {
-        tx.executeSql('SELECT Version FROM Version ORDER BY Version DESC LIMIT 1', [], (_, results) => {
-            const dbVersion = useMock ? 0 : results.rows.item(0).Version
+        tx.executeSql('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', [], (_, results) => {
+            const dbVersion = useMock ? 0 : results.rows.item(0).Versao
             console.log("Current database version is: " + dbVersion);
             const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
             migrateVersions(tx, versionsToMigrate)
@@ -144,7 +145,7 @@ const migrateUp = (useMock) => {
 }
 const dropTables = () => {
     return `
-        DROP TABLE IF EXISTS Version;
+        DROP TABLE IF EXISTS Versao;
 
         DROP TABLE IF EXISTS Abastecimento;
 

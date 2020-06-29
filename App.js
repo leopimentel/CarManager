@@ -24,7 +24,7 @@ export default function App(props) {
   const isLoadingComplete = useCachedResources();
 
   useEffect(() => {
-    __DEV__ ? migrateUp(true) : migrateUp();
+    migrateUp();
   }, []);
 
   if (!isLoadingComplete) {
