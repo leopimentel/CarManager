@@ -93,12 +93,8 @@ function FillingScreen({ theme, route }) {
                 function() {
                   console.log(`Filling ${codAbastecimento} removed`)
                   setVisibleDialog(true)
-                  setTotalFuel(null)
-                  setPricePerUnit(null)
-                  setObservation(null)
-                  setKm(null)
                   setLoading(false)
-                  setCodAbastecimento(null)
+                  clearForm()
                 }, function (_, error) {
                   console.log(error)
                   setLoading(false)
@@ -118,6 +114,15 @@ function FillingScreen({ theme, route }) {
         }
       );
     })
+  }
+
+  const clearForm = () => {
+    setTotalFuel(null)
+    setPricePerUnit(null)
+    setObservation(null)
+    setKm(null)
+    setCodAbastecimento(null)
+    setCodGasto(null)
   }
 
   const saveFilling = () => {
@@ -154,12 +159,9 @@ function FillingScreen({ theme, route }) {
                   [1, fillingDateSqlLite, 1, totalFuel, observation, insertId],
                   function() {
                     console.log(`Filling ${insertId} inserted`)
-                    setVisibleDialog(true)
-                    setTotalFuel(null)
-                    setPricePerUnit(null)
-                    setObservation(null)
-                    setKm(null)
+                    clearForm()
                     setLoading(false)
+                    setVisibleDialog(true)
                   }, function (_, error) {
                     console.log(error)
                     setLoading(false)
@@ -200,12 +202,8 @@ function FillingScreen({ theme, route }) {
                   function() {
                     console.log(`Filling ${codAbastecimento} updated`)
                     setVisibleDialog(true)
-                    setTotalFuel(null)
-                    setPricePerUnit(null)
-                    setObservation(null)
-                    setKm(null)
+                    clearForm()
                     setLoading(false)
-                    setCodAbastecimento(null)
                   }, function (_, error) {
                     console.log(error)
                     setLoading(false)
@@ -293,7 +291,10 @@ function FillingScreen({ theme, route }) {
             <TextInput
               label={t('pricePerUnit')}
               value={pricePerUnit}
-              onChangeText={text => setPricePerUnit(databaseFloatFormat(text))}
+              onChangeText={text => {
+                setPricePerUnit(databaseFloatFormat(text))
+                setFormErrors({...formErrors, pricePerUnit: [false, '']})
+              }}
               style={{ marginRight: 5, flex: 1 }}
               placeholder={t('pricePerUnit')}
               keyboardType={'numeric'}
@@ -309,7 +310,10 @@ function FillingScreen({ theme, route }) {
             <TextInput
               label={t('fillingTotal')}
               value={totalFuel}
-              onChangeText={text => setTotalFuel(databaseFloatFormat(text))}
+              onChangeText={text => {
+                setFormErrors({...formErrors, totalFuel: [false, '']})
+                setTotalFuel(databaseFloatFormat(text))
+              }}
               keyboardType={'numeric'}
               mode='outlined'
               style={{ flex: 1 }}
@@ -325,7 +329,10 @@ function FillingScreen({ theme, route }) {
           <TextInput
             label='KM'
             value={km}
-            onChangeText={text => setKm(databaseIntegerFormat(text))}
+            onChangeText={text => {
+              setKm(databaseIntegerFormat(text))
+              setFormErrors({...formErrors, km: [false, '']})
+            }}
             keyboardType={'numeric'}
             mode='outlined'
             style={{flex: 1}}
