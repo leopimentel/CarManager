@@ -10,11 +10,11 @@ const migrateUp = (useMock) => {
         dropTablesStr = dropTables()
     }
 
-  /**
-   *
-   * @type {{"1": string[]}} key = version value array of statement
-   */
-  const migrations = {
+    /**
+     *
+     * @type {{"1": string[]}} key = version value array of statement
+     */
+    const migrations = {
         1: `
             ${dropTablesStr}
 
@@ -126,7 +126,7 @@ const migrateUp = (useMock) => {
             }
         })
         if (!versionsToMigrate.length) {
-            console.log('No database versions to update ')
+            console.log('No database versions to update')
         }
     }
 
