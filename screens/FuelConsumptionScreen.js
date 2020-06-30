@@ -24,15 +24,19 @@ function FuelConsumptionScreen({ theme, navigation }) {
     endFillingDate: moment().format(t('dateFormat'))
   })
   const [fuelType, setFuelType] = useState(0)
+  const [fuelTypeView, setFuelTypeView] = useState(t('all'))
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
   const [totalAverage, setTotalAverage] = useState(0)
   const vehicles = v;
+  //@todo today only one vehicle is supported
+  const vehicleId = vehicles[0].index;
   const fuels = [{
     index: 0,
     value: t('all')
   }, ...f];
   const timeOptions = timeFilter;
+  const [periodView, setPeriodView] = useState(timeOptions[0].value)
   const [loading, setLoading] = useState(false)
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
@@ -100,17 +104,18 @@ function FuelConsumptionScreen({ theme, navigation }) {
         A.KM,
         A.Observacao,
         A.TanqueCheio,
-        AC.CodCombustivel,
-        AC.Litros,
-        AC.Valor_Litro,
-        AC.Total
+        GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
+        SUM(AC.Litros) AS Litros,
+        AVG(AC.Valor_Litro) AS Valor_Litro,
+        SUM(AC.Total) AS Total
         FROM Abastecimento A
         INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-        WHERE A.CodVeiculo = 1
+        WHERE A.CodVeiculo = ?
         AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
+        GROUP BY AC.CodAbastecimento
         ORDER BY A.KM DESC
       `,
-      [fromUserDateToDatabase(fillingPeriod.startFillingDate), fromUserDateToDatabase(fillingPeriod.endFillingDate)],
+      [vehicleId, fromUserDateToDatabase(fillingPeriod.startFillingDate), fromUserDateToDatabase(fillingPeriod.endFillingDate)],
       function(tx, results) {
         const callback = (nextFilling) => {
           const temp = [];
@@ -119,7 +124,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
           let totalCount = 0
           for (let i = 0; i < results.rows.length; i++) {
             const filling = results.rows.item(i)
-            if (filling.CodCombustivel !== fuelType && fuelType !== 0) {
+            if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
               continue
             }
 
@@ -134,7 +139,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
             temp.push([
               filling.CodAbastecimento,
               fromDatabaseToUserDate(filling.Data_Abastecimento),
-              fuels[filling.CodCombustivel].value,
+              filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(),
               filling.Litros.toFixed(2),
               filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
               filling.Valor_Litro,
@@ -143,7 +148,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
               filling.TanqueCheio ? t('yes'): t('no'),
               accomplishedKm,
               accomplishedKm ? (filling.Total / accomplishedKm).toFixed(2) : '',
-              t('no'),
+              filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
               filling.Observacao,
             ]);
 
@@ -164,13 +169,13 @@ function FuelConsumptionScreen({ theme, navigation }) {
             SELECT A.KM, AC.Litros
             FROM Abastecimento A
             INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-            WHERE A.CodVeiculo = 1
+            WHERE A.CodVeiculo = ?
             AND A.KM > ?
             ORDER BY A.KM
             LIMIT 1
           `,
-            [results.rows.item(0).KM],
-            (tx, fillings) => {
+            [vehicleId, results.rows.item(0).KM],
+            (_, fillings) => {
               let nextFilling
               if (fillings.rows.length) {
                 nextFilling = fillings.rows.item(0)
@@ -205,19 +210,23 @@ function FuelConsumptionScreen({ theme, navigation }) {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return <Loading loading={loading} />
+  }
+
   return (
     <View style={styles.container}>
-      <Loading loading={loading} />
       <ScrollView>
         <View style={{ ...styles.splitRow}}>
-          <View style={{ flex: 8 }}>
-            <Dropdown style={{flex: 1}} label={t('vehicle')} data={vehicles} value='Meu'/>
-          </View>
-          <View style={{ flex: 1 }}/>
-          <View style={{ flex: 8 }}>
-            <Dropdown label={t('fuel')} data={fuels} value={t('all')} onChangeText={(value, index) => {
-              setFuelType(index)
-             } }/>
+          {/* <View style={{ flex: 8 }}> */}
+            {/* <Dropdown style={{flex: 1}} label={t('vehicle')} data={vehicles} value='Meu'/> */}
+          {/* </View> */}
+          {/* <View style={{ flex: 1 }}/> */}
+          <View style={{ flex: 1 }}>
+            <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
+              setFuelType(fuels.filter(fuel => fuel.value === value)[0].index)
+              setFuelTypeView(fuels.filter(fuel => fuel.value === value)[0].value)
+            }}/>
           </View>
         </View>
         <View style={styles.splitRow}>
@@ -258,7 +267,10 @@ function FuelConsumptionScreen({ theme, navigation }) {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Dropdown style={{flex: 1}} label={t('period')} data={timeOptions} value={timeOptions[0].value} onChangeText={(value, index, data) => setPeriod(data[index].index)}/>
+            <Dropdown style={{flex: 1}} label={t('period')} data={timeOptions} value={periodView} onChangeText={(value, index, data) => {
+              setPeriod(data[index].index)
+              setPeriodView(data[index].value)
+            }}/>
           </View>
         </View>
 

@@ -50,4 +50,9 @@ export default {
   close: 'Fechar',
   edit: 'Alterar',
   delete: 'Remover',
+  isTwoFuels: 'Dois combustíveis',
+  clearFields: 'Limpar campos', 
+  mine: 'Meu',
+  oil: 'Óleo',
+  carRepair: 'Manutenção'
 };
