@@ -173,6 +173,7 @@ function FillingScreen({ theme, route }) {
   }
 
   const clearForm = () => {
+    setFillingDate(moment().format(t('dateFormat')))
     setTotalFuel(null)
     setTotalFuel2(null)
     setPricePerUnit(null)
