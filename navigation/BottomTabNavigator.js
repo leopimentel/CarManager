@@ -2,8 +2,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as React from 'react';
 
 import FillingScreen from '../screens/FillingScreen';
+import SpendingScreen from '../screens/SpendingScreen';
+import SpendingReportScreen from '../screens/SpendingReportScreen'
 import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
-import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Entypo, Foundation } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Fuel';
@@ -37,12 +39,12 @@ function BottomTabNavigator({ navigation, route }) {
         component={FuelConsumptionScreen}
         options={{
           title: t('consumption'),
-          tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          tabBarIcon: ({ focused }) => <MaterialCommunityIcons name="numeric" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
-      {/* <BottomTab.Screen
+      <BottomTab.Screen
         name="Spending"
-        component={LinksScreen}
+        component={SpendingScreen}
         options={{
           title: t('spending'),
           tabBarIcon: ({ focused }) => <Foundation name="dollar" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
@@ -50,12 +52,12 @@ function BottomTabNavigator({ navigation, route }) {
       />
       <BottomTab.Screen
         name="Report"
-        component={LinksScreen}
+        component={SpendingReportScreen}
         options={{
           title: t('report'),
-          tabBarIcon: ({ focused }) => <Foundation name="list-number" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
-      /> */}
+      />
     </BottomTab.Navigator>
   );
 }

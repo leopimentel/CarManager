@@ -6,7 +6,7 @@ const vehicles = [{
   index:1, value: t('mine')
 }];
 
-const spendingType = [{
+const spendingTypes = [{
   index:1, value: t('fuel')
 },{
   index:2, value: t('oil')
@@ -55,5 +55,5 @@ export {
   timeFilter,
   decimalSeparator,
   thousandSeparator,
-  spendingType
+  spendingTypes
 };

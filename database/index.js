@@ -72,7 +72,8 @@ const migrateUp = (useMock = __DEV__) => {
                 Valor FLOAT default 0,
                 Observacao VARCHAR(200),
                 CodAbastecimento INTEGER,
-                Codigo_Abastecimento_Combustivel INTEGER
+                Codigo_Abastecimento_Combustivel INTEGER,
+                KM BIGINT
             );
 
             create table if not exists GastoTipo

@@ -54,5 +54,6 @@ export default {
   clearFields: 'Limpar campos', 
   mine: 'Meu',
   oil: 'Óleo',
-  carRepair: 'Manutenção'
+  carRepair: 'Manutenção',
+  spendingType: 'Tipo de gasto'
 };
