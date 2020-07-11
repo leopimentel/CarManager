@@ -131,22 +131,23 @@ function SpendingReportScreen({ theme, navigation }) {
   }, [isFocused, period, spendingType]);
 
   const cellEditRow = (rowData) => {
+    const isFuel = rowData[3] === t('fuel')
     return (
-    <TouchableOpacity onPress={() => {
+      <TouchableOpacity onPress={() => {
+        if (isFuel) {
+          navigation.navigate('Fuel', {
+            CodAbastecimento: rowData[0]
+          })
+        } else {
+          navigation.navigate('Spending', {
+            CodGasto: rowData[0]
+          })
+        }
+      }}>
 
-      if (rowData[3] === t('fuel')) {
-        navigation.navigate('Fuel', {
-          CodAbastecimento: rowData[0]
-        })
-      } else {
-        navigation.navigate('Spending', {
-          CodGasto: rowData[0]
-        })
-      }
-    }}>
       <View style={{...styles.btn, height: '100%'}}>
         <Text style={styles.btnText}><MaterialCommunityIcons
-          name="gas-station" size={30} /></Text>
+          name={isFuel ? "gas-station" : "edit"} size={30} /></Text>
       </View>
     </TouchableOpacity>
   )};

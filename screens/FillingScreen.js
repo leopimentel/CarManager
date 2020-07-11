@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Switch, Dialog, Portal, Paragraph } from 'react-native-paper';
+import { withTheme, Button, TextInput, Switch, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
-import { vehicles as v, fuels as f, spendingType } from '../constants/fuel'
+import { vehicles as v, fuels as f, spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 
-function FillingScreen({ theme, route }) {
+function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
   const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
 
@@ -239,7 +239,7 @@ function FillingScreen({ theme, route }) {
                 const codAbastecimentoCombustivelInserted = res.insertId
                 tx.executeSql(
                   `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                  [vehicleId, fillingDateSqlLite, spendingType[0].index, totalFuel, observation, insertId, codAbastecimentoCombustivelInserted],
+                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, insertId, codAbastecimentoCombustivelInserted],
                   function(tx) {
                     if (!isTwoFuelTypes) {
                       console.log(`Filling ${insertId} inserted`)
@@ -254,7 +254,7 @@ function FillingScreen({ theme, route }) {
                           const codAbastecimentoCombustivelInserted2 = res.insertId
                           tx.executeSql(
                             `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                            [vehicleId, fillingDateSqlLite, spendingType[0].index, totalFuel2, observation, insertId, codAbastecimentoCombustivelInserted2],
+                            [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, insertId, codAbastecimentoCombustivelInserted2],
                             function() {
                               console.log(`Filling ${insertId} inserted`)
                               clearForm()
@@ -289,7 +289,7 @@ function FillingScreen({ theme, route }) {
                   `UPDATE Gasto
                    SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?
                    WHERE CodGasto = ?`,
-                  [vehicleId, fillingDateSqlLite, spendingType[0].index, totalFuel, observation, codGasto],
+                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, codGasto],
                   function(tx) {
                     if (!codAbastecimentoCombustivel2) {
                       console.log(`Filling ${codAbastecimento} updated`)
@@ -309,7 +309,7 @@ function FillingScreen({ theme, route }) {
                               `UPDATE Gasto
                                SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?
                                WHERE CodGasto = ?`,
-                              [vehicleId, fillingDateSqlLite, spendingType[0].index, totalFuel2, observation, codGasto2],
+                              [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, codGasto2],
                               function() {
                                 console.log(`Filling ${codAbastecimento} updated`)
                                 setVisibleDialog(true)
@@ -359,12 +359,16 @@ function FillingScreen({ theme, route }) {
     <Portal>
       <Dialog visible={visibleDialog}
           onDismiss={() => setVisibleDialog(false)}>
-        <Dialog.Title>{t('save')}</Dialog.Title>
-        <Dialog.Content>
+        <Dialog.Title>{t('savedFilling')}</Dialog.Title>
+        {/* <Dialog.Content>
           <Paragraph>{t('savedFilling')}</Paragraph>
-        </Dialog.Content>
+        </Dialog.Content> */}
         <Dialog.Actions>
-          <Button onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
+          <Button uppercase={false} mode="outlined" onPress={() => {
+            setVisibleDialog(false)
+            navigation.navigate('Consumption')
+          }}>{t('seeComsumption')}</Button>
+          <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>
@@ -538,7 +542,7 @@ function FillingScreen({ theme, route }) {
       <View style={styles.splitRow}>
         <Button style={{ flex: 1, marginTop: 10 }} labelStyle={{fontSize: 25}}
         uppercase={false} compact icon="content-save" mode="contained" onPress={() => saveFilling()}>
-        {t('confirm')}
+        {t('save')}
         </Button>
       </View>
 

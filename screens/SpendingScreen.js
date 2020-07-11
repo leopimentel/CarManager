@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Dialog, Portal, Paragraph } from 'react-native-paper';
+import { withTheme, Button, TextInput, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import { Dropdown } from 'react-native-material-dropdown';
 import DatePicker from 'react-native-datepicker'
 import moment from 'moment';
@@ -15,7 +15,7 @@ import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 
-function SpendingScreen({ theme, route }) {
+function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
   const [date, setDate] = useState(moment().format(t('dateFormat')))
   const spendingTypesMinusFueling = spendingTypes.slice(1)
@@ -154,12 +154,17 @@ function SpendingScreen({ theme, route }) {
     <Portal>
       <Dialog visible={visibleDialog}
           onDismiss={() => setVisibleDialog(false)}>
-        <Dialog.Title>{t('save')}</Dialog.Title>
-        <Dialog.Content>
+        <Dialog.Title>{t('spendingSaved')}</Dialog.Title>
+        {/* <Dialog.Content>
           <Paragraph>{t('savedFilling')}</Paragraph>
-        </Dialog.Content>
+        </Dialog.Content> */}
         <Dialog.Actions>
-          <Button onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
+          <Button uppercase={false} mode="outlined" onPress={() => {
+            setVisibleDialog(false)
+            navigation.navigate('Report')
+          }}>{t('seeReport')}</Button>
+
+          <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

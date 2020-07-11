@@ -55,5 +55,8 @@ export default {
   mine: 'Meu',
   oil: 'Óleo',
   carRepair: 'Manutenção',
-  spendingType: 'Tipo de gasto'
+  spendingType: 'Tipo de gasto',
+  seeComsumption: 'Ver consumo',
+  seeReport: 'Ver gastos',
+  spendingSaved: 'Gasto salvo'
 };
