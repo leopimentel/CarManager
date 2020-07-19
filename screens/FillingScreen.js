@@ -374,6 +374,12 @@ function FillingScreen({ theme, route, navigation }) {
     </Portal>
 
     <ScrollView style={styles.container}>
+
+      <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
+        uppercase={false} compact icon="gas-station" mode="contained" onPress={() => clearForm()}>
+        {t('new')}
+      </Button>
+
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.dateLabel}> {t('fillingDate')} </Text>
@@ -424,13 +430,31 @@ function FillingScreen({ theme, route, navigation }) {
       <View style={styles.splitRow}>
         <View style={{flex: 1}}>
           <TextInput
-            label={t('pricePerUnit')}
+            label='KM'
+            value={km}
+            onChangeText={text => {
+              setKm(databaseIntegerFormat(text))
+              setFormErrors({...formErrors, km: [false, '']})
+            }}
+            keyboardType={'numeric'}
+            mode='outlined'
+            style={{flex: 1}}
+          />
+
+          {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
+            {formErrors.km[1]}
+          </HelperText>}
+        </View>
+
+        <View style={{flex: 1}}>
+          <TextInput
+            label={'$ ' + t('pricePerUnit')}
             value={pricePerUnit}
             onChangeText={text => {
               setPricePerUnit(databaseFloatFormat(text))
               setFormErrors({...formErrors, pricePerUnit: [false, '']})
             }}
-            style={{ marginRight: 5, flex: 1 }}
+            style={{ marginLeft: 5, flex: 1 }}
             placeholder={t('pricePerUnit')}
             keyboardType={'numeric'}
             mode='outlined'
@@ -440,41 +464,23 @@ function FillingScreen({ theme, route, navigation }) {
             {formErrors.pricePerUnit[1]}
           </HelperText>}
         </View>
-
-        <View style={{flex: 1}}>
-          <TextInput
-            label={t('fillingTotal')}
-            value={totalFuel}
-            onChangeText={text => {
-              setFormErrors({...formErrors, totalFuel: [false, '']})
-              setTotalFuel(databaseFloatFormat(text))
-            }}
-            keyboardType={'numeric'}
-            mode='outlined'
-            style={{ flex: 1 }}
-          />
-
-          {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
-            {formErrors.totalFuel[1]}
-          </HelperText>}
-        </View>
       </View>
 
       <View style={styles.splitRow}>
         <TextInput
-          label='KM'
-          value={km}
+          label={'$ ' + t('fillingTotal')}
+          value={totalFuel}
           onChangeText={text => {
-            setKm(databaseIntegerFormat(text))
-            setFormErrors({...formErrors, km: [false, '']})
+            setFormErrors({...formErrors, totalFuel: [false, '']})
+            setTotalFuel(databaseFloatFormat(text))
           }}
           keyboardType={'numeric'}
           mode='outlined'
-          style={{flex: 1}}
+          style={{ flex: 1 }}
         />
 
-        {formErrors.km[0] && <HelperText type="error" visible={formErrors.km[0]} padding='none'>
-          {formErrors.km[1]}
+        {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
+          {formErrors.totalFuel[1]}
         </HelperText>}
       </View>
 
@@ -553,10 +559,6 @@ function FillingScreen({ theme, route, navigation }) {
           {t('delete')}
           </Button>
         }
-        <Button style={{ flex: 1, marginTop: 10, backgroundColor: Colors.accent }} labelStyle={{fontSize: 15}}
-        uppercase={false} compact icon="eraser" mode="contained" onPress={() => clearForm()}>
-        {t('clearFields')}
-        </Button>
       </View>
     </ScrollView>
   </View>

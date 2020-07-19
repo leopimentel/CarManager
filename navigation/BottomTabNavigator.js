@@ -5,7 +5,8 @@ import FillingScreen from '../screens/FillingScreen';
 import SpendingScreen from '../screens/SpendingScreen';
 import SpendingReportScreen from '../screens/SpendingReportScreen'
 import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
-import { MaterialCommunityIcons, Entypo, Foundation } from '@expo/vector-icons';
+import SettingsScreen from '../screens/SettingsScreen';
+import { MaterialCommunityIcons, Entypo, Foundation, Feather } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Fuel';
@@ -58,6 +59,14 @@ function BottomTabNavigator({ navigation, route }) {
           tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
+      <BottomTab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: t('settings'),
+          tabBarIcon: ({ focused }) => <Feather name="settings" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+        }}
+      />
     </BottomTab.Navigator>
   );
 }
@@ -78,6 +87,8 @@ function getHeaderTitle(route) {
       return t('spending');
     case 'Report':
       return t('report');
+    case 'Settings':
+      return t('settings');
   }
 }
 

@@ -170,6 +170,10 @@ function SpendingScreen({ theme, route, navigation }) {
     </Portal>
 
     <ScrollView style={styles.container}>
+      <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
+        uppercase={false} compact icon="cash-usd" mode="contained" onPress={() => clearForm()}>
+        {t('new')}
+      </Button>
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.dateLabel}> {t('fillingDate')} </Text>
@@ -201,14 +205,14 @@ function SpendingScreen({ theme, route, navigation }) {
       <View style={styles.splitRow}>
         <View style={{flex: 1}}>
           <TextInput
-            label={t('value')}
+            label={'$ ' + t('value')}
             value={price}
             onChangeText={text => {
               setPrice(databaseFloatFormat(text))
               setFormErrors({...formErrors, price: [false, '']})
             }}
             style={{ flex: 1 }}
-            placeholder={t('value')}
+            placeholder={'$ ' + t('value')}
             keyboardType={'numeric'}
             mode='outlined'
           />
@@ -245,7 +249,7 @@ function SpendingScreen({ theme, route, navigation }) {
       <View style={styles.splitRow}>
         <Button style={{ flex: 1, marginTop: 10 }} labelStyle={{fontSize: 25}}
         uppercase={false} compact icon="content-save" mode="contained" onPress={() => saveSpending()}>
-        {t('confirm')}
+        {t('save')}
         </Button>
       </View>
 
@@ -256,10 +260,6 @@ function SpendingScreen({ theme, route, navigation }) {
           {t('delete')}
           </Button>
         }
-        <Button style={{ flex: 1, marginTop: 10, backgroundColor: Colors.accent }} labelStyle={{fontSize: 15}}
-        uppercase={false} compact icon="eraser" mode="contained" onPress={() => clearForm()}>
-        {t('clearFields')}
-        </Button>
       </View>
     </ScrollView>
   </View>

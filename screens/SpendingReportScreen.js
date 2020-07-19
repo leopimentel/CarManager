@@ -120,6 +120,7 @@ function SpendingReportScreen({ theme, navigation }) {
               spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
               spending.Observacao,
             ]);
+            totalSumAcc += spending.Valor
           }
 
           setTableData(temp)
@@ -147,7 +148,7 @@ function SpendingReportScreen({ theme, navigation }) {
 
       <View style={{...styles.btn, height: '100%'}}>
         <Text style={styles.btnText}><MaterialCommunityIcons
-          name={isFuel ? "gas-station" : "edit"} size={30} /></Text>
+          name={isFuel ? "gas-station" : "playlist-edit"} size={30} /></Text>
       </View>
     </TouchableOpacity>
   )};

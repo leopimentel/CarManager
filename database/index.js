@@ -1,6 +1,11 @@
 import * as SQLite from 'expo-sqlite';
+import * as FileSystem from 'expo-file-system'
 
-const db = SQLite.openDatabase('carManager.db');
+const databaseName = 'carManager.db';
+
+const db = SQLite.openDatabase(databaseName);
+
+const databaseFilePath = `${FileSystem.documentDirectory}SQLite/${databaseName}`
 
 const migrateUp = (useMock = __DEV__) => {
     let testData = ''
@@ -656,6 +661,8 @@ const mock = () => {
 }
 
 export {
+    databaseName,
+    databaseFilePath,
     migrateUp,
     db
 }
