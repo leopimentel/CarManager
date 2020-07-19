@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Dropdown } from 'react-native-material-dropdown';
-import DatePicker from 'react-native-datepicker'
-import { withTheme } from 'react-native-paper';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { withTheme, TextInput } from 'react-native-paper';
 import { vehicles as v, spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
@@ -20,9 +20,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 function SpendingReportScreen({ theme, navigation }) {
   const styles = getStyles(theme)
   const [period, setPeriod] = useState({
-    startDate: moment().subtract(1, 'months').format(t('dateFormat')),
-    endDate: moment().format(t('dateFormat'))
+    startDate: moment().subtract(1, 'months').toDate(),
+    endDate: moment().toDate()
   })
+  const [showStartDate, setShowStartDate] = useState(false)
+  const [showEndDate, setShowEndDate] = useState(false)
   const [spendingType, setSpendingType] = useState(0)
   const [spendingTypeView, setSpendingTypeView] = useState(t('all'))
   const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
@@ -75,8 +77,8 @@ function SpendingReportScreen({ theme, navigation }) {
     }
 
     setPeriod({
-      startDate: startDate.format(t('dateFormat')),
-      endDate: endDate.format(t('dateFormat'))
+      startDate: startDate.toDate(),
+      endDate: endDate.toDate()
     })
   }
 
@@ -160,49 +162,37 @@ function SpendingReportScreen({ theme, navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView>
+        {showStartDate &&
+          <DateTimePicker
+          value={period.startDate}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowStartDate(!showStartDate);
+            setPeriod({
+              ...period,
+              startDate: selectedDate || period.startDate
+            })
+          }}
+        />}
+
+        {showEndDate &&
+          <DateTimePicker
+          value={period.endDate}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowEndDate(!showEndDate);
+            setPeriod({
+              ...period,
+              endDate: selectedDate || period.endDate
+            })
+          }}
+        />}
         <View style={{ ...styles.splitRow}}>
-          <View style={{ flex: 1, marginLeft: 5 }}>
+          <View style={{ flex: 1, marginRight: 5 }}>
             <Dropdown label={t('spendingType')} data={spendingTypesAll} value={spendingTypeView} onChangeText={(value) => {
               setSpendingType(spendingTypesAll.filter(fuel => fuel.value === value)[0].index)
               setSpendingTypeView(spendingTypesAll.filter(fuel => fuel.value === value)[0].value)
             }}/>
-          </View>
-        </View>
-        <View style={styles.splitRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dateLabel}> {t('startDate')} </Text>
-            <DatePicker
-              style={{ flex: 1, width: 100 }}
-              date={period.startDate}
-              mode="date"
-              format={t('dateFormat')}
-              confirmBtnText={t('confirm')}
-              cancelBtnText={t('cancel')}
-              locale="pt_br"
-              showIcon={false}
-              onDateChange={(date) => {setPeriod({
-                ...period,
-                startDate: date
-              })}}
-            />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dateLabel}> {t('endDate')} </Text>
-            <DatePicker
-              style={{ flex: 1, width: 100 }}
-              date={period.endDate}
-              mode="date"
-              format={t('dateFormat')}
-              confirmBtnText={t('confirm')}
-              cancelBtnText={t('cancel')}
-              locale="pt_br"
-              showIcon={false}
-              onDateChange={(date) => {setPeriod({
-                ...period,
-                endDate: date
-              })}}
-            />
           </View>
 
           <View style={{ flex: 1 }}>
@@ -212,9 +202,36 @@ function SpendingReportScreen({ theme, navigation }) {
             }}/>
           </View>
         </View>
+        <View style={styles.splitRow}>
+          <View style={{ flex: 1, marginRight: 5 }}>
+            <TouchableOpacity onPress={() => setShowStartDate(true)}>
+              <TextInput
+                label={t('startDate')}
+                value={fromDatabaseToUserDate(period.startDate)}
+                mode='outlined'
+                style={{flex: 1}}
+                editable={false}
+                onPress={() => {setShowStartDate(true)}}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity onPress={() => setShowEndDate(true)}>
+              <TextInput
+                label={t('endDate')}
+                value={fromDatabaseToUserDate(period.endDate)}
+                mode='outlined'
+                style={{flex: 1}}
+                editable={false}
+                onPress={() => {setShowEndDate(true)}}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <ScrollView horizontal>
-          <View>
+          <View style={{marginTop: 10}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
 

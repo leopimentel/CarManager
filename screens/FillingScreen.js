@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Switch, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import { Dropdown } from 'react-native-material-dropdown';
-import DatePicker from 'react-native-datepicker'
+import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
 import { vehicles as v, fuels as f, spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase } from '../utils/date'
+import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
-  const [fillingDate, setFillingDate] = useState(moment().format(t('dateFormat')))
+  const [fillingDate, setFillingDate] = useState(new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
 
   const [totalFuel, setTotalFuel] = useState()
   const [pricePerUnit, setPricePerUnit] = useState()
@@ -73,7 +74,7 @@ function FillingScreen({ theme, route, navigation }) {
               const abastecimento = results.rows.item(0)
               setCodAbastecimento(route.params.CodAbastecimento)
               setTotalFuel(abastecimento.Total)
-              setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').format(t('dateFormat')))
+              setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').toDate())
               setPricePerUnit(abastecimento.Valor_Litro)
               setObservation(abastecimento.Observacao)
               setFuelType(abastecimento.CodCombustivel)
@@ -173,7 +174,7 @@ function FillingScreen({ theme, route, navigation }) {
   }
 
   const clearForm = () => {
-    setFillingDate(moment().format(t('dateFormat')))
+    setFillingDate(new Date())
     setTotalFuel(null)
     setTotalFuel2(null)
     setPricePerUnit(null)
@@ -374,7 +375,15 @@ function FillingScreen({ theme, route, navigation }) {
     </Portal>
 
     <ScrollView style={styles.container}>
-
+      {showDatePicker &&
+        <DateTimePicker
+          value={fillingDate}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(!showDatePicker);
+            setFillingDate(selectedDate || fillingDate)              
+          }}
+        />}
       <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
         uppercase={false} compact icon="gas-station" mode="contained" onPress={() => clearForm()}>
         {t('new')}
@@ -382,25 +391,17 @@ function FillingScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.dateLabel}> {t('fillingDate')} </Text>
-          <DatePicker
-            // iconSource={{uri: 'https://avatars0.githubusercontent.com/u/17571969?v=3&s=400'}}
-            // iconSource={require('../assets/images/favicon.png')}
-            style={{width: '100%'}}
-            date={fillingDate}
-            mode="date"
-            format={t('dateFormat')}
-            confirmBtnText={t('confirm')}
-            cancelBtnText={t('cancel')}
-            locale="pt_br"
-            customStyles={{
-              dateIcon: styles.dateIcon,
-              dateInput: {
-                marginLeft: 36
-              }
-            }}
-            onDateChange={(date) => {setFillingDate(date)}}
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TextInput
+            label={t('fillingDate')}
+            value={fromDatabaseToUserDate(fillingDate)}
+            mode='outlined'
+            style={{flex: 1}}
+            editable={false}
+            onPress={() => {setShowDatePicker(true)}}
           />
+          </TouchableOpacity>
+
           {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View  style={{ flex: 1, alignItems: 'center' }}>

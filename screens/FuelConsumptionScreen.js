@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Dropdown } from 'react-native-material-dropdown';
-import DatePicker from 'react-native-datepicker'
-import { withTheme } from 'react-native-paper';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { withTheme, TextInput } from 'react-native-paper';
 import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
@@ -20,9 +20,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 function FuelConsumptionScreen({ theme, navigation }) {
   const styles = getStyles(theme)
   const [fillingPeriod, setFillingPeriod] = useState({
-    startFillingDate: moment().subtract(1, 'months').format(t('dateFormat')),
-    endFillingDate: moment().format(t('dateFormat'))
+    startFillingDate: moment().subtract(1, 'months').toDate(),
+    endFillingDate: moment().toDate()
   })
+
+  const [showStartFillingDate, setShowStartFillingDate] = useState(false)
+  const [showEndFillingDate, setShowEndFillingDate] = useState(false)
   const [fuelType, setFuelType] = useState(0)
   const [fuelTypeView, setFuelTypeView] = useState(t('all'))
   const [tableData, setTableData] = useState([])
@@ -85,8 +88,8 @@ function FuelConsumptionScreen({ theme, navigation }) {
     }
 
     setFillingPeriod({
-      startFillingDate: startDate.format(t('dateFormat')),
-      endFillingDate: endDate.format(t('dateFormat'))
+      startFillingDate: startDate.toDate(),
+      endFillingDate: endDate.toDate()
     })
   }
 
@@ -217,53 +220,42 @@ function FuelConsumptionScreen({ theme, navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView>
+        {showStartFillingDate &&
+          <DateTimePicker
+          value={fillingPeriod.startFillingDate}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowStartFillingDate(!showStartFillingDate);
+            setFillingPeriod({
+              ...fillingPeriod,
+              startFillingDate: selectedDate || fillingPeriod.startFillingDate
+            })
+          }}
+        />}
+
+        {showEndFillingDate &&
+          <DateTimePicker
+          value={fillingPeriod.endFillingDate}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowEndFillingDate(!showEndFillingDate);
+            setFillingPeriod({
+              ...fillingPeriod,
+              endFillingDate: selectedDate || fillingPeriod.endFillingDate
+            })
+          }}
+        />}
+
         <View style={{ ...styles.splitRow}}>
           {/* <View style={{ flex: 8 }}> */}
             {/* <Dropdown style={{flex: 1}} label={t('vehicle')} data={vehicles} value='Meu'/> */}
           {/* </View> */}
           {/* <View style={{ flex: 1 }}/> */}
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginRight: 5 }}>
             <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
               setFuelType(fuels.filter(fuel => fuel.value === value)[0].index)
               setFuelTypeView(fuels.filter(fuel => fuel.value === value)[0].value)
             }}/>
-          </View>
-        </View>
-        <View style={styles.splitRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dateLabel}> {t('startDate')} </Text>
-            <DatePicker
-              style={{ flex: 1, width: 100 }}
-              date={fillingPeriod.startFillingDate}
-              mode="date"
-              format={t('dateFormat')}
-              confirmBtnText={t('confirm')}
-              cancelBtnText={t('cancel')}
-              locale="pt_br"
-              showIcon={false}
-              onDateChange={(date) => {setFillingPeriod({
-                ...fillingPeriod,
-                startFillingDate: date
-              })}}
-            />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dateLabel}> {t('endDate')} </Text>
-            <DatePicker
-              style={{ flex: 1, width: 100 }}
-              date={fillingPeriod.endFillingDate}
-              mode="date"
-              format={t('dateFormat')}
-              confirmBtnText={t('confirm')}
-              cancelBtnText={t('cancel')}
-              locale="pt_br"
-              showIcon={false}
-              onDateChange={(date) => {setFillingPeriod({
-                ...fillingPeriod,
-                endFillingDate: date
-              })}}
-            />
           </View>
 
           <View style={{ flex: 1 }}>
@@ -273,9 +265,36 @@ function FuelConsumptionScreen({ theme, navigation }) {
             }}/>
           </View>
         </View>
+        <View style={styles.splitRow}>
+          <View style={{ flex: 1, marginRight: 5 }}>
+            <TouchableOpacity onPress={() => setShowStartFillingDate(true)}>
+              <TextInput
+                label={t('startDate')}
+                value={fromDatabaseToUserDate(fillingPeriod.startFillingDate)}
+                mode='outlined'
+                style={{flex: 1}}
+                editable={false}
+                onPress={() => {setShowStartFillingDate(true)}}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity onPress={() => setShowEndFillingDate(true)}>
+              <TextInput
+                label={t('endDate')}
+                value={fromDatabaseToUserDate(fillingPeriod.endFillingDate)}
+                mode='outlined'
+                style={{flex: 1}}
+                editable={false}
+                onPress={() => {setShowEndFillingDate(true)}}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <ScrollView horizontal>
-          <View>
+          <View style={{marginTop: 10}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
 

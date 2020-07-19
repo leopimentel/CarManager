@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import { Dropdown } from 'react-native-material-dropdown';
-import DatePicker from 'react-native-datepicker'
+import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
 import { vehicles as v, spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase } from '../utils/date'
+import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 
 function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
-  const [date, setDate] = useState(moment().format(t('dateFormat')))
+  const [date, setDate] = useState(new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
   const spendingTypesMinusFueling = spendingTypes.slice(1)
   const [price, setPrice] = useState()
   const [spendingTypeView, setSpendingTypeView] = useState(t('carRepair'))
@@ -54,7 +55,7 @@ function SpendingScreen({ theme, route, navigation }) {
               const abastecimento = results.rows.item(0)
               console.log(abastecimento)
               setPrice(''+abastecimento.Valor)
-              setDate(moment(abastecimento.Data, 'YYYY-MM-DD').format(t('dateFormat')))
+              setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
               setObservation(abastecimento.Observacao)
               setSpendingType(abastecimento.CodGastoTipo)
               if (abastecimento.KM) {
@@ -98,7 +99,7 @@ function SpendingScreen({ theme, route, navigation }) {
   }
 
   const clearForm = () => {
-    setDate(moment().format(t('dateFormat')))
+    setDate(new Date())
     setPrice(null)
     setObservation(null)
     setKm(null)
@@ -170,29 +171,31 @@ function SpendingScreen({ theme, route, navigation }) {
     </Portal>
 
     <ScrollView style={styles.container}>
+      {showDatePicker &&
+        <DateTimePicker
+          value={date}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(!showDatePicker);
+            setDate(selectedDate || date)              
+          }}
+        />}
       <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
         uppercase={false} compact icon="cash-usd" mode="contained" onPress={() => clearForm()}>
         {t('new')}
       </Button>
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.dateLabel}> {t('fillingDate')} </Text>
-          <DatePicker
-            style={{width: '100%'}}
-            date={date}
-            mode="date"
-            format={t('dateFormat')}
-            confirmBtnText={t('confirm')}
-            cancelBtnText={t('cancel')}
-            locale="pt_br"
-            customStyles={{
-              dateIcon: styles.dateIcon,
-              dateInput: {
-                marginLeft: 36
-              }
-            }}
-            onDateChange={(date) => {setDate(date)}}
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TextInput
+            label={t('fillingDate')}
+            value={fromDatabaseToUserDate(date)}
+            mode='outlined'
+            style={{flex: 1}}
+            editable={false}
+            onPress={() => {setShowDatePicker(true)}}
           />
+          </TouchableOpacity>
           {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View style={{ flex: 1, marginLeft: 5 }}>
