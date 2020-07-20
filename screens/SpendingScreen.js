@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
-import { Dropdown } from 'react-native-material-dropdown';
+import {Picker} from '@react-native-community/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
@@ -199,9 +199,11 @@ function SpendingScreen({ theme, route, navigation }) {
           {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View style={{ flex: 1, marginLeft: 5 }}>
-          <Dropdown label={t('spendingType')} data={spendingTypesMinusFueling} value={spendingTypeView} onChangeText={(value) => {
-            setSpendingType(spendingTypesMinusFueling.filter(fuel => fuel.value === value)[0].index)
-          }}/>
+          <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
+            {
+              spendingTypesMinusFueling.map(spending => <Picker.Item label={spending.value} value={spending.index} key={spending.index}/>)
+            }  
+          </Picker>
         </View>
       </View>
 

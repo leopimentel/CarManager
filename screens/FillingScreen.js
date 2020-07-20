@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Switch, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
-import { Dropdown } from 'react-native-material-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
@@ -14,6 +13,7 @@ import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
+import {Picker} from '@react-native-community/picker';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -415,9 +415,11 @@ function FillingScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
-          <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
-            setFuelType(fuels.filter(fuel => fuel.value === value)[0].index)
-          }}/>
+          <Picker selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
+            {
+              fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
+            }  
+          </Picker>
         </View>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={styles.fullTank}> {t('fullTank')} </Text>
@@ -499,9 +501,11 @@ function FillingScreen({ theme, route, navigation }) {
       <>
         <View style={styles.splitRow}>
           <View style={{ flex: 1 }}>
-            <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView2} onChangeText={(value) => {
-              setFuelType2(fuels.filter(fuel => fuel.value === value)[0].index)
-            }}/>
+            <Picker selectedValue={fuelType2} onValueChange={itemValue => setFuelType2(itemValue)}>
+              {
+                fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
+              }
+            </Picker>
           </View>
         </View>
 

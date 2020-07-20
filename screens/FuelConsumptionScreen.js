@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Dropdown } from 'react-native-material-dropdown';
+import {Picker} from '@react-native-community/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { withTheme, TextInput } from 'react-native-paper';
 import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
@@ -39,7 +39,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
     value: t('all')
   }, ...f];
   const timeOptions = timeFilter;
-  const [periodView, setPeriodView] = useState(timeOptions[0].value)
+  const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
@@ -87,9 +87,12 @@ function FuelConsumptionScreen({ theme, navigation }) {
         break
     }
 
+    startDate = startDate.toDate()
+    endDate = endDate.toDate()
+
     setFillingPeriod({
-      startFillingDate: startDate.toDate(),
-      endFillingDate: endDate.toDate()
+      startFillingDate: startDate,
+      endFillingDate: endDate
     })
   }
 
@@ -252,17 +255,24 @@ function FuelConsumptionScreen({ theme, navigation }) {
           {/* </View> */}
           {/* <View style={{ flex: 1 }}/> */}
           <View style={{ flex: 1, marginRight: 5 }}>
-            <Dropdown label={t('fuel')} data={fuels} value={fuelTypeView} onChangeText={(value) => {
-              setFuelType(fuels.filter(fuel => fuel.value === value)[0].index)
-              setFuelTypeView(fuels.filter(fuel => fuel.value === value)[0].value)
-            }}/>
+            <Picker selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
+              {
+                fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
+              }
+            </Picker>
           </View>
 
           <View style={{ flex: 1 }}>
-            <Dropdown style={{flex: 1}} label={t('period')} data={timeOptions} value={periodView} onChangeText={(value, index, data) => {
-              setPeriod(data[index].index)
-              setPeriodView(data[index].value)
-            }}/>
+            <Picker selectedValue={periodView} onValueChange={itemValue => {
+              if (itemValue != periodView) {
+                setPeriodView(itemValue)
+                setPeriod(itemValue)
+              }
+            }}>
+              {
+                timeOptions.map(timeOption => <Picker.Item label={timeOption.value} value={timeOption.index} key={timeOption.index}/>)
+              }
+            </Picker>
           </View>
         </View>
         <View style={styles.splitRow}>

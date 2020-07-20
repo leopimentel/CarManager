@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Dropdown } from 'react-native-material-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-community/picker';
 import { withTheme, TextInput } from 'react-native-paper';
 import { vehicles as v, spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
@@ -26,7 +26,6 @@ function SpendingReportScreen({ theme, navigation }) {
   const [showStartDate, setShowStartDate] = useState(false)
   const [showEndDate, setShowEndDate] = useState(false)
   const [spendingType, setSpendingType] = useState(0)
-  const [spendingTypeView, setSpendingTypeView] = useState(t('all'))
   const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
 
   const [tableData, setTableData] = useState([])
@@ -35,7 +34,7 @@ function SpendingReportScreen({ theme, navigation }) {
   //@todo today only one vehicle is supported
   const vehicleId = vehicles[0].index;
   const timeOptions = timeFilter;
-  const [periodView, setPeriodView] = useState(timeOptions[0].value)
+  const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
@@ -76,9 +75,12 @@ function SpendingReportScreen({ theme, navigation }) {
         break
     }
 
+    startDate = startDate.toDate()
+    endDate = endDate.toDate()
+
     setPeriod({
-      startDate: startDate.toDate(),
-      endDate: endDate.toDate()
+      startDate: startDate,
+      endDate: endDate
     })
   }
 
@@ -106,28 +108,26 @@ function SpendingReportScreen({ theme, navigation }) {
       `,
       [vehicleId, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
       function(_, results) {
-        if (results.rows.length) {
-          let totalSumAcc = 0
-          const temp = [];
-          for (let i = 0; i < results.rows.length; i++) {
-            const spending = results.rows.item(i)
-            if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
-              continue
-            }
-            temp.push([
-              spending.CodAbastecimento || spending.CodGasto,
-              fromDatabaseToUserDate(spending.Data),
-              spending.Valor,
-              spendingTypes.filter(spd => spd.index === spending.CodGastoTipo)[0].value,
-              spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
-              spending.Observacao,
-            ]);
-            totalSumAcc += spending.Valor
+        let totalSumAcc = 0
+        const temp = [];
+        for (let i = 0; i < results.rows.length; i++) {
+          const spending = results.rows.item(i)
+          if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
+            continue
           }
-
-          setTableData(temp)
-          setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+          temp.push([
+            spending.CodAbastecimento || spending.CodGasto,
+            fromDatabaseToUserDate(spending.Data),
+            spending.Valor,
+            spendingTypes.filter(spd => spd.index === spending.CodGastoTipo)[0].value,
+            spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
+            spending.Observacao,
+          ]);
+          totalSumAcc += spending.Valor
         }
+
+        setTableData(temp)
+        setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
         setLoading(false)
       })
     })
@@ -189,17 +189,24 @@ function SpendingReportScreen({ theme, navigation }) {
         />}
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5 }}>
-            <Dropdown label={t('spendingType')} data={spendingTypesAll} value={spendingTypeView} onChangeText={(value) => {
-              setSpendingType(spendingTypesAll.filter(fuel => fuel.value === value)[0].index)
-              setSpendingTypeView(spendingTypesAll.filter(fuel => fuel.value === value)[0].value)
-            }}/>
+            <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
+            {
+              spendingTypesAll.map(spending => <Picker.Item label={spending.value} value={spending.index} key={spending.index}/>)
+            }  
+          </Picker>
           </View>
 
           <View style={{ flex: 1 }}>
-            <Dropdown style={{flex: 1}} label={t('period')} data={timeOptions} value={periodView} onChangeText={(value, index, data) => {
-              choosePeriod(data[index].index)
-              setPeriodView(data[index].value)
-            }}/>
+            <Picker selectedValue={periodView} onValueChange={itemValue => {
+              if (itemValue != periodView) {
+                setPeriodView(itemValue)
+                choosePeriod(itemValue)
+              }
+            }}>
+              {
+                timeOptions.map(timeOption => <Picker.Item label={timeOption.value} value={timeOption.index} key={timeOption.index}/>)
+              }
+            </Picker>
           </View>
         </View>
         <View style={styles.splitRow}>
