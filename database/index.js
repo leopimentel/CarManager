@@ -3,9 +3,18 @@ import * as FileSystem from 'expo-file-system'
 
 const databaseName = 'carManager.db';
 
-const db = SQLite.openDatabase(databaseName);
+const openDatabase = () => {
+    db = SQLite.openDatabase(databaseName);
+    return db
+}
 
-const databaseFilePath = `${FileSystem.documentDirectory}SQLite/${databaseName}`
+let db = openDatabase()
+
+const closeDatabase = () => {
+    db._db.close();
+}
+
+const databaseFilePath = `${FileSystem.documentDirectory}/SQLite/${databaseName}`
 
 const migrateUp = (useMock = __DEV__) => {
     let testData = ''
@@ -684,6 +693,8 @@ const mock = () => {
 }
 
 export {
+    openDatabase,
+    closeDatabase,
     databaseName,
     databaseFilePath,
     migrateUp,

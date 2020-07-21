@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, List } from 'react-native-paper';
 import { getStyles } from './style'
 import { t } from '../locales'
-import { databaseFilePath, databaseName } from '../database'
+import { databaseFilePath, databaseName, openDatabase, closeDatabase } from '../database'
 import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
@@ -13,30 +13,43 @@ import * as FileSystem from 'expo-file-system'
 function SettingsScreen({ theme }) {
   const styles = getStyles(theme)
   const [loading, setLoading] = useState(false)
+
   const importDatabase = async () => {
     setLoading(true)
 
-    const uploadedFile = await DocumentPicker.getDocumentAsync()
-   
-    if (uploadedFile.type === 'success' && uploadedFile.name === databaseName) {
-      await FileSystem.copyAsync({
-        from: uploadedFile.uri,
-        to: databaseFilePath
-      })
+    closeDatabase()
 
-      setLoading(false)
+    try {
+      const uploadedFile = await DocumentPicker.getDocumentAsync()
 
-      Alert.alert(t('successRestore')); 
-    } else {
-      console.log('Fail to upload file', uploadedFile, databaseName)
+      if (uploadedFile.type === 'success' && uploadedFile.name === databaseName) {
+        await FileSystem.copyAsync({
+          from: uploadedFile.uri,
+          to: databaseFilePath
+        })
 
-      setLoading(false)
+        setLoading(false)
 
-      Alert.alert(t('failRestore'));
-    }
+        Alert.alert(t('successRestore'));
+      } else {
+        console.log('Fail to upload file', uploadedFile, databaseName)
+
+        setLoading(false)
+
+        Alert.alert(t('failRestore'));
+      }
+    } catch (e){}
+
+    openDatabase()
   }
 
-  const exportDatabase = async () => await Sharing.shareAsync(databaseFilePath);
+  const exportDatabase = async () => {
+    closeDatabase()
+    try{
+      await Sharing.shareAsync(databaseFilePath);
+    } catch (e){}
+    openDatabase()
+  }
 
   if (loading) {
     return <Loading loading={loading} />
@@ -49,8 +62,8 @@ function SettingsScreen({ theme }) {
           <List.Subheader>{t('backupRestore')}</List.Subheader>
           <List.Item
             title={t('backupDatabase')}
-            left={() => <List.Icon icon="database-export" />} 
-            onPress={() => exportDatabase()} 
+            left={() => <List.Icon icon="database-export" />}
+            onPress={() => exportDatabase()}
           />
           <List.Item
             title={t('retoreDatabase')}
