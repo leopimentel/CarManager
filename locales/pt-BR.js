@@ -9,7 +9,7 @@ export default {
   gas: 'Gasolina',
   leadedGas: 'Gasolina aditivada',
   naturalGas: 'Gás natural',
-  fillingDate: 'Data do abastecimento',
+  fillingDate: 'Data',
   save: 'Salvar',
   confirm: 'Confirmar',
   cancel: 'Cancelar',
@@ -46,7 +46,7 @@ export default {
   mixed: 'Mistura Combustível',
   decimal: ',',
   saved: 'Cadastro confirmado',
-  savedFilling: 'Abastecimento salvo',
+  savedFilling: 'Operação realizada com sucesso',
   close: 'Fechar',
   edit: 'Alterar',
   delete: 'Remover',
@@ -65,5 +65,6 @@ export default {
   backupRestore: 'Backup / Restauração',
   failRestore: 'Falha ao restaurar backup',
   successRestore: 'Backup restaurado com sucesso',
-  backupDatabase: 'Backup do banco de dados'
+  backupDatabase: 'Backup do banco de dados',
+  confirmDelete: "Deseja mesmo deletar este registro?"
 };

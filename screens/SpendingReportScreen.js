@@ -115,6 +115,7 @@ function SpendingReportScreen({ theme, navigation }) {
           if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
             continue
           }
+
           temp.push([
             spending.CodAbastecimento || spending.CodGasto,
             fromDatabaseToUserDate(spending.Data),
@@ -161,7 +162,7 @@ function SpendingReportScreen({ theme, navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps='always'>
         {showStartDate &&
           <DateTimePicker
           value={period.startDate}

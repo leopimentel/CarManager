@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import {Picker} from '@react-native-community/picker';
@@ -77,19 +77,32 @@ function SpendingScreen({ theme, route, navigation }) {
   }, [route.params])
 
   const removeSpending = () => {
-    setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `DELETE FROM Gasto WHERE CodGasto = ?`,
-        [codGasto],
-        function() {
-          console.log(`Spending ${codGasto} removed`)
-          setVisibleDialog(true)
-          setLoading(false)
-          clearForm()
-        }, handleDatabaseError
-      )
-    })
+    const confirmDelete = () => {
+      setLoading(true)
+      db.transaction(function(tx) {
+        tx.executeSql(
+          `DELETE FROM Gasto WHERE CodGasto = ?`,
+          [codGasto],
+          function() {
+            console.log(`Spending ${codGasto} removed`)
+            setVisibleDialog(true)
+            setLoading(false)
+            clearForm()
+          }, handleDatabaseError
+        )
+      })
+    }
+
+    Alert.alert(
+      t('confirmDelete'),
+      '',
+      [
+        {
+          text: t('yes'), onPress: () => confirmDelete()
+        },
+        { text: t('no'), style: "cancel" }
+      ]
+    );
   }
 
   const handleDatabaseError = function (_, error) {
@@ -170,7 +183,7 @@ function SpendingScreen({ theme, route, navigation }) {
       </Dialog>
     </Portal>
 
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='always'>
       {showDatePicker &&
         <DateTimePicker
           value={date}

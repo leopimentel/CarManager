@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Switch, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -121,50 +121,64 @@ function FillingScreen({ theme, route, navigation }) {
   }, [route.params])
 
   const removeFilling = () => {
-    setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `DELETE FROM Abastecimento WHERE CodAbastecimento = ?`,
-        [codAbastecimento],
-        function(tx) {
-          tx.executeSql(
-            'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
-            [codAbastecimentoCombustivel],
-            function(tx) {
-              tx.executeSql(
-                `DELETE FROM Gasto WHERE CodGasto = ?`,
-                [codGasto],
-                function(tx) {
-                  if (!codAbastecimentoCombustivel2) {
-                    console.log(`Filling ${codAbastecimento} removed`)
-                    setVisibleDialog(true)
-                    setLoading(false)
-                    clearForm()
-                  } else {
-                    tx.executeSql(
-                      'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
-                      [codAbastecimentoCombustivel2],
-                      function(tx) {
-                        tx.executeSql(
-                          `DELETE FROM Gasto WHERE CodGasto = ?`,
-                          [codGasto2],
-                          function() {
-                            console.log(`Filling ${codAbastecimento} removed`)
-                            setVisibleDialog(true)
-                            setLoading(false)
-                            clearForm()
-                          }, handleDatabaseError
-                        )
-                      }, handleDatabaseError
-                    );
-                  }
-                }, handleDatabaseError
-              )
-            }, handleDatabaseError
-          );
-        }, handleDatabaseError
-      );
-    })
+    const confirmFilling = () => {
+      setLoading(true)
+      db.transaction(function(tx) {
+        tx.executeSql(
+          `DELETE FROM Abastecimento WHERE CodAbastecimento = ?`,
+          [codAbastecimento],
+          function(tx) {
+            tx.executeSql(
+              'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
+              [codAbastecimentoCombustivel],
+              function(tx) {
+                tx.executeSql(
+                  `DELETE FROM Gasto WHERE CodGasto = ?`,
+                  [codGasto],
+                  function(tx) {
+                    if (!codAbastecimentoCombustivel2) {
+                      console.log(`Filling ${codAbastecimento} removed`)
+                      setVisibleDialog(true)
+                      setLoading(false)
+                      clearForm()
+                    } else {
+                      tx.executeSql(
+                        'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
+                        [codAbastecimentoCombustivel2],
+                        function(tx) {
+                          tx.executeSql(
+                            `DELETE FROM Gasto WHERE CodGasto = ?`,
+                            [codGasto2],
+                            function() {
+                              console.log(`Filling ${codAbastecimento} removed`)
+                              setVisibleDialog(true)
+                              setLoading(false)
+                              clearForm()
+                            }, handleDatabaseError
+                          )
+                        }, handleDatabaseError
+                      );
+                    }
+                  }, handleDatabaseError
+                )
+              }, handleDatabaseError
+            );
+          }, handleDatabaseError
+        );
+      })
+    }
+
+    Alert.alert(
+      t('confirmDelete'),
+      '',
+      [
+        {
+          text: t('yes'), onPress: () => confirmFilling()
+        },
+        { text: t('no'), style: "cancel" }
+      ]
+    );
+    
   }
 
   const handleDatabaseError = function (_, error) {
@@ -239,8 +253,8 @@ function FillingScreen({ theme, route, navigation }) {
               function(tx, res) {
                 const codAbastecimentoCombustivelInserted = res.insertId
                 tx.executeSql(
-                  `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, insertId, codAbastecimentoCombustivelInserted],
+                  `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, insertId, codAbastecimentoCombustivelInserted, km],
                   function(tx) {
                     if (!isTwoFuelTypes) {
                       console.log(`Filling ${insertId} inserted`)
@@ -254,8 +268,8 @@ function FillingScreen({ theme, route, navigation }) {
                         function(tx, res) {
                           const codAbastecimentoCombustivelInserted2 = res.insertId
                           tx.executeSql(
-                            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                            [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, insertId, codAbastecimentoCombustivelInserted2],
+                            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, insertId, codAbastecimentoCombustivelInserted2, km],
                             function() {
                               console.log(`Filling ${insertId} inserted`)
                               clearForm()
@@ -288,12 +302,12 @@ function FillingScreen({ theme, route, navigation }) {
               function(tx) {
                 tx.executeSql(
                   `UPDATE Gasto
-                   SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?
+                   SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
                    WHERE CodGasto = ?`,
-                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, codGasto],
+                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, km, codGasto],
                   function(tx) {
                     if (!codAbastecimentoCombustivel2) {
-                      console.log(`Filling ${codAbastecimento} updated`)
+                      console.log(`Filling ${codAbastecimento} updated ${km}`)
                       setVisibleDialog(true)
                       clearForm()
                       setLoading(false)
@@ -308,9 +322,9 @@ function FillingScreen({ theme, route, navigation }) {
                           function(tx) {
                             tx.executeSql(
                               `UPDATE Gasto
-                               SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?
+                               SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
                                WHERE CodGasto = ?`,
-                              [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, codGasto2],
+                              [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, km, codGasto2],
                               function() {
                                 console.log(`Filling ${codAbastecimento} updated`)
                                 setVisibleDialog(true)
@@ -374,7 +388,7 @@ function FillingScreen({ theme, route, navigation }) {
       </Dialog>
     </Portal>
 
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps='always'>
       {showDatePicker &&
         <DateTimePicker
           value={fillingDate}

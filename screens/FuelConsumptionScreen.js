@@ -112,7 +112,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
         A.TanqueCheio,
         GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
         SUM(AC.Litros) AS Litros,
-        AVG(AC.Valor_Litro) AS Valor_Litro,
+        (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
         SUM(AC.Total) AS Total
         FROM Abastecimento A
         INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
@@ -222,7 +222,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps='always'>
         {showStartFillingDate &&
           <DateTimePicker
           value={fillingPeriod.startFillingDate}
