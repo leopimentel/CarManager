@@ -41,7 +41,7 @@ function SpendingReportScreen({ theme, navigation }) {
     {title: t('date'), style: {width: 90}},
     {title: t('value'), style: {width: 100}},
     {title: t('spendingType'), style: {width: 100}},
-    {title: 'km', style: {width: 50}},
+    {title: 'km', style: {width: 65}},
     {title: t('observation'), style: {width: 500}},
   ];
 
