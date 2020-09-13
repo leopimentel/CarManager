@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -27,6 +27,7 @@ function SpendingReportScreen({ theme, navigation }) {
   const [showEndDate, setShowEndDate] = useState(false)
   const [spendingType, setSpendingType] = useState(0)
   const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
+  const [observation, setObservation] = useState('')
 
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
@@ -39,10 +40,10 @@ function SpendingReportScreen({ theme, navigation }) {
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
     {title: t('date'), style: {width: 90}},
-    {title: t('value'), style: {width: 100}},
+    {title: t('value'), style: {width: 70}},
     {title: t('spendingType'), style: {width: 100}},
     {title: 'km', style: {width: 65}},
-    {title: t('observation'), style: {width: 500}},
+    {title: t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
 
   const isFocused = useIsFocused()
@@ -84,11 +85,7 @@ function SpendingReportScreen({ theme, navigation }) {
     })
   }
 
-  useEffect(() => {
-    if (!isFocused) {
-      return
-    }
-
+  const search = useCallback(()=>{
     setLoading(true)
 
     db.transaction(function(tx) {
@@ -116,6 +113,17 @@ function SpendingReportScreen({ theme, navigation }) {
             continue
           }
 
+          if (observation) {
+            if (!spending.Observacao) {
+              continue
+            }
+            const str = observation.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+            const strDatabase = spending.Observacao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+            if (strDatabase.indexOf(str) === -1) {
+              continue
+            }
+          }
+
           temp.push([
             spending.CodAbastecimento || spending.CodGasto,
             fromDatabaseToUserDate(spending.Data),
@@ -132,6 +140,13 @@ function SpendingReportScreen({ theme, navigation }) {
         setLoading(false)
       })
     })
+  }, [period, spendingType, observation]);
+
+  useEffect(() => {
+    if (!isFocused) {
+      return
+    }
+    search()
   }, [isFocused, period, spendingType]);
 
   const cellEditRow = (rowData) => {
@@ -238,6 +253,16 @@ function SpendingReportScreen({ theme, navigation }) {
           </View>
         </View>
 
+        <View style={styles.splitRow}>
+          <TextInput
+            label={t('observation')}
+            value={observation}
+            onChangeText={text => setObservation(text)}
+            onBlur={() => search()}
+            mode='outlined'
+            style={{flex: 1}}
+          />
+        </View>
         <ScrollView horizontal>
           <View style={{marginTop: 10}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>

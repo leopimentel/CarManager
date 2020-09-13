@@ -5,7 +5,7 @@ import {Picker} from '@react-native-community/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { withTheme, TextInput } from 'react-native-paper';
 import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
-import { getStyles } from './style'
+import { getStyles, toastError } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
@@ -31,6 +31,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
   const [totalAverage, setTotalAverage] = useState(0)
+  const [accurateAverage, setAccurateAverage] = useState(0)
   const vehicles = v;
   //@todo today only one vehicle is supported
   const vehicleId = vehicles[0].index;
@@ -49,12 +50,12 @@ function FuelConsumptionScreen({ theme, navigation }) {
     {title:'KM', style: {width: 65}},
     {title:t('value'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
     {title:t('total'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
-    {title:t('average'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
+    {title:t('average'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
     {title:t('fullTank'), style: {width: 50}},
     {title:t('milleage'), style: {width: 50}},
     {title:'$' + t('milleage'), style: {width: 50}},
     {title:t('mixed'), style: {width: 100}},
-    {title:t('observation'), style: {width: 500}},
+    {title:t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
 
   const isFocused = useIsFocused()
@@ -128,6 +129,9 @@ function FuelConsumptionScreen({ theme, navigation }) {
           let totalSumAcc = 0
           let totalAverageAcc = 0
           let totalCount = 0
+          let totalCountAccurate = 0
+          let totalAccurate = 0
+
           for (let i = 0; i < results.rows.length; i++) {
             const filling = results.rows.item(i)
             if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
@@ -162,11 +166,16 @@ function FuelConsumptionScreen({ theme, navigation }) {
             if (average) {
               totalAverageAcc += average
               totalCount++
+              if (filling.TanqueCheio && nextFilling.TanqueCheio) {
+                totalAccurate += average
+                totalCountAccurate++
+              }
             }
           }
           setTableData(temp)
           setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
           setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
+          setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
           setLoading(false)
         }
 
@@ -215,6 +224,21 @@ function FuelConsumptionScreen({ theme, navigation }) {
       </View>
     </TouchableOpacity>
   );
+
+  const cellAverage = (data, index) => {
+    var notFullTank = tableData[index][8] === t('no') || (index && tableData[index-1][8] === t('no'))
+    return (
+      <Text style={{...styles.text}} onPress={()=>  
+        notFullTank ? 
+        toastError(t('wrongAverageInfo'))
+       : null
+      }>
+        { notFullTank ? <MaterialCommunityIcons
+        name="information" style={{color: Colors.negativeColor}} size={14} /> : '' }
+        { data }
+      </Text>
+    );    
+  };
 
   if (loading) {
     return <Loading loading={loading} />
@@ -314,7 +338,8 @@ function FuelConsumptionScreen({ theme, navigation }) {
                       <>
                       {rowData.map((cellData, cellIndex) => (
                         <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}
-                        key={cellIndex} data={cellIndex === 0 ? cellEditRow(cellData, index) : cellData}
+                        key={cellIndex} data={cellIndex === 0 ? cellEditRow(cellData, index) : 
+                          cellIndex === 7 ? cellAverage(cellData, index) : cellData}
                         textStyle={{...styles.text, ...tableHead[cellIndex].textStyle}}
                         style={tableHead[cellIndex].style} />
                       ))}
@@ -331,6 +356,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
         <View style={{ flex: 1, marginTop: 5 }}>
           <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('averageOfAveragesAccurate')}: <NumberFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
       </ScrollView>
     </View>

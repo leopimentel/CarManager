@@ -259,7 +259,7 @@ function SpendingScreen({ theme, route, navigation }) {
           value={observation}
           onChangeText={text => setObservation(text)}
           mode='outlined'
-          placeholder={t('fillingObservation')}
+          placeholder={t('spendingObservation')}
           style={{flex: 1}}
         />
       </View>
