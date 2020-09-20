@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Switch, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
+import { withTheme, Button, TextInput, Switch, Dialog, Portal } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
@@ -393,7 +393,7 @@ function FillingScreen({ theme, route, navigation }) {
         <DateTimePicker
           value={fillingDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onChange={(_, selectedDate) => {
             setShowDatePicker(!showDatePicker);
             setFillingDate(selectedDate || fillingDate)              
           }}
