@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -24,15 +24,13 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 1
+      "versionCode": 3,
+      "permissions": []
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.webmoderna.carManager",
-      "buildNumber": "1.0.0"
-    },
-    "web": {
-      "favicon": "./assets/images/favicon.png"
+      "buildNumber": "1.0.2"
     }
   }
 }

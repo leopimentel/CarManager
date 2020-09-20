@@ -11,7 +11,7 @@ import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -49,40 +49,7 @@ function SpendingReportScreen({ theme, navigation }) {
   const isFocused = useIsFocused()
 
   const choosePeriod = (index) => {
-    let startDate = moment().subtract(1, 'months')
-    let endDate = moment()
-    switch (index) {
-      case 'three_months':
-        startDate = moment().subtract(3, 'months')
-        break
-      case 'six_months':
-        startDate = moment().subtract(6, 'months')
-        break
-      case 'current_month':
-        startDate = moment().startOf('month');
-        break
-      case 'current_year':
-        startDate = moment().startOf('year');
-        break
-      case 'previous_month':
-        startDate = moment().subtract(1,'months').startOf('month');
-        endDate = moment().subtract(1,'months').endOf('month');
-        break
-      case 'previous_year':
-        startDate = moment().subtract(1, 'years').startOf('year')
-        endDate = moment().subtract(1, 'years').endOf('year')
-        break
-      default:
-        break
-    }
-
-    startDate = startDate.toDate()
-    endDate = endDate.toDate()
-
-    setPeriod({
-      startDate: startDate,
-      endDate: endDate
-    })
+    setPeriod(choosePeriodFromIndex(index))
   }
 
   const search = useCallback(()=>{

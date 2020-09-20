@@ -11,7 +11,7 @@ import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -20,14 +20,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 function FuelConsumptionScreen({ theme, navigation }) {
   const styles = getStyles(theme)
   const [fillingPeriod, setFillingPeriod] = useState({
-    startFillingDate: moment().subtract(1, 'months').toDate(),
-    endFillingDate: moment().toDate()
+    startDate: moment().subtract(1, 'months').toDate(),
+    endDate: moment().toDate()
   })
 
   const [showStartFillingDate, setShowStartFillingDate] = useState(false)
   const [showEndFillingDate, setShowEndFillingDate] = useState(false)
   const [fuelType, setFuelType] = useState(0)
-  const [fuelTypeView, setFuelTypeView] = useState(t('all'))
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
   const [totalAverage, setTotalAverage] = useState(0)
@@ -61,40 +60,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
   const isFocused = useIsFocused()
 
   const setPeriod = (index) => {
-    let startDate = moment().subtract(1, 'months')
-    let endDate = moment()
-    switch (index) {
-      case 'three_months':
-        startDate = moment().subtract(3, 'months')
-        break
-      case 'six_months':
-        startDate = moment().subtract(6, 'months')
-        break
-      case 'current_month':
-        startDate = moment().startOf('month');
-        break
-      case 'current_year':
-        startDate = moment().startOf('year');
-        break
-      case 'previous_month':
-        startDate = moment().subtract(1,'months').startOf('month');
-        endDate = moment().subtract(1,'months').endOf('month');
-        break
-      case 'previous_year':
-        startDate = moment().subtract(1, 'years').startOf('year')
-        endDate = moment().subtract(1, 'years').endOf('year')
-        break
-      default:
-        break
-    }
-
-    startDate = startDate.toDate()
-    endDate = endDate.toDate()
-
-    setFillingPeriod({
-      startFillingDate: startDate,
-      endFillingDate: endDate
-    })
+    setFillingPeriod(choosePeriodFromIndex(index))
   }
 
   useEffect(() => {
@@ -122,7 +88,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
         GROUP BY AC.CodAbastecimento
         ORDER BY A.KM DESC
       `,
-      [vehicleId, fromUserDateToDatabase(fillingPeriod.startFillingDate), fromUserDateToDatabase(fillingPeriod.endFillingDate)],
+      [vehicleId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
       function(tx, results) {
         const callback = (nextFilling) => {
           const temp = [];
@@ -140,10 +106,12 @@ function FuelConsumptionScreen({ theme, navigation }) {
 
             let accomplishedKm
             let average
+            let costPerKm = 0
             nextFilling = i === 0 ? nextFilling : results.rows.item(i - 1)
             if (nextFilling) {
               accomplishedKm = nextFilling.KM - filling.KM
               average = accomplishedKm / nextFilling.Litros
+              costPerKm = nextFilling.Total / accomplishedKm
             }
 
             temp.push([
@@ -157,7 +125,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
               average ? average.toFixed(2) : '',
               filling.TanqueCheio ? t('yes'): t('no'),
               accomplishedKm,
-              accomplishedKm ? (filling.Total / accomplishedKm).toFixed(2) : '',
+              costPerKm.toFixed(2),
               filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
               filling.Observacao,
             ]);
@@ -249,26 +217,26 @@ function FuelConsumptionScreen({ theme, navigation }) {
       <ScrollView keyboardShouldPersistTaps='always'>
         {showStartFillingDate &&
           <DateTimePicker
-          value={fillingPeriod.startFillingDate}
+          value={fillingPeriod.startDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onChange={(_, selectedDate) => {
             setShowStartFillingDate(!showStartFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
-              startFillingDate: selectedDate || fillingPeriod.startFillingDate
+              startDate: selectedDate || fillingPeriod.startDate
             })
           }}
         />}
 
         {showEndFillingDate &&
           <DateTimePicker
-          value={fillingPeriod.endFillingDate}
+          value={fillingPeriod.endDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onChange={(_, selectedDate) => {
             setShowEndFillingDate(!showEndFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
-              endFillingDate: selectedDate || fillingPeriod.endFillingDate
+              endDate: selectedDate || fillingPeriod.endDate
             })
           }}
         />}
@@ -304,7 +272,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
             <TouchableOpacity onPress={() => setShowStartFillingDate(true)}>
               <TextInput
                 label={t('startDate')}
-                value={fromDatabaseToUserDate(fillingPeriod.startFillingDate)}
+                value={fromDatabaseToUserDate(fillingPeriod.startDate)}
                 mode='outlined'
                 style={{flex: 1}}
                 editable={false}
@@ -317,7 +285,7 @@ function FuelConsumptionScreen({ theme, navigation }) {
             <TouchableOpacity onPress={() => setShowEndFillingDate(true)}>
               <TextInput
                 label={t('endDate')}
-                value={fromDatabaseToUserDate(fillingPeriod.endFillingDate)}
+                value={fromDatabaseToUserDate(fillingPeriod.endDate)}
                 mode='outlined'
                 style={{flex: 1}}
                 editable={false}
