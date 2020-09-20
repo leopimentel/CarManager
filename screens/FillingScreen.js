@@ -23,14 +23,12 @@ function FillingScreen({ theme, route, navigation }) {
   const [totalFuel, setTotalFuel] = useState()
   const [pricePerUnit, setPricePerUnit] = useState()
   const [fuelType, setFuelType] = useState(2)
-  const [fuelTypeView, setFuelTypeView] = useState(t('alcohol'))
   const [km, setKm] = useState()
 
   const [totalFuel2, setTotalFuel2] = useState()
   const [pricePerUnit2, setPricePerUnit2] = useState()
   const [fuelType2, setFuelType2] = useState(2)
-  const [fuelTypeView2, setFuelTypeView2] = useState(t('alcohol'))
-
+  
   const [observation, setObservation] = useState()
   const [isFullTank, setFullTank] = useState(true)
   const [visibleDialog, setVisibleDialog] = useState(false)
@@ -83,12 +81,6 @@ function FillingScreen({ theme, route, navigation }) {
               setCodGasto(abastecimento.CodGasto)
               setCodAbastecimentoCombustivel(abastecimento.Codigo)
 
-              for (let i=0; i<f.length; i++) {
-                if (f[i].index === abastecimento.CodCombustivel) {
-                  setFuelTypeView(f[i].value)
-                  break
-                }
-              }
               if (results.rows.length === 2) {
                 const abastecimento2 = results.rows.item(1)
                 setTotalFuel2(abastecimento2.Total)
@@ -97,19 +89,12 @@ function FillingScreen({ theme, route, navigation }) {
                 setCodGasto2(abastecimento2.CodGasto)
                 setCodAbastecimentoCombustivel2(abastecimento2.Codigo)
                 setIsTwoFuelTypes(true)
-                for (let i=0; i<f.length; i++) {
-                  if (f[i].index === abastecimento2.CodCombustivel) {
-                    setFuelTypeView2(f[i].value)
-                    break
-                  }
-                }
               } else {
                 setTotalFuel2(null)
                 setPricePerUnit2(null)
                 setCodGasto2(null)
                 setCodAbastecimentoCombustivel2(null)
                 setIsTwoFuelTypes(false)
-                setFuelTypeView2(t('alcohol'))
               }
             }
             setLoading(false)

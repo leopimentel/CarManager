@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Dialog, Portal/*, Paragraph*/ } from 'react-native-paper';
+import { withTheme, Button, TextInput, Dialog, Portal } from 'react-native-paper';
 import {Picker} from '@react-native-community/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
@@ -21,7 +21,6 @@ function SpendingScreen({ theme, route, navigation }) {
   const [showDatePicker, setShowDatePicker] = useState(false)
   const spendingTypesMinusFueling = spendingTypes.slice(1)
   const [price, setPrice] = useState()
-  const [spendingTypeView, setSpendingTypeView] = useState(t('carRepair'))
   const [spendingType, setSpendingType] = useState(3)
   const [km, setKm] = useState()
 
@@ -62,12 +61,6 @@ function SpendingScreen({ theme, route, navigation }) {
                 setKm(''+abastecimento.KM)
               }
               setCodGasto(route.params.CodGasto)
-              for (let i=0; i<spendingTypes.length; i++) {
-                if (spendingTypes[i].index === abastecimento.CodGastoTipo) {
-                  setSpendingTypeView(spendingTypes[i].value)
-                  break
-                }
-              }
             }
             setLoading(false)
           }

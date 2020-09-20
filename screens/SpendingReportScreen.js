@@ -162,7 +162,7 @@ function SpendingReportScreen({ theme, navigation }) {
           <DateTimePicker
           value={period.endDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onChange={(_, selectedDate) => {
             setShowEndDate(!showEndDate);
             setPeriod({
               ...period,
