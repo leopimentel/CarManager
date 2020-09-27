@@ -69,5 +69,9 @@ export default {
   failRestore: 'Falha ao restaurar backup',
   successRestore: 'Backup restaurado com sucesso',
   backupDatabase: 'Backup do banco de dados',
-  confirmDelete: "Deseja mesmo deletar este registro?"
+  confirmDelete: "Deseja mesmo deletar este registro?",
+  name: "Nome",
+  fillVehicleInfo: "Preencha as informações do veículo",
+  vehicleRegistering: "Cadastro de Veículos",
+  newVehicle: "Adicionar outro veículo"
 };

@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import {Picker} from '@react-native-community/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { withTheme, TextInput } from 'react-native-paper';
-import { vehicles as v, fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
+import { fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles, toastError } from './style'
 import { t } from '../locales'
 import moment from 'moment';
@@ -17,7 +17,7 @@ import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function FuelConsumptionScreen({ theme, navigation }) {
+function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
   const [fillingPeriod, setFillingPeriod] = useState({
     startDate: moment().subtract(1, 'months').toDate(),
@@ -31,9 +31,9 @@ function FuelConsumptionScreen({ theme, navigation }) {
   const [totalSum, setTotalSum] = useState(0)
   const [totalAverage, setTotalAverage] = useState(0)
   const [accurateAverage, setAccurateAverage] = useState(0)
-  const vehicles = v;
-  //@todo today only one vehicle is supported
-  const vehicleId = vehicles[0].index;
+  const [vehicles, setVehicles] = useState([])
+  const [vehicleId, setVehicleId] = useState();
+  
   const fuels = [{
     index: 0,
     value: t('all')
@@ -64,6 +64,10 @@ function FuelConsumptionScreen({ theme, navigation }) {
   }
 
   useEffect(() => {
+    setVehicleId(route.params?.CodVeiculo)
+  }, [route.params?.CodVeiculo])
+
+  useEffect(() => {
     if (!isFocused) {
       return
     }
@@ -71,116 +75,133 @@ function FuelConsumptionScreen({ theme, navigation }) {
     setLoading(true)
 
     db.transaction(function(tx) {
-      tx.executeSql(`
-        SELECT A.CodAbastecimento,
-        A.Data_Abastecimento,
-        A.KM,
-        A.Observacao,
-        A.TanqueCheio,
-        GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
-        SUM(AC.Litros) AS Litros,
-        (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
-        SUM(AC.Total) AS Total
-        FROM Abastecimento A
-        INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-        WHERE A.CodVeiculo = ?
-        AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
-        GROUP BY AC.CodAbastecimento
-        ORDER BY A.KM DESC
-      `,
-      [vehicleId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
-      function(tx, results) {
-        const callback = (nextFilling) => {
-          const temp = [];
-          let totalSumAcc = 0
-          let totalAverageAcc = 0
-          let totalCount = 0
-          let totalCountAccurate = 0
-          let totalAccurate = 0
-
-          for (let i = 0; i < results.rows.length; i++) {
-            const filling = results.rows.item(i)
-            if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
-              continue
+      tx.executeSql(
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        [],
+        function(_, results) {
+          if (results.rows.length) {
+            let cars = []
+            for (let i = 0; i < results.rows.length; i++) {
+              cars.push({
+                index: results.rows.item(i).CodVeiculo,
+                value: results.rows.item(i).Descricao
+              });
             }
+            setVehicles(cars)
+            tx.executeSql(`
+              SELECT A.CodAbastecimento,
+              A.Data_Abastecimento,
+              A.KM,
+              A.Observacao,
+              A.TanqueCheio,
+              GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
+              SUM(AC.Litros) AS Litros,
+              (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
+              SUM(AC.Total) AS Total
+              FROM Abastecimento A
+              INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+              WHERE A.CodVeiculo = ?
+              AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
+              GROUP BY AC.CodAbastecimento
+              ORDER BY A.KM DESC
+            `,
+            [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
+            function(tx, results) {
+              const callback = (nextFilling) => {
+                const temp = [];
+                let totalSumAcc = 0
+                let totalAverageAcc = 0
+                let totalCount = 0
+                let totalCountAccurate = 0
+                let totalAccurate = 0
 
-            let accomplishedKm
-            let average
-            let costPerKm = 0
-            nextFilling = i === 0 ? nextFilling : results.rows.item(i - 1)
-            if (nextFilling) {
-              accomplishedKm = nextFilling.KM - filling.KM
-              average = accomplishedKm / nextFilling.Litros
-              costPerKm = nextFilling.Total / accomplishedKm
-            }
+                for (let i = 0; i < results.rows.length; i++) {
+                  const filling = results.rows.item(i)
+                  if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
+                    continue
+                  }
 
-            temp.push([
-              filling.CodAbastecimento,
-              fromDatabaseToUserDate(filling.Data_Abastecimento),
-              filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(),
-              filling.Litros.toFixed(2),
-              filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-              filling.Valor_Litro.toFixed(2),
-              filling.Total.toFixed(2),
-              average ? average.toFixed(2) : '',
-              filling.TanqueCheio ? t('yes'): t('no'),
-              accomplishedKm,
-              costPerKm.toFixed(2),
-              filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
-              filling.Observacao,
-            ]);
+                  let accomplishedKm
+                  let average
+                  let costPerKm = 0
+                  nextFilling = i === 0 ? nextFilling : results.rows.item(i - 1)
+                  if (nextFilling) {
+                    accomplishedKm = nextFilling.KM - filling.KM
+                    average = accomplishedKm / nextFilling.Litros
+                    costPerKm = nextFilling.Total / accomplishedKm
+                  }
 
-            totalSumAcc += filling.Total
-            if (average) {
-              totalAverageAcc += average
-              totalCount++
-              if (filling.TanqueCheio && nextFilling.TanqueCheio) {
-                totalAccurate += average
-                totalCountAccurate++
-              }
-            }
-          }
-          setTableData(temp)
-          setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-          setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
-          setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
-          setLoading(false)
-        }
+                  temp.push([
+                    filling.CodAbastecimento,
+                    fromDatabaseToUserDate(filling.Data_Abastecimento),
+                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(),
+                    filling.Litros.toFixed(2),
+                    filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+                    filling.Valor_Litro.toFixed(2),
+                    filling.Total.toFixed(2),
+                    average ? average.toFixed(2) : '',
+                    filling.TanqueCheio ? t('yes'): t('no'),
+                    accomplishedKm,
+                    costPerKm.toFixed(2),
+                    filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
+                    filling.Observacao,
+                  ]);
 
-        if (results.rows.length) {
-          tx.executeSql(`
-            SELECT A.KM, AC.Litros
-            FROM Abastecimento A
-            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-            WHERE A.CodVeiculo = ?
-            AND A.KM > ?
-            ORDER BY A.KM
-            LIMIT 1
-          `,
-            [vehicleId, results.rows.item(0).KM],
-            (_, fillings) => {
-              let nextFilling
-              if (fillings.rows.length) {
-                nextFilling = fillings.rows.item(0)
+                  totalSumAcc += filling.Total
+                  if (average) {
+                    totalAverageAcc += average
+                    totalCount++
+                    if (filling.TanqueCheio && nextFilling.TanqueCheio) {
+                      totalAccurate += average
+                      totalCountAccurate++
+                    }
+                  }
+                }
+                setTableData(temp)
+                setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+                setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
+                setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
+                setLoading(false)
               }
 
-              return callback(nextFilling)
+              if (results.rows.length) {
+                tx.executeSql(`
+                  SELECT A.KM, AC.Litros
+                  FROM Abastecimento A
+                  INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+                  WHERE A.CodVeiculo = ?
+                  AND A.KM > ?
+                  ORDER BY A.KM
+                  LIMIT 1
+                `,
+                  [vehicleId, results.rows.item(0).KM],
+                  (_, fillings) => {
+                    let nextFilling
+                    if (fillings.rows.length) {
+                      nextFilling = fillings.rows.item(0)
+                    }
+
+                    return callback(nextFilling)
+                  }, function(_, error) {
+                    console.log(error)
+                    setLoading(false)
+                  })
+              } else {
+                setLoading(false)
+                setTableData([])
+                setTotalSum(0)
+                setTotalAverage(0)
+              }
             }, function(_, error) {
               console.log(error)
               setLoading(false)
             })
-        } else {
-          setLoading(false)
-          setTableData([])
-          setTotalSum(0)
-          setTotalAverage(0)
+          }
         }
-      }, function(_, error) {
-        console.log(error)
-        setLoading(false)
-      })
+      )
     })
-  }, [isFocused, fuelType, fillingPeriod]);
+      
+  }, [isFocused, fuelType, fillingPeriod, vehicleId]);
 
   const cellEditRow = (data) => (
     <TouchableOpacity onPress={() => {
@@ -241,11 +262,13 @@ function FuelConsumptionScreen({ theme, navigation }) {
           }}
         />}
 
-        <View style={{ ...styles.splitRow}}>
-          {/* <View style={{ flex: 8 }}> */}
-            {/* <Dropdown style={{flex: 1}} label={t('vehicle')} data={vehicles} value='Meu'/> */}
-          {/* </View> */}
-          {/* <View style={{ flex: 1 }}/> */}
+        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+          {
+            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+          }  
+        </Picker>
+
+        <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
             <Picker selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
               {

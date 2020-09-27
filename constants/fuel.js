@@ -2,10 +2,6 @@ import { t } from '../locales'
 
 const fuels = [{index: 1, value: t('gas')}, {index: 2, value: t('alcohol')}, {index: 3, value: t('diesel')}, {index: 4, value: t('naturalGas')}, {index: 5, value: t('leadedGas')}]
 
-const vehicles = [{
-  index:1, value: t('mine')
-}];
-
 const spendingTypes = [{
   index:1, value: t('fuel')
 },{
@@ -51,7 +47,6 @@ const thousandSeparator = '.'
 
 export {
   fuels,
-  vehicles,
   timeFilter,
   decimalSeparator,
   thousandSeparator,

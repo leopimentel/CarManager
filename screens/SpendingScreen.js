@@ -8,12 +8,13 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
-import { vehicles as v, spendingTypes } from '../constants/fuel'
+import { spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
+import { useIsFocused } from '@react-navigation/native'
 
 function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -27,13 +28,35 @@ function SpendingScreen({ theme, route, navigation }) {
   const [observation, setObservation] = useState()
   const [visibleDialog, setVisibleDialog] = useState(false)
   const [codGasto, setCodGasto] = useState()
-  const vehicles = v;
-  //@todo today only one vehicle is supported
-  const vehicleId = vehicles[0].index;
+  const [vehicles, setVehicles] = useState([])
+  const [vehicleId, setVehicleId] = useState();
   const [loading, setLoading] = useState(false)
   const [formErrors, setFormErrors] = useState({
     price: [false, ''],
   })
+
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    db.transaction(function(tx) {
+      tx.executeSql(
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        [],
+        function(_, results) {
+          if (results.rows.length) {
+            let cars = []
+            for (let i = 0; i < results.rows.length; i++) {
+              cars.push({
+                index: results.rows.item(i).CodVeiculo,
+                value: results.rows.item(i).Descricao
+              });
+            }
+            setVehicles(cars)
+          }
+        }
+      )
+    })
+  }, [isFocused])
 
   useEffect(() => {
     if (route.params && route.params.CodGasto) {
@@ -45,7 +68,8 @@ function SpendingScreen({ theme, route, navigation }) {
            G.CodGastoTipo,
            G.Valor,
            G.Observacao,
-           G.KM
+           G.KM,
+           G.CodVeiculo
            FROM Gasto G
            WHERE G.CodGasto = ?`,
           [route.params.CodGasto],
@@ -61,10 +85,32 @@ function SpendingScreen({ theme, route, navigation }) {
                 setKm(''+abastecimento.KM)
               }
               setCodGasto(route.params.CodGasto)
+              setVehicleId(abastecimento.CodVeiculo)
             }
+
             setLoading(false)
           }
         )
+      })
+    } else {
+      db.transaction(function(tx) {
+
+      tx.executeSql(
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        [],
+        function(_, results) {
+          if (results.rows.length) {
+            let cars = []
+            for (let i = 0; i < results.rows.length; i++) {
+              cars.push({
+                index: results.rows.item(i).CodVeiculo,
+                value: results.rows.item(i).Descricao
+              });
+            }
+            setVehicleId(cars[0].index)
+          }
+        }
+      )
       })
     }
   }, [route.params])
@@ -162,13 +208,11 @@ function SpendingScreen({ theme, route, navigation }) {
       <Dialog visible={visibleDialog}
           onDismiss={() => setVisibleDialog(false)}>
         <Dialog.Title>{t('spendingSaved')}</Dialog.Title>
-        {/* <Dialog.Content>
-          <Paragraph>{t('savedFilling')}</Paragraph>
-        </Dialog.Content> */}
+
         <Dialog.Actions>
           <Button uppercase={false} mode="outlined" onPress={() => {
             setVisibleDialog(false)
-            navigation.navigate('Report')
+            navigation.navigate('Report', {CodVeiculo: vehicleId})
           }}>{t('seeReport')}</Button>
 
           <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
@@ -190,6 +234,13 @@ function SpendingScreen({ theme, route, navigation }) {
         uppercase={false} compact icon="cash-usd" mode="contained" onPress={() => clearForm()}>
         {t('new')}
       </Button>
+
+      <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {
+          vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+        }  
+      </Picker>
+
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>

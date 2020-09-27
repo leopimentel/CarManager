@@ -14,6 +14,7 @@ import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import {Picker} from '@react-native-community/picker';
+import { useIsFocused } from '@react-navigation/native'
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -38,9 +39,8 @@ function FillingScreen({ theme, route, navigation }) {
   const [codGasto, setCodGasto] = useState()
   const [codGasto2, setCodGasto2] = useState()
   const [isTwoFuelTypes, setIsTwoFuelTypes] = useState()
-  const vehicles = v;
-  //@todo today only one vehicle is supported
-  const vehicleId = vehicles[0].index;
+  const [vehicles, setVehicles] = useState([])
+  const [vehicleId, setVehicleId] = useState();
   const fuels = f;
   const [loading, setLoading] = useState(false)
   const [formErrors, setFormErrors] = useState({
@@ -50,6 +50,29 @@ function FillingScreen({ theme, route, navigation }) {
     totalFuel2: [false, ''],
     pricePerUnit2: [false, ''],
   })
+  
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    db.transaction(function(tx) {
+      tx.executeSql(
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        [],
+        function(_, results) {
+          if (results.rows.length) {
+            let cars = []
+            for (let i = 0; i < results.rows.length; i++) {
+              cars.push({
+                index: results.rows.item(i).CodVeiculo,
+                value: results.rows.item(i).Descricao
+              });
+            }
+            setVehicles(cars)
+          }
+        }
+      )
+    })
+  }, [isFocused])
 
   useEffect(() => {
     if (route.params && route.params.CodAbastecimento) {
@@ -58,7 +81,7 @@ function FillingScreen({ theme, route, navigation }) {
         tx.executeSql(
           `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
            AC.Codigo, AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
-           G.CodGasto
+           G.CodGasto, A.CodVeiculo
            FROM Abastecimento A
            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
            INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
@@ -80,6 +103,7 @@ function FillingScreen({ theme, route, navigation }) {
               setFullTank(abastecimento.TanqueCheio)
               setCodGasto(abastecimento.CodGasto)
               setCodAbastecimentoCombustivel(abastecimento.Codigo)
+              setVehicleId(abastecimento.CodVeiculo)
 
               if (results.rows.length === 2) {
                 const abastecimento2 = results.rows.item(1)
@@ -97,11 +121,30 @@ function FillingScreen({ theme, route, navigation }) {
                 setIsTwoFuelTypes(false)
               }
             }
-            setLoading(false)
+          }
+        )
+
+        setLoading(false)
+      });
+    } else {
+      db.transaction(function(tx) {
+        tx.executeSql(
+          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+          [],
+          function(_, results) {
+            if (results.rows.length) {
+              let cars = []
+              for (let i = 0; i < results.rows.length; i++) {
+                cars.push({
+                  index: results.rows.item(i).CodVeiculo,
+                  value: results.rows.item(i).Descricao
+                });
+              }
+              setVehicleId(cars[0].index)
+            }
           }
         )
       })
-
     }
   }, [route.params])
 
@@ -360,13 +403,10 @@ function FillingScreen({ theme, route, navigation }) {
       <Dialog visible={visibleDialog}
           onDismiss={() => setVisibleDialog(false)}>
         <Dialog.Title>{t('savedFilling')}</Dialog.Title>
-        {/* <Dialog.Content>
-          <Paragraph>{t('savedFilling')}</Paragraph>
-        </Dialog.Content> */}
         <Dialog.Actions>
           <Button uppercase={false} mode="outlined" onPress={() => {
             setVisibleDialog(false)
-            navigation.navigate('Consumption')
+            navigation.navigate('Consumption', {CodVeiculo: vehicleId})
           }}>{t('seeComsumption')}</Button>
           <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
         </Dialog.Actions>
@@ -388,6 +428,12 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
+        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+          {
+            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+          }  
+        </Picker>
+
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
@@ -400,8 +446,6 @@ function FillingScreen({ theme, route, navigation }) {
             onPress={() => {setShowDatePicker(true)}}
           />
           </TouchableOpacity>
-
-          {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View  style={{ flex: 1, alignItems: 'center' }}>
           <Text style={styles.fullTank}> {t('isTwoFuels')} </Text>
