@@ -12,6 +12,7 @@ import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -194,11 +195,12 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }}
         />}
 
+        {vehicles.length > 1 && 
         <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
-            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>
+            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
+          }
+        </Picker>}
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5 }}>
             <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>

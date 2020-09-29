@@ -5,6 +5,7 @@ import { withTheme, List, TextInput, Dialog, Portal, Button } from 'react-native
 import { getStyles } from './style'
 import { t } from '../locales'
 import { databaseFilePath, databaseName, openDatabase, closeDatabase, db } from '../database'
+import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
@@ -257,9 +258,9 @@ function SettingsScreen({ theme }) {
             }} title={t('newVehicle')} left={props => <List.Icon {...props} icon="plus-circle" />}/>
             {vehicles.map(vehicle => <List.Item value={vehicle.index} onPress={() => {
               setVehicleId(vehicle.index)
-              setDescription(vehicle.value)
+              setDescription(ucfirst(vehicle.value))
               setVisibleDialog(true)
-            }} key={vehicle.index} title={vehicle.value} left={props => <List.Icon {...props} icon="playlist-edit" />}/>)}
+            }} key={vehicle.index} title={ucfirst(vehicle.value)} left={props => <List.Icon {...props} icon="playlist-edit" />}/>)}
           {/* </List.Accordion> */}
         </List.Section>
 

@@ -11,6 +11,7 @@ import { db } from '../database'
 import { spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
@@ -235,11 +236,11 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+      {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
         {
-          vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+          vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
         }  
-      </Picker>
+      </Picker>}
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>

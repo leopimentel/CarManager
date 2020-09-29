@@ -12,6 +12,7 @@ import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -88,6 +89,9 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
               });
             }
             setVehicles(cars)
+
+            const carId = vehicleId ? vehicleId : cars[0].index
+
             tx.executeSql(`
               SELECT A.CodAbastecimento,
               A.Data_Abastecimento,
@@ -105,7 +109,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
               GROUP BY AC.CodAbastecimento
               ORDER BY A.KM DESC
             `,
-            [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
+            [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
             function(tx, results) {
               const callback = (nextFilling) => {
                 const temp = [];
@@ -174,7 +178,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                   ORDER BY A.KM
                   LIMIT 1
                 `,
-                  [vehicleId, results.rows.item(0).KM],
+                  [carId, results.rows.item(0).KM],
                   (_, fillings) => {
                     let nextFilling
                     if (fillings.rows.length) {
@@ -262,11 +266,11 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           }}
         />}
 
-        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
-            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  
-        </Picker>
+        </Picker>}
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
