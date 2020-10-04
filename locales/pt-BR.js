@@ -36,7 +36,7 @@ export default {
     pricePerUnit: 'Preço por litro não foi preenchido',
     km: 'KM não foi preenchido',
     volume: "Litros não foi preenchido",
-    computedTotalValue: "Litros x Preço po litro não equivale ao Valor Total"
+    computedTotalValue: "Preço por litro x Litros não equivale ao Valor Total"
   },
   averageOfAverages: 'Média das médias',
   averageOfAveragesAccurate: 'Média das médias com tanque cheio',

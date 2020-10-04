@@ -110,7 +110,7 @@ function FillingScreen({ theme, route, navigation }) {
         tx.executeSql(
           `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
            AC.Codigo, AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
-           G.CodGasto, A.CodVeiculo
+           CAST(AC.Litros AS TEXT) AS Litros, G.CodGasto, A.CodVeiculo
            FROM Abastecimento A
            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
            INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
@@ -133,6 +133,7 @@ function FillingScreen({ theme, route, navigation }) {
               setCodGasto(abastecimento.CodGasto)
               setCodAbastecimentoCombustivel(abastecimento.Codigo)
               setVehicleId(abastecimento.CodVeiculo)
+              setLitters(abastecimento.Litros)
 
               if (results.rows.length === 2) {
                 const abastecimento2 = results.rows.item(1)
@@ -142,12 +143,14 @@ function FillingScreen({ theme, route, navigation }) {
                 setCodGasto2(abastecimento2.CodGasto)
                 setCodAbastecimentoCombustivel2(abastecimento2.Codigo)
                 setIsTwoFuelTypes(true)
+                setLitters2(abastecimento2.Litros)
               } else {
                 setTotalFuel2(null)
                 setPricePerUnit2(null)
                 setCodGasto2(null)
                 setCodAbastecimentoCombustivel2(null)
                 setIsTwoFuelTypes(false)
+                setLitters2(null)
               }
             }
           }
