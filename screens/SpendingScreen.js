@@ -268,14 +268,14 @@ function SpendingScreen({ theme, route, navigation }) {
       <View style={styles.splitRow}>
         <View style={{flex: 1}}>
           <TextInput
-            label={'$ ' + t('value')}
+            label={t('currency') + t('value')}
             value={price}
             onChangeText={text => {
               setPrice(databaseFloatFormat(text))
               setFormErrors({...formErrors, price: [false, '']})
             }}
             style={{ flex: 1 }}
-            placeholder={'$ ' + t('value')}
+            placeholder={t('currency') + t('value')}
             keyboardType={'numeric'}
             mode='outlined'
           />

@@ -34,7 +34,9 @@ export default {
   errorMessage: {
     totalFuel: 'Valor total não foi preenchido',
     pricePerUnit: 'Preço por litro não foi preenchido',
-    km: 'KM não foi preenchido'
+    km: 'KM não foi preenchido',
+    volume: "Litros não foi preenchido",
+    computedTotalValue: "Litros x Preço po litro não equivale ao Valor Total"
   },
   averageOfAverages: 'Média das médias',
   averageOfAveragesAccurate: 'Média das médias com tanque cheio',
@@ -73,5 +75,6 @@ export default {
   name: "Nome",
   fillVehicleInfo: "Preencha as informações do veículo",
   vehicleRegistering: "Cadastro de Veículos",
-  newVehicle: "Adicionar outro veículo"
+  newVehicle: "Adicionar outro veículo",
+  currency: "R$ "
 };
