@@ -58,27 +58,75 @@ function FillingScreen({ theme, route, navigation }) {
   
   const isFocused = useIsFocused()
 
-  const computeBasedOnLitters = (_) => {
+  const OnBlurLitters = (_) => {
+    if (litters && pricePerUnit) {
+      setTotalFuel((litters * pricePerUnit).toFixed(2).toString())
+      return
+    }
+
     if (totalFuel && litters) {
       setPricePerUnit((totalFuel / litters).toFixed(3).toString())
+      return
     }
   }
 
-  const computeBasedOnPricePerUnit = (_) => {
+  const OnBlurTotalFuel = (_) => {
     if (totalFuel && pricePerUnit) {
       setLitters((totalFuel / pricePerUnit).toFixed(3).toString())
+      return
+    }
+
+    if (totalFuel && litters) {
+      setPricePerUnit((totalFuel / litters).toFixed(3).toString())
+      return
     }
   }
 
-  const computeBasedOnLitters2 = (_) => {
+  const OnBlurPricePerUnit = (_) => {
+    if (litters && pricePerUnit) {
+      setTotalFuel((litters * pricePerUnit).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel && pricePerUnit) {
+      setLitters((totalFuel / pricePerUnit).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurLitters2 = (_) => {
+    if (litters2 && pricePerUnit2) {
+      setTotalFuel2((litters2 * pricePerUnit2).toFixed(2).toString())
+      return
+    }
+
     if (totalFuel2 && litters2) {
       setPricePerUnit2((totalFuel2 / litters2).toFixed(3).toString())
+      return
     }
   }
 
-  const computeBasedOnPricePerUnit2 = (_) => {
+  const OnBlurTotalFuel2 = (_) => {
     if (totalFuel2 && pricePerUnit2) {
       setLitters2((totalFuel2 / pricePerUnit2).toFixed(3).toString())
+      return
+    }
+
+    if (totalFuel2 && litters2) {
+      setPricePerUnit2((totalFuel2 / litters2).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurPricePerUnit2 = (_) => {
+    if (litters2 && pricePerUnit2) {
+      setTotalFuel2((litters2 * pricePerUnit2).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel2 && pricePerUnit2) {
+      setLitters2((totalFuel2 / pricePerUnit2).toFixed(3).toString())
+      return
     }
   }
 
@@ -562,6 +610,7 @@ function FillingScreen({ theme, route, navigation }) {
             keyboardType={'numeric'}
             mode='outlined'
             style={{ marginLeft: 5, flex: 1 }}
+            onBlur={() => OnBlurTotalFuel()}
           />
 
           {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
@@ -583,7 +632,7 @@ function FillingScreen({ theme, route, navigation }) {
             placeholder={t('pricePerUnit')}
             keyboardType={'numeric'}
             mode='outlined'
-            onBlur={(e) => computeBasedOnPricePerUnit(e)}
+            onBlur={(e) => OnBlurPricePerUnit(e)}
           />
 
           {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
@@ -602,7 +651,7 @@ function FillingScreen({ theme, route, navigation }) {
             keyboardType={'numeric'}
             mode='outlined'
             style={{ marginLeft: 5, flex: 1 }}
-            onBlur={(e) => computeBasedOnLitters(e)}
+            onBlur={(e) => OnBlurLitters(e)}
           />
 
           {formErrors.litters[0] && <HelperText type="error" visible={formErrors.litters[0]} padding='none'>
@@ -643,6 +692,7 @@ function FillingScreen({ theme, route, navigation }) {
     keyboardType={'numeric'}
     mode='outlined'
     style={{ marginLeft: 5, flex: 1 }}
+    onBlur={() => OnBlurTotalFuel2()}
   />
 
   {formErrors.totalFuel2[0] && <HelperText type="error" visible={formErrors.totalFuel2[0]} padding='none'>
@@ -665,7 +715,7 @@ function FillingScreen({ theme, route, navigation }) {
               placeholder={t('currency') + t('pricePerUnit')}
               keyboardType={'numeric'}
               mode='outlined'
-              onBlur={(e) => computeBasedOnPricePerUnit2(e)}
+              onBlur={(e) => OnBlurPricePerUnit2(e)}
             />
 
             {formErrors.pricePerUnit2[0] && <HelperText type="error" visible={formErrors.pricePerUnit2[0]} padding='none'>
@@ -684,7 +734,7 @@ function FillingScreen({ theme, route, navigation }) {
             keyboardType={'numeric'}
             mode='outlined'
             style={{ marginLeft: 5, flex: 1 }}
-            onBlur={(e) => computeBasedOnLitters2(e)}
+            onBlur={(e) => OnBlurLitters2(e)}
           />
 
           {formErrors.litters2[0] && <HelperText type="error" visible={formErrors.litters2[0]} padding='none'>
