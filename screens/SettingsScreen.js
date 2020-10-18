@@ -119,11 +119,17 @@ function SettingsScreen({ theme }) {
         tx.executeSql(
           `DELETE FROM Veiculo WHERE CodVeiculo = ?`,
           [vehicleId],
-          function(tx, res) {
+          function(tx) {
+            console.log('Vehicle deleted')
             setVehicleId()
             setDescription()
             setVisibleDialog(false)
-  
+            tx.executeSql(`DELETE FROM Gasto WHERE CodVeiculo = ?`, [vehicleId])
+            tx.executeSql(`DELETE FROM Abastecimento_Combustivel 
+              WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`, [vehicleId]
+            )
+            tx.executeSql(`DELETE FROM Abastecimento WHERE CodVeiculo = ?`, [vehicleId])
+            
             tx.executeSql(
               `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
               [],

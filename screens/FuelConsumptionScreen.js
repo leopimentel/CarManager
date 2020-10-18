@@ -138,7 +138,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                   temp.push([
                     filling.CodAbastecimento,
                     fromDatabaseToUserDate(filling.Data_Abastecimento),
-                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(),
+                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(', '),
                     filling.Litros.toFixed(2),
                     filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
                     filling.Valor_Litro.toFixed(2),
@@ -146,7 +146,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     average ? average.toFixed(2) : '',
                     filling.TanqueCheio ? t('yes'): t('no'),
                     accomplishedKm,
-                    costPerKm.toFixed(2),
+                    costPerKm ? costPerKm.toFixed(2) : '',
                     filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
                     filling.Observacao,
                   ]);
