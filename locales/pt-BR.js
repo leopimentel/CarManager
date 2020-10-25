@@ -19,6 +19,8 @@ export default {
   fillingTotal: 'Valor total',
   observation: 'Observação',
   fillingObservation: 'Posto Parada Perfeita',
+  spendingObservation: '4 Pneus',
+  wrongAverageInfo: 'Média calculada pode estar errada pois este abastecimento ou o anterior não foi com tanque cheio.',
   fullTank: 'Tanque cheio',
   startDate: 'Data inicial',
   endDate: 'Data final',
@@ -35,6 +37,7 @@ export default {
     km: 'KM não foi preenchido'
   },
   averageOfAverages: 'Média das médias',
+  averageOfAveragesAccurate: 'Média das médias com tanque cheio',
   total: 'Total',
   period: 'Período',
   date: 'Data',
@@ -66,5 +69,9 @@ export default {
   failRestore: 'Falha ao restaurar backup',
   successRestore: 'Backup restaurado com sucesso',
   backupDatabase: 'Backup do banco de dados',
-  confirmDelete: "Deseja mesmo deletar este registro?"
+  confirmDelete: "Deseja mesmo deletar este registro?",
+  name: "Nome",
+  fillVehicleInfo: "Preencha as informações do veículo",
+  vehicleRegistering: "Cadastro de Veículos",
+  newVehicle: "Adicionar outro veículo"
 };

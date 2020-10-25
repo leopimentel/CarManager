@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Colors from '../constants/Colors';
+import Toast from 'react-native-tiny-toast'
 
 function getStyles(theme) {
     const { colors } = theme;
@@ -28,6 +29,23 @@ function getStyles(theme) {
     });
 }
 
+const toastError = msg => Toast.show(msg, {
+    position: Toast.position.center,
+    containerStyle:{
+        backgroundColor: '#f00',
+        borderRadius: 15,
+    },
+    textStyle:{
+        color:'#fff',
+    },
+    imgStyle:{},
+    mask:false,
+    maskStyle:{},
+    duration: 2000,
+    animation: true,
+});
+
 export {
-    getStyles
+    getStyles,
+    toastError
 }

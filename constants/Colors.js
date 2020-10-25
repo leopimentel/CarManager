@@ -5,6 +5,7 @@ const tintColor = '#2f95dc';
 export default {
   primary: '#008542',
   accent: '#fdc82f',
+  //splashImageColor: '#FFD648',
   tintColor,
   tabIconDefault: '#ccc',
   tabIconSelected: tintColor,

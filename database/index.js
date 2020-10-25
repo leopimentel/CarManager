@@ -179,6 +179,9 @@ const dropTables = () => {
 
 const mock = () => {
     return `
+    INSERT OR IGNORE INTO Veiculo (CodVeiculo, Placa, Descricao) VALUES
+    (2, null, 'corsa');
+    
     INSERT OR IGNORE INTO Abastecimento (CodAbastecimento, CodVeiculo, Data_Cadastro, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES
     (1, 1, '2017-02-06 22:17:30', '2017-02-06', 128729, 'posto Goiânia ', 1),
     (2, 1, '2017-02-06 22:19:37', '2017-02-06', 128329, 'início ', 1),

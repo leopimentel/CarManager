@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-community/picker';
 import { withTheme, TextInput } from 'react-native-paper';
-import { vehicles as v, spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
+import { spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function SpendingReportScreen({ theme, navigation }) {
+function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
   const [period, setPeriod] = useState({
     startDate: moment().subtract(1, 'months').toDate(),
@@ -27,112 +27,117 @@ function SpendingReportScreen({ theme, navigation }) {
   const [showEndDate, setShowEndDate] = useState(false)
   const [spendingType, setSpendingType] = useState(0)
   const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
+  const [observation, setObservation] = useState('')
 
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
-  const vehicles = v;
-  //@todo today only one vehicle is supported
-  const vehicleId = vehicles[0].index;
+  const [vehicles, setVehicles] = useState([])
+  const [vehicleId, setVehicleId] = useState();
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
     {title: t('date'), style: {width: 90}},
-    {title: t('value'), style: {width: 100}},
+    {title: t('value'), style: {width: 70}},
     {title: t('spendingType'), style: {width: 100}},
     {title: 'km', style: {width: 65}},
-    {title: t('observation'), style: {width: 500}},
+    {title: t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
 
   const isFocused = useIsFocused()
 
   const choosePeriod = (index) => {
-    let startDate = moment().subtract(1, 'months')
-    let endDate = moment()
-    switch (index) {
-      case 'three_months':
-        startDate = moment().subtract(3, 'months')
-        break
-      case 'six_months':
-        startDate = moment().subtract(6, 'months')
-        break
-      case 'current_month':
-        startDate = moment().startOf('month');
-        break
-      case 'current_year':
-        startDate = moment().startOf('year');
-        break
-      case 'previous_month':
-        startDate = moment().subtract(1,'months').startOf('month');
-        endDate = moment().subtract(1,'months').endOf('month');
-        break
-      case 'previous_year':
-        startDate = moment().subtract(1, 'years').startOf('year')
-        endDate = moment().subtract(1, 'years').endOf('year')
-        break
-      default:
-        break
-    }
-
-    startDate = startDate.toDate()
-    endDate = endDate.toDate()
-
-    setPeriod({
-      startDate: startDate,
-      endDate: endDate
-    })
+    setPeriod(choosePeriodFromIndex(index))
   }
+
+  useEffect(() => {
+    setVehicleId(route.params?.CodVeiculo)
+  }, [route.params?.CodVeiculo])
+
+  const search = useCallback(()=>{
+    setLoading(true)
+    
+    db.transaction(function(tx) {
+      tx.executeSql(
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        [],
+        function(_, results) {
+          if (results.rows.length) {
+            let cars = []
+            for (let i = 0; i < results.rows.length; i++) {
+              cars.push({
+                index: results.rows.item(i).CodVeiculo,
+                value: results.rows.item(i).Descricao
+              });
+            }
+            setVehicles(cars)
+
+            tx.executeSql(`
+              SELECT
+              G.CodAbastecimento,
+              G.CodGasto,
+              G.Data,
+              G.Valor,
+              G.CodGastoTipo,
+              G.Observacao,
+              G.KM
+              FROM Gasto G
+              WHERE G.CodVeiculo = ?
+              AND G.Data >= ? AND G.Data <= ?
+              ORDER BY G.Data DESC
+            `,
+            [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
+            function(_, results) {
+              let totalSumAcc = 0
+              const temp = [];
+              for (let i = 0; i < results.rows.length; i++) {
+                const spending = results.rows.item(i)
+                if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
+                  continue
+                }
+
+                if (observation) {
+                  if (!spending.Observacao) {
+                    continue
+                  }
+                  const str = observation.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+                  const strDatabase = spending.Observacao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+                  if (strDatabase.indexOf(str) === -1) {
+                    continue
+                  }
+                }
+
+                temp.push([
+                  spending.CodAbastecimento || spending.CodGasto,
+                  fromDatabaseToUserDate(spending.Data),
+                  spending.Valor,
+                  spendingTypes.filter(spd => spd.index === spending.CodGastoTipo)[0].value,
+                  spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
+                  spending.Observacao,
+                ]);
+                totalSumAcc += spending.Valor
+              }
+
+              setTableData(temp)
+              setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+
+              
+              setLoading(false)
+            })
+          }
+        }
+      )
+    })
+  }, [period, spendingType, observation, vehicleId]);
 
   useEffect(() => {
     if (!isFocused) {
       return
     }
-
-    setLoading(true)
-
-    db.transaction(function(tx) {
-      tx.executeSql(`
-        SELECT
-        G.CodAbastecimento,
-        G.CodGasto,
-        G.Data,
-        G.Valor,
-        G.CodGastoTipo,
-        G.Observacao,
-        G.KM
-        FROM Gasto G
-        WHERE G.CodVeiculo = ?
-        AND G.Data >= ? AND G.Data <= ?
-        ORDER BY G.Data DESC
-      `,
-      [vehicleId, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
-      function(_, results) {
-        let totalSumAcc = 0
-        const temp = [];
-        for (let i = 0; i < results.rows.length; i++) {
-          const spending = results.rows.item(i)
-          if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
-            continue
-          }
-
-          temp.push([
-            spending.CodAbastecimento || spending.CodGasto,
-            fromDatabaseToUserDate(spending.Data),
-            spending.Valor,
-            spendingTypes.filter(spd => spd.index === spending.CodGastoTipo)[0].value,
-            spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
-            spending.Observacao,
-          ]);
-          totalSumAcc += spending.Valor
-        }
-
-        setTableData(temp)
-        setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-        setLoading(false)
-      })
-    })
-  }, [isFocused, period, spendingType]);
+    
+    search()
+  }, [isFocused, period, spendingType, vehicleId]);
 
   const cellEditRow = (rowData) => {
     const isFuel = rowData[3] === t('fuel')
@@ -180,7 +185,7 @@ function SpendingReportScreen({ theme, navigation }) {
           <DateTimePicker
           value={period.endDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onChange={(_, selectedDate) => {
             setShowEndDate(!showEndDate);
             setPeriod({
               ...period,
@@ -188,6 +193,12 @@ function SpendingReportScreen({ theme, navigation }) {
             })
           }}
         />}
+
+        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+          {
+            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+          }  
+        </Picker>
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5 }}>
             <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
@@ -238,8 +249,18 @@ function SpendingReportScreen({ theme, navigation }) {
           </View>
         </View>
 
+        <View style={styles.splitRow}>
+          <TextInput
+            label={t('observation')}
+            value={observation}
+            onChangeText={text => setObservation(text)}
+            onBlur={() => search()}
+            mode='outlined'
+            style={{flex: 1}}
+          />
+        </View>
         <ScrollView horizontal>
-          <View style={{marginTop: 10}}>
+          <View style={{marginTop: 5}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
 
