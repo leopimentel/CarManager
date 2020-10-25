@@ -10,6 +10,7 @@ import { db } from '../database'
 import { vehicles as v, fuels as f, spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
@@ -25,9 +26,11 @@ function FillingScreen({ theme, route, navigation }) {
   const [pricePerUnit, setPricePerUnit] = useState()
   const [fuelType, setFuelType] = useState(2)
   const [km, setKm] = useState()
+  const [litters, setLitters] = useState()
 
   const [totalFuel2, setTotalFuel2] = useState()
   const [pricePerUnit2, setPricePerUnit2] = useState()
+  const [litters2, setLitters2] = useState()
   const [fuelType2, setFuelType2] = useState(2)
   
   const [observation, setObservation] = useState()
@@ -47,11 +50,85 @@ function FillingScreen({ theme, route, navigation }) {
     totalFuel: [false, ''],
     pricePerUnit: [false, ''],
     km: [false, ''],
+    litters: [false, ''],
     totalFuel2: [false, ''],
     pricePerUnit2: [false, ''],
+    litters2: [false, ''],
   })
   
   const isFocused = useIsFocused()
+
+  const OnBlurLitters = (_) => {
+    if (litters && pricePerUnit) {
+      setTotalFuel((litters * pricePerUnit).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel && litters) {
+      setPricePerUnit((totalFuel / litters).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurTotalFuel = (_) => {
+    if (totalFuel && pricePerUnit) {
+      setLitters((totalFuel / pricePerUnit).toFixed(3).toString())
+      return
+    }
+
+    if (totalFuel && litters) {
+      setPricePerUnit((totalFuel / litters).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurPricePerUnit = (_) => {
+    if (litters && pricePerUnit) {
+      setTotalFuel((litters * pricePerUnit).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel && pricePerUnit) {
+      setLitters((totalFuel / pricePerUnit).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurLitters2 = (_) => {
+    if (litters2 && pricePerUnit2) {
+      setTotalFuel2((litters2 * pricePerUnit2).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel2 && litters2) {
+      setPricePerUnit2((totalFuel2 / litters2).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurTotalFuel2 = (_) => {
+    if (totalFuel2 && pricePerUnit2) {
+      setLitters2((totalFuel2 / pricePerUnit2).toFixed(3).toString())
+      return
+    }
+
+    if (totalFuel2 && litters2) {
+      setPricePerUnit2((totalFuel2 / litters2).toFixed(3).toString())
+      return
+    }
+  }
+
+  const OnBlurPricePerUnit2 = (_) => {
+    if (litters2 && pricePerUnit2) {
+      setTotalFuel2((litters2 * pricePerUnit2).toFixed(2).toString())
+      return
+    }
+
+    if (totalFuel2 && pricePerUnit2) {
+      setLitters2((totalFuel2 / pricePerUnit2).toFixed(3).toString())
+      return
+    }
+  }
 
   useEffect(() => {
     db.transaction(function(tx) {
@@ -81,7 +158,7 @@ function FillingScreen({ theme, route, navigation }) {
         tx.executeSql(
           `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
            AC.Codigo, AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
-           G.CodGasto, A.CodVeiculo
+           CAST(AC.Litros AS TEXT) AS Litros, G.CodGasto, A.CodVeiculo
            FROM Abastecimento A
            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
            INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
@@ -96,7 +173,7 @@ function FillingScreen({ theme, route, navigation }) {
               setCodAbastecimento(route.params.CodAbastecimento)
               setTotalFuel(abastecimento.Total)
               setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').toDate())
-              setPricePerUnit(abastecimento.Valor_Litro)
+              setPricePerUnit(parseFloat(abastecimento.Valor_Litro).toFixed(3).toString())
               setObservation(abastecimento.Observacao)
               setFuelType(abastecimento.CodCombustivel)
               setKm(abastecimento.KM)
@@ -104,21 +181,24 @@ function FillingScreen({ theme, route, navigation }) {
               setCodGasto(abastecimento.CodGasto)
               setCodAbastecimentoCombustivel(abastecimento.Codigo)
               setVehicleId(abastecimento.CodVeiculo)
+              setLitters(parseFloat(abastecimento.Litros).toFixed(3).toString())
 
               if (results.rows.length === 2) {
                 const abastecimento2 = results.rows.item(1)
                 setTotalFuel2(abastecimento2.Total)
-                setPricePerUnit2(abastecimento2.Valor_Litro)
+                setPricePerUnit2(parseFloat(abastecimento2.Valor_Litro).toFixed(3).toString())
                 setFuelType2(abastecimento2.CodCombustivel)
                 setCodGasto2(abastecimento2.CodGasto)
                 setCodAbastecimentoCombustivel2(abastecimento2.Codigo)
                 setIsTwoFuelTypes(true)
+                setLitters2(parseFloat(abastecimento2.Litros).toFixed(3).toString())
               } else {
                 setTotalFuel2(null)
                 setPricePerUnit2(null)
                 setCodGasto2(null)
                 setCodAbastecimentoCombustivel2(null)
                 setIsTwoFuelTypes(false)
+                setLitters2(null)
               }
             }
           }
@@ -229,12 +309,16 @@ function FillingScreen({ theme, route, navigation }) {
     setCodAbastecimentoCombustivel2(null)
     setCodGasto2(null)
     setIsTwoFuelTypes(false)
+    setLitters(null)
+    setLitters2(null)
     setFormErrors({
       totalFuel: [false, ''],
       pricePerUnit: [false, ''],
       km: [false, ''],
       totalFuel2: [false, ''],
       pricePerUnit2: [false, ''],
+      litters: [false, ''],
+      litters2: [false, ''],
     })
   }
 
@@ -254,6 +338,17 @@ function FillingScreen({ theme, route, navigation }) {
       return false
     }
 
+    if (!litters || litters < 0) {
+      setFormErrors({...formErrors, litters: [true, t('errorMessage.volume')]})
+      return false
+    }
+
+    if (Math.abs(litters * pricePerUnit - totalFuel) > 0.01) {
+      //setFormErrors({...formErrors, litters: [true, t('errorMessage.computedTotalValue')]})
+      Alert.alert(t('errorMessage.computedTotalValue'));
+      return false
+    }
+
     if (isTwoFuelTypes) {
       if (!pricePerUnit2 || pricePerUnit2 < 0) {
         setFormErrors({...formErrors, pricePerUnit2: [true, t('errorMessage.pricePerUnit')]})
@@ -262,6 +357,17 @@ function FillingScreen({ theme, route, navigation }) {
 
       if (!totalFuel2 || totalFuel2 < 0) {
         setFormErrors({...formErrors, totalFuel2: [true, t('errorMessage.totalFuel')]})
+        return false
+      }
+
+      if (!litters2 || litters2 < 0) {
+        setFormErrors({...formErrors, litters2: [true, t('errorMessage.volume')]})
+        return false
+      }
+
+      if (Math.abs(litters2 * pricePerUnit2 - totalFuel2) > 0.01) {
+        //setFormErrors({...formErrors, litters2: [true, t('errorMessage.computedTotalValue')]})
+        Alert.alert(t('errorMessage.computedTotalValue'));
         return false
       }
     }
@@ -326,7 +432,7 @@ function FillingScreen({ theme, route, navigation }) {
                SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?
                WHERE Codigo = ?
                `,
-              [fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel, codAbastecimentoCombustivel],
+              [fuelType, litters, pricePerUnit, totalFuel, codAbastecimentoCombustivel],
               function(tx) {
                 tx.executeSql(
                   `UPDATE Gasto
@@ -346,7 +452,7 @@ function FillingScreen({ theme, route, navigation }) {
                            SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?
                            WHERE Codigo = ?
                            `,
-                          [fuelType2, totalFuel2/pricePerUnit2, pricePerUnit2, totalFuel2, codAbastecimentoCombustivel2],
+                          [fuelType2, litters2, pricePerUnit2, totalFuel2, codAbastecimentoCombustivel2],
                           function(tx) {
                             tx.executeSql(
                               `UPDATE Gasto
@@ -428,11 +534,11 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
-            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  
-        </Picker>
+        </Picker>}
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
@@ -493,41 +599,65 @@ function FillingScreen({ theme, route, navigation }) {
         </View>
 
         <View style={{flex: 1}}>
-          <TextInput
-            label={'$ ' + t('pricePerUnit')}
+          
+        <TextInput
+            label={t('currency') + t('fillingTotal')}
+            value={totalFuel}
+            onChangeText={text => {
+              setFormErrors({...formErrors, totalFuel: [false, '']})
+              setTotalFuel(databaseFloatFormat(text))
+            }}
+            keyboardType={'numeric'}
+            mode='outlined'
+            style={{ marginLeft: 5, flex: 1 }}
+            onBlur={() => OnBlurTotalFuel()}
+          />
+
+          {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
+            {formErrors.totalFuel[1]}
+          </HelperText>}
+        </View>
+      </View>
+
+      <View style={styles.splitRow}>
+        <View style={{flex: 1}}>
+        <TextInput
+            label={t('currency') + t('pricePerUnit')}
             value={pricePerUnit}
             onChangeText={text => {
               setPricePerUnit(databaseFloatFormat(text))
               setFormErrors({...formErrors, pricePerUnit: [false, '']})
             }}
-            style={{ marginLeft: 5, flex: 1 }}
+            style={{ flex: 1 }}
             placeholder={t('pricePerUnit')}
             keyboardType={'numeric'}
             mode='outlined'
+            onBlur={(e) => OnBlurPricePerUnit(e)}
           />
 
           {formErrors.pricePerUnit[0] && <HelperText type="error" visible={formErrors.pricePerUnit[0]} padding='none'>
             {formErrors.pricePerUnit[1]}
           </HelperText>}
         </View>
-      </View>
 
-      <View style={styles.splitRow}>
-        <TextInput
-          label={'$ ' + t('fillingTotal')}
-          value={totalFuel}
-          onChangeText={text => {
-            setFormErrors({...formErrors, totalFuel: [false, '']})
-            setTotalFuel(databaseFloatFormat(text))
-          }}
-          keyboardType={'numeric'}
-          mode='outlined'
-          style={{ flex: 1 }}
-        />
+        <View style={{flex: 1}}>
+          <TextInput
+            label={t('volume')}
+            value={litters}
+            onChangeText={text => {
+              setFormErrors({...formErrors, litters: [false, '']})
+              setLitters(databaseFloatFormat(text))
+            }}
+            keyboardType={'numeric'}
+            mode='outlined'
+            style={{ marginLeft: 5, flex: 1 }}
+            onBlur={(e) => OnBlurLitters(e)}
+          />
 
-        {formErrors.totalFuel[0] && <HelperText type="error" visible={formErrors.totalFuel[0]} padding='none'>
-          {formErrors.totalFuel[1]}
-        </HelperText>}
+          {formErrors.litters[0] && <HelperText type="error" visible={formErrors.litters[0]} padding='none'>
+            {formErrors.litters[1]}
+          </HelperText>}
+        </View>
       </View>
 
       <View style={styles.splitRow}>
@@ -542,7 +672,7 @@ function FillingScreen({ theme, route, navigation }) {
 
       {isTwoFuelTypes &&
       <>
-        <View style={styles.splitRow}>
+        <View style={{...styles.splitRow, marginTop:10}}>
           <View style={{ flex: 1 }}>
             <Picker selectedValue={fuelType2} onValueChange={itemValue => setFuelType2(itemValue)}>
               {
@@ -550,21 +680,42 @@ function FillingScreen({ theme, route, navigation }) {
               }
             </Picker>
           </View>
+
+          <View style={{flex: 1}}>
+  <TextInput
+    label={t('currency') + t('fillingTotal')}
+    value={totalFuel2}
+    onChangeText={text => {
+      setFormErrors({...formErrors, totalFuel2: [false, '']})
+      setTotalFuel2(databaseFloatFormat(text))
+    }}
+    keyboardType={'numeric'}
+    mode='outlined'
+    style={{ marginLeft: 5, flex: 1 }}
+    onBlur={() => OnBlurTotalFuel2()}
+  />
+
+  {formErrors.totalFuel2[0] && <HelperText type="error" visible={formErrors.totalFuel2[0]} padding='none'>
+    {formErrors.totalFuel2[1]}
+  </HelperText>}
+</View>
         </View>
 
         <View style={styles.splitRow}>
+
           <View style={{flex: 1}}>
             <TextInput
-              label={t('pricePerUnit')}
+              label={t('currency') + t('pricePerUnit')}
               value={pricePerUnit2}
               onChangeText={text => {
                 setPricePerUnit2(databaseFloatFormat(text))
                 setFormErrors({...formErrors, pricePerUnit2: [false, '']})
               }}
-              style={{ marginRight: 5, flex: 1 }}
-              placeholder={t('pricePerUnit')}
+              style={{ flex: 1 }}
+              placeholder={t('currency') + t('pricePerUnit')}
               keyboardType={'numeric'}
               mode='outlined'
+              onBlur={(e) => OnBlurPricePerUnit2(e)}
             />
 
             {formErrors.pricePerUnit2[0] && <HelperText type="error" visible={formErrors.pricePerUnit2[0]} padding='none'>
@@ -573,22 +724,23 @@ function FillingScreen({ theme, route, navigation }) {
           </View>
 
           <View style={{flex: 1}}>
-            <TextInput
-              label={t('fillingTotal')}
-              value={totalFuel2}
-              onChangeText={text => {
-                setFormErrors({...formErrors, totalFuel2: [false, '']})
-                setTotalFuel2(databaseFloatFormat(text))
-              }}
-              keyboardType={'numeric'}
-              mode='outlined'
-              style={{ flex: 1 }}
-            />
+          <TextInput
+            label={t('volume')}
+            value={litters2}
+            onChangeText={text => {
+              setFormErrors({...formErrors, litters2: [false, '']})
+              setLitters2(databaseFloatFormat(text))
+            }}
+            keyboardType={'numeric'}
+            mode='outlined'
+            style={{ marginLeft: 5, flex: 1 }}
+            onBlur={(e) => OnBlurLitters2(e)}
+          />
 
-            {formErrors.totalFuel2[0] && <HelperText type="error" visible={formErrors.totalFuel2[0]} padding='none'>
-              {formErrors.totalFuel2[1]}
-            </HelperText>}
-          </View>
+          {formErrors.litters2[0] && <HelperText type="error" visible={formErrors.litters2[0]} padding='none'>
+            {formErrors.litters2[1]}
+          </HelperText>}
+        </View>
         </View>
       </>
       }

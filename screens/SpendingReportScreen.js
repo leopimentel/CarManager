@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-community/picker';
-import { withTheme, TextInput } from 'react-native-paper';
+import { withTheme, TextInput, Button, Card } from 'react-native-paper';
 import { spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'
 import { t } from '../locales'
@@ -12,6 +12,7 @@ import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -28,11 +29,13 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const [spendingType, setSpendingType] = useState(0)
   const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
   const [observation, setObservation] = useState('')
-
+  const TABLE_MODE = true
+  const CARD_MODE = false
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
+  const [mode, setMode] = useState(TABLE_MODE)
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
@@ -194,11 +197,12 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }}
         />}
 
+        {vehicles.length > 1 &&
         <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
-            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>
+            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
+          }
+        </Picker>}
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5 }}>
             <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
@@ -259,6 +263,21 @@ function SpendingReportScreen({ theme, route, navigation }) {
             style={{flex: 1}}
           />
         </View>
+
+        <View style={{...styles.splitRow, justifyContent: 'flex-start', marginTop: 10}}>
+            <Button
+              icon={() => <MaterialCommunityIcons name='format-list-checkbox' size={35} style={{color: mode === TABLE_MODE ? 'green': 'black'}} />}
+              onPress={() => setMode(TABLE_MODE)}
+            >
+            </Button>
+            <Button
+              icon={() => <MaterialCommunityIcons name='view-dashboard-outline' size={35} style={{color: mode === CARD_MODE ? 'green': 'black'}}/>}
+              onPress={() => setMode(CARD_MODE)}
+            >
+            </Button>
+        </View>
+
+        {mode === TABLE_MODE &&
         <ScrollView horizontal>
           <View style={{marginTop: 5}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
@@ -282,10 +301,36 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
             </Table>
           </View>
-        </ScrollView>
+        </ScrollView>}
 
+        {mode === CARD_MODE &&
+        <>
+        {tableData.map((rowData, index) => (
+          <Card key={index} style={{borderColor: 'gray', borderWidth: 1, flex: 1, marginTop: 5, marginBottom: 5}}>
+             <Card.Content>
+               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[1].title}:</Text> {rowData[1]}</Text>
+               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[2].title}:</Text> {rowData[2]}</Text>
+               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[3].title}:</Text> {rowData[3]}</Text>
+               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[4].title}:</Text> {rowData[4]}</Text>
+               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[5].title}:</Text> {rowData[5]}</Text>
+             </Card.Content>
+             <Card.Actions>
+             <Button mode="contained" onPress={() => rowData[3] === t('fuel') ?
+                navigation.navigate('Fuel', {
+                  CodAbastecimento: rowData[0]
+                }) :
+                navigation.navigate('Spending', {
+                  CodGasto: rowData[0]
+                })
+              }
+             >{tableHead[0].title}</Button>
+             </Card.Actions>
+          </Card>
+          ))}
+        </>
+      }
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
       </ScrollView>
     </View>

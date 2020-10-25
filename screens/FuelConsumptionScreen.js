@@ -12,6 +12,7 @@ import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
+import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -52,7 +53,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     {title:t('average'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
     {title:t('fullTank'), style: {width: 50}},
     {title:t('milleage'), style: {width: 50}},
-    {title:'$' + t('milleage'), style: {width: 50}},
+    {title:t('currency') + t('milleage'), style: {width: 50}},
     {title:t('mixed'), style: {width: 100}},
     {title:t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
@@ -88,6 +89,9 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
               });
             }
             setVehicles(cars)
+
+            const carId = vehicleId ? vehicleId : cars[0].index
+
             tx.executeSql(`
               SELECT A.CodAbastecimento,
               A.Data_Abastecimento,
@@ -105,7 +109,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
               GROUP BY AC.CodAbastecimento
               ORDER BY A.KM DESC
             `,
-            [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
+            [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
             function(tx, results) {
               const callback = (nextFilling) => {
                 const temp = [];
@@ -134,7 +138,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                   temp.push([
                     filling.CodAbastecimento,
                     fromDatabaseToUserDate(filling.Data_Abastecimento),
-                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(),
+                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(', '),
                     filling.Litros.toFixed(2),
                     filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
                     filling.Valor_Litro.toFixed(2),
@@ -142,7 +146,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     average ? average.toFixed(2) : '',
                     filling.TanqueCheio ? t('yes'): t('no'),
                     accomplishedKm,
-                    costPerKm.toFixed(2),
+                    costPerKm ? costPerKm.toFixed(2) : '',
                     filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
                     filling.Observacao,
                   ]);
@@ -174,7 +178,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                   ORDER BY A.KM
                   LIMIT 1
                 `,
-                  [vehicleId, results.rows.item(0).KM],
+                  [carId, results.rows.item(0).KM],
                   (_, fillings) => {
                     let nextFilling
                     if (fillings.rows.length) {
@@ -262,11 +266,11 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           }}
         />}
 
-        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
-            vehicles.map(vehicle => <Picker.Item label={vehicle.value} value={vehicle.index} key={vehicle.index}/>)
+            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  
-        </Picker>
+        </Picker>}
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
@@ -345,7 +349,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
         </ScrollView>
 
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={'$ '} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAveragesAccurate')}: <NumberFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
