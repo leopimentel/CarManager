@@ -197,7 +197,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 && 
+        {vehicles.length > 1 &&
         <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
@@ -265,15 +265,15 @@ function SpendingReportScreen({ theme, route, navigation }) {
         </View>
 
         <View style={{...styles.splitRow, justifyContent: 'flex-start', marginTop: 10}}>
-            <Button 
+            <Button
               icon={() => <MaterialCommunityIcons name='format-list-checkbox' size={35} style={{color: mode === TABLE_MODE ? 'green': 'black'}} />}
               onPress={() => setMode(TABLE_MODE)}
-            >            
+            >
             </Button>
-            <Button 
+            <Button
               icon={() => <MaterialCommunityIcons name='view-dashboard-outline' size={35} style={{color: mode === CARD_MODE ? 'green': 'black'}}/>}
               onPress={() => setMode(CARD_MODE)}
-            >                
+            >
             </Button>
         </View>
 
@@ -315,10 +315,10 @@ function SpendingReportScreen({ theme, route, navigation }) {
                <Text><Text style={{fontWeight: 'bold'}}>{tableHead[5].title}:</Text> {rowData[5]}</Text>
              </Card.Content>
              <Card.Actions>
-             <Button mode="contained" onPress={() => rowData[3] === t('fuel') ? 
+             <Button mode="contained" onPress={() => rowData[3] === t('fuel') ?
                 navigation.navigate('Fuel', {
                   CodAbastecimento: rowData[0]
-                }) : 
+                }) :
                 navigation.navigate('Spending', {
                   CodGasto: rowData[0]
                 })
@@ -328,7 +328,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           </Card>
           ))}
         </>
-      } 
+      }
         <View style={{ flex: 1, marginTop: 5 }}>
           <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
