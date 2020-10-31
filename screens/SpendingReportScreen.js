@@ -66,16 +66,15 @@ function SpendingReportScreen({ theme, route, navigation }) {
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
         [],
         function(_, results) {
+          let cars = []
+            
           if (results.rows.length) {
-            let cars = []
             for (let i = 0; i < results.rows.length; i++) {
               cars.push({
                 index: results.rows.item(i).CodVeiculo,
                 value: results.rows.item(i).Descricao
               });
             }
-            setVehicles(cars)
-
             tx.executeSql(`
               SELECT
               G.CodAbastecimento,
@@ -129,6 +128,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
               setLoading(false)
             })
           }
+
+          setVehicles(cars)
         }
       )
     })

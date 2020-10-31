@@ -16,7 +16,7 @@ const closeDatabase = () => {
 
 const databaseFilePath = `${FileSystem.documentDirectory}/SQLite/${databaseName}`
 
-const migrateUp = (useMock = __DEV__) => {
+const migrateUp = async (useMock = __DEV__) => {
     let testData = ''
     let dropTablesStr = ''
     if (useMock) {

@@ -32,6 +32,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [totalSum, setTotalSum] = useState(0)
   const [totalAverage, setTotalAverage] = useState(0)
   const [accurateAverage, setAccurateAverage] = useState(0)
+  const [totalKM, setTotalKM] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
   
@@ -80,15 +81,15 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
         [],
         function(_, results) {
+          let cars = []
+
           if (results.rows.length) {
-            let cars = []
             for (let i = 0; i < results.rows.length; i++) {
               cars.push({
                 index: results.rows.item(i).CodVeiculo,
                 value: results.rows.item(i).Descricao
               });
             }
-            setVehicles(cars)
 
             const carId = vehicleId ? vehicleId : cars[0].index
 
@@ -118,6 +119,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 let totalCount = 0
                 let totalCountAccurate = 0
                 let totalAccurate = 0
+                let minKm = 0
+                let maxKm = 0
 
                 for (let i = 0; i < results.rows.length; i++) {
                   const filling = results.rows.item(i)
@@ -160,7 +163,20 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                       totalCountAccurate++
                     }
                   }
+
+                  if (temp.length === 1) {
+                    minKm = maxKm = filling.KM 
+                  } else {
+                    if (filling.KM < minKm || minKm === 0) {
+                      minKm = filling.KM
+                    }
+
+                    if (filling.KM > maxKm || maxKm === 0) {
+                      maxKm = filling.KM
+                    }
+                  }
                 }
+                setTotalKM(maxKm - minKm)
                 setTableData(temp)
                 setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
                 setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
@@ -195,12 +211,15 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 setTableData([])
                 setTotalSum(0)
                 setTotalAverage(0)
+                setTotalKM(0)
               }
             }, function(_, error) {
               console.log(error)
               setLoading(false)
             })
           }
+
+          setVehicles(cars)
         }
       )
     })
@@ -352,6 +371,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAveragesAccurate')}: <NumberFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('totalKM')}: <NumberFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
       </ScrollView>
     </View>

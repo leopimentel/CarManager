@@ -29,6 +29,7 @@
     "expo-sharing": "~8.4.1",
     "expo-splash-screen": "~0.6.1",
     "expo-sqlite": "~8.4.0",
+    "expo-updates": "^0.3.5",
     "expo-web-browser": "~8.5.0",
     "i18n-js": "^3.5.1",
     "moment": "^2.25.3",

@@ -134,17 +134,19 @@ function SettingsScreen({ theme }) {
               `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
               [],
               function(_, results) {
+                let cars = []
+                  
                 if (results.rows.length) {
-                  let cars = []
                   for (let i = 0; i < results.rows.length; i++) {
                     cars.push({
                       index: results.rows.item(i).CodVeiculo,
                       value: results.rows.item(i).Descricao
                     });
                   }
-                  setVehicles(cars)
+                  
                 }
                 setLoading(false)
+                setVehicles(cars)
               }
             )
           }
@@ -218,7 +220,7 @@ function SettingsScreen({ theme }) {
           </Dialog.Content>
           
           <Dialog.Actions>
-            {vehicleId && <Button uppercase={false} mode="outlined" onPress={() => {
+            {vehicleId && vehicles.length > 1 && <Button uppercase={false} mode="outlined" onPress={() => {
               setVisibleDialog(false)
               deleteVehicle()
             }}>{t('delete')}</Button>}
