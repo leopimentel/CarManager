@@ -692,6 +692,16 @@ const mock = () => {
     (242, 1, '2020-07-06 09:24:33', '2020-07-05', 1, 87.77, 'shell jaragua ', 160, null),
     (243, 1, '2020-07-11 12:53:39', '2020-07-11', 3, 200, 'óleo + filtro de óleo + filtro de ar do motor + filtro de ar condicionado ', null, null),
     (245, 1, '2020-07-14 13:16:24', '2020-07-13', 1, 104.25, 'posto karaiba ', 161, null);
+
+    UPDATE Abastecimento
+    SET Data_Abastecimento = date(strftime('%Y-%m-%d','now'),
+    ('-' || cast(((select max(CodAbastecimento) from Abastecimento)-CodAbastecimento)*7 as text) || ' day'));
+
+    UPDATE Gasto
+    SET Data = (CASE WHEN CodGastoTipo = 1
+      THEN date(strftime('%Y-%m-%d', 'now'), ('-' || cast(((SELECT max(CodAbastecimento)
+                                                            FROM Abastecimento) - CodAbastecimento) * 7 AS TEXT) || ' day'))
+                ELSE date(strftime('%Y-%m-%d', 'now'), ('-' || cast(Gasto.CodGasto AS TEXT) || ' day')) END);
     `;
 }
 
