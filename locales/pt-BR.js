@@ -41,7 +41,7 @@ export default {
   averageOfAverages: 'Média das médias',
   averageOfAveragesAccurate: 'Média das médias com tanque cheio',
   total: 'Total',
-  totalKM: 'Kilômetros rodados no período',
+  totalKM: 'KMs rodados no período',
   period: 'Período',
   date: 'Data',
   volume: 'Litros',

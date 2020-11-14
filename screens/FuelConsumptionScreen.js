@@ -55,7 +55,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     {title:t('fullTank'), style: {width: 50}},
     {title:t('milleage'), style: {width: 50}},
     {title:t('currency') + t('milleage'), style: {width: 50}},
-    {title:t('mixed'), style: {width: 100}},
+    //{title:t('mixed'), style: {width: 100}},
     {title:t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
 
@@ -150,7 +150,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     filling.TanqueCheio ? t('yes'): t('no'),
                     accomplishedKm,
                     costPerKm ? costPerKm.toFixed(2) : '',
-                    filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
+                    //filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
                     filling.Observacao,
                   ]);
 
@@ -212,6 +212,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 setTotalSum(0)
                 setTotalAverage(0)
                 setTotalKM(0)
+                setAccurateAverage(0)
               }
             }, function(_, error) {
               console.log(error)
