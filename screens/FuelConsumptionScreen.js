@@ -35,6 +35,10 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [totalKM, setTotalKM] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
+  const [greatestAverage, setGreatestAverage] = useState(0);
+  const [lowestAverage, setLowestAverage] = useState(0);
+  const [greatestAverageFullTank, setGreatestAverageFullTank] = useState(0);
+  const [lowestAverageFullTank, setLowestAverageFullTank] = useState(0);
   
   const fuels = [{
     index: 0,
@@ -121,6 +125,10 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 let totalAccurate = 0
                 let minKm = 0
                 let maxKm = 0
+                let greatestAverageAux = 0
+                let greatestAverageFullTankAux = 0
+                let lowestAverageAux = 0
+                let lowestAverageFullTankAux = 0
 
                 for (let i = 0; i < results.rows.length; i++) {
                   const filling = results.rows.item(i)
@@ -161,6 +169,19 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     if (filling.TanqueCheio && nextFilling.TanqueCheio) {
                       totalAccurate += average
                       totalCountAccurate++
+                      if (greatestAverageFullTankAux === 0 || average > greatestAverageFullTankAux) {
+                        greatestAverageFullTankAux = average
+                      }
+
+                      if (lowestAverageFullTankAux === 0 || average < lowestAverageFullTankAux) {
+                        lowestAverageFullTankAux = average
+                      }
+                    }
+                    if (greatestAverageAux === 0 || average > greatestAverageAux) {
+                      greatestAverageAux = average
+                    }
+                    if (lowestAverageAux === 0 || average < lowestAverageAux) {
+                      lowestAverageAux = average
                     }
                   }
 
@@ -182,6 +203,10 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
                 setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
                 setLoading(false)
+                setGreatestAverage(greatestAverageAux.toFixed(2))
+                setGreatestAverageFullTank(greatestAverageFullTankAux.toFixed(2))
+                setLowestAverage(lowestAverageAux.toFixed(2))
+                setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
               }
 
               if (results.rows.length) {
@@ -213,6 +238,10 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 setTotalAverage(0)
                 setTotalKM(0)
                 setAccurateAverage(0)
+                setGreatestAverage(0)
+                setGreatestAverageFullTank(0)
+                setLowestAverage(0)
+                setLowestAverageFullTank(0)
               }
             }, function(_, error) {
               console.log(error)
@@ -369,10 +398,14 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
         </ScrollView>
 
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('totalSpent')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('averageOfAveragesAccurate')}: <NumberFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           <Text>{t('totalKM')}: <NumberFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('greatestAverage')}: <NumberFormat value={greatestAverage} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('greatestAverageFullTank')}: <NumberFormat value={greatestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('lowestAverage')}: <NumberFormat value={lowestAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('lowestAverageFullTank')}: <NumberFormat value={lowestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
       </ScrollView>
     </View>

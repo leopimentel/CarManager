@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-community/picker';
@@ -17,6 +17,7 @@ import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MultiSelect from '../components/react-native-multiple-select';
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -26,8 +27,6 @@ function SpendingReportScreen({ theme, route, navigation }) {
   })
   const [showStartDate, setShowStartDate] = useState(false)
   const [showEndDate, setShowEndDate] = useState(false)
-  const [spendingType, setSpendingType] = useState(0)
-  const spendingTypesAll = [{index:0, value: t('all')},...spendingTypes]
   const [observation, setObservation] = useState('')
   const TABLE_MODE = true
   const CARD_MODE = false
@@ -47,6 +46,11 @@ function SpendingReportScreen({ theme, route, navigation }) {
     {title: 'km', style: {width: 65}},
     {title: t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const onSelectedItemsChange = selectedItems => {
+    setSelectedItems(selectedItems);
+  };
 
   const isFocused = useIsFocused()
 
@@ -75,6 +79,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
                 value: results.rows.item(i).Descricao
               });
             }
+
             tx.executeSql(`
               SELECT
               G.CodAbastecimento,
@@ -95,7 +100,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
               const temp = [];
               for (let i = 0; i < results.rows.length; i++) {
                 const spending = results.rows.item(i)
-                if (spending.CodGastoTipo !== spendingType && spendingType !== 0) {
+                
+                if (selectedItems.indexOf(''+spending.CodGastoTipo) === -1 && selectedItems.length !== 0) {
                   continue
                 }
 
@@ -114,7 +120,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
                   spending.CodAbastecimento || spending.CodGasto,
                   fromDatabaseToUserDate(spending.Data),
                   spending.Valor,
-                  spendingTypes.filter(spd => spd.index === spending.CodGastoTipo)[0].value,
+                  spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
                   spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
                   spending.Observacao,
                 ]);
@@ -133,7 +139,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         }
       )
     })
-  }, [period, spendingType, observation, vehicleId]);
+  }, [period, selectedItems, observation, vehicleId]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -141,7 +147,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
     
     search()
-  }, [isFocused, period, spendingType, vehicleId]);
+  }, [isFocused, period, selectedItems, vehicleId]);
 
   const cellEditRow = (rowData) => {
     const isFuel = rowData[3] === t('fuel')
@@ -171,7 +177,9 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps='always'>
+      <FlatList
+      ListHeaderComponent={
+      <>
         {showStartDate &&
           <DateTimePicker
           value={period.startDate}
@@ -205,12 +213,29 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }
         </Picker>}
         <View style={{ ...styles.splitRow}}>
-          <View style={{ flex: 1, marginRight: 5 }}>
-            <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
-            {
-              spendingTypesAll.map(spending => <Picker.Item label={spending.value} value={spending.index} key={spending.index}/>)
-            }  
-          </Picker>
+          <View style={{ flex: 1, marginRight: 5, marginLeft: 5 }}>
+            <MultiSelect
+              items={spendingTypes}
+              fontSize={16}
+              uniqueKey="index"
+              displayKey="value"
+              onSelectedItemsChange={onSelectedItemsChange}
+              selectedItems={selectedItems}
+              selectText={t('spending')}
+              // onChangeInput={ (text)=> console.log(text)}
+              tagRemoveIconColor="#000"
+              tagBorderColor="#CCC"
+              textColor="#000"
+              tagTextColor="#000"
+              selectedItemTextColor="#000"
+              selectedItemIconColor="#000"
+              itemTextColor="#000"
+              searchInputStyle={{ color: '#000' }}
+              submitButtonColor={Colors.primary}
+              searchInputPlaceholderText={t('search') + '...'}
+              submitButtonText={t('search')}
+           />
+       
           </View>
 
           <View style={{ flex: 1 }}>
@@ -262,6 +287,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
             onBlur={() => search()}
             mode='outlined'
             style={{flex: 1}}
+            left={<TextInput.Icon name={'magnify'} color={'grey'}/>}
           />
         </View>
 
@@ -333,7 +359,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         <View style={{ flex: 1, marginTop: 5 }}>
           <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
         </View>
-      </ScrollView>
+      </>}/>
     </View>
   );
 }

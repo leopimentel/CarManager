@@ -20,7 +20,7 @@ export default {
   observation: 'Observação',
   fillingObservation: 'Posto Parada Perfeita',
   spendingObservation: '4 Pneus',
-  wrongAverageInfo: 'Média calculada pode estar errada pois este abastecimento ou o anterior não foi com tanque cheio.',
+  wrongAverageInfo: 'Média calculada pode estar errada pois este abastecimento ou o próximo não foi com tanque cheio.',
   fullTank: 'Tanque cheio',
   startDate: 'Data inicial',
   endDate: 'Data final',
@@ -77,5 +77,16 @@ export default {
   fillVehicleInfo: "Preencha as informações do veículo",
   vehicleRegistering: "Cadastro de Veículos",
   newVehicle: "Adicionar outro veículo",
-  currency: "R$ "
+  currency: "R$ ",
+  lowestAverageFullTank: "Menor média com tanque cheio",
+  lowestAverage: "Menor média",
+  greatestAverageFullTank: "Maior média com tanque cheio",
+  greatestAverage: "Maior média",
+  totalSpent: "Total gasto",
+  search: "Pesquisar",
+  tapOrPressReturn: "Pressione retornar",
+  add: "Adicionar",
+  selected: "Selecionado(s)",
+  select: "Selecionar",
+  noItemToDisplay: "Nenhum item para mostrar"
 };
