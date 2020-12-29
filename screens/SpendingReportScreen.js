@@ -92,7 +92,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               FROM Gasto G
               WHERE G.CodVeiculo = ?
               AND G.Data >= ? AND G.Data <= ?
-              ORDER BY G.Data DESC
+              ORDER BY G.Data DESC, G.KM DESC
             `,
             [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
             function(_, results) {
