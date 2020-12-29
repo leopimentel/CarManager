@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as React from 'react';
-
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import FillingScreen from '../screens/FillingScreen';
 import SpendingScreen from '../screens/SpendingScreen';
 import SpendingReportScreen from '../screens/SpendingReportScreen'
@@ -82,7 +82,7 @@ function getFocusedColor(focused) {
 }
 
 function getHeaderTitle(route) {
-  const routeName = route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
+  const routeName = getFocusedRouteNameFromRoute(route) ?? INITIAL_ROUTE_NAME;
 
   switch (routeName) {
     case 'Fuel':

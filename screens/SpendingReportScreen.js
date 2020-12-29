@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-community/picker';
+import { Picker } from '@react-native-picker/picker';
 import { withTheme, TextInput, Button, Card } from 'react-native-paper';
 import { spendingTypes, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles } from './style'

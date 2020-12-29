@@ -14,7 +14,7 @@ import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
-import {Picker} from '@react-native-community/picker';
+import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 
 function FillingScreen({ theme, route, navigation }) {
