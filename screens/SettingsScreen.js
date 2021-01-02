@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, List, TextInput, Dialog, Portal, Button } from 'react-native-paper';
+import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'react-native-paper';
 import { getStyles } from './style'
 import { t } from '../locales'
 import { databaseFilePath, databaseName, openDatabase, closeDatabase, db } from '../database'
@@ -10,6 +10,7 @@ import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system'
+import Constants from 'expo-constants';
 
 function SettingsScreen({ theme }) {
   const styles = getStyles(theme)
@@ -241,6 +242,7 @@ function SettingsScreen({ theme }) {
       </Portal>
 
       <ScrollView>
+        <Caption style={{textAlign: 'right'}}>{t('version')}: {Constants.manifest.version}</Caption>
         <List.Section>
           <List.Subheader>{t('backupRestore')}</List.Subheader>
           <List.Item

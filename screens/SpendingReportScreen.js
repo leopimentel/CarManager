@@ -47,6 +47,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     {title: t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
   const [selectedItems, setSelectedItems] = useState([]);
+  const [totalKM, setTotalKM] = useState(0)
 
   const onSelectedItemsChange = selectedItems => {
     setSelectedItems(selectedItems);
@@ -88,8 +89,9 @@ function SpendingReportScreen({ theme, route, navigation }) {
               G.Valor,
               G.CodGastoTipo,
               G.Observacao,
-              G.KM
+              COALESCE(A.KM, G.KM) AS KM
               FROM Gasto G
+              LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
               WHERE G.CodVeiculo = ?
               AND G.Data >= ? AND G.Data <= ?
               ORDER BY G.Data DESC, G.KM DESC
@@ -97,6 +99,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
             [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
             function(_, results) {
               let totalSumAcc = 0
+              let minKm = 0
+              let maxKm = 0
               const temp = [];
               for (let i = 0; i < results.rows.length; i++) {
                 const spending = results.rows.item(i)
@@ -125,11 +129,25 @@ function SpendingReportScreen({ theme, route, navigation }) {
                   spending.Observacao,
                 ]);
                 totalSumAcc += spending.Valor
+
+                if (spending.KM) {
+                  if (temp.length === 1) {
+                    minKm = maxKm = spending.KM 
+                  } else {
+                    if (spending.KM < minKm || minKm === 0) {
+                      minKm = spending.KM
+                    }
+
+                    if (spending.KM > maxKm || maxKm === 0) {
+                      maxKm = spending.KM
+                    }
+                  }
+                }
               }
 
               setTableData(temp)
               setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-
+              setTotalKM(maxKm - minKm)
               
               setLoading(false)
             })
@@ -358,6 +376,11 @@ function SpendingReportScreen({ theme, route, navigation }) {
       }
         <View style={{ flex: 1, marginTop: 5 }}>
           <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          {totalKM > 0 && <Text>{t('totalSpentByKM')}: <NumberFormat 
+            value={(totalSum / totalKM).toFixed(2)} displayType={'text'} 
+            isNumericString={true} thousandSeparator={thousandSeparator} 
+            decimalSeparator={decimalSeparator} prefix={t('currency')} 
+            renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
         </View>
       </>}/>
     </View>

@@ -88,5 +88,14 @@ export default {
   add: "Adicionar",
   selected: "Selecionado(s)",
   select: "Selecionar",
-  noItemToDisplay: "Nenhum item para mostrar"
+  noItemToDisplay: "Nenhum item para mostrar",
+  averageOfAverages1: "Média das médias com gasolina e tanque cheio",
+  averageOfAverages2: "Média das médias com álcool e tanque cheio",
+  averageOfAverages3: "Média das médias com diesel e tanque cheio",
+  averageOfAverages4: "Média das médias com gás natural e tanque cheio",
+  averageOfAverages5: "Média das médias com gasolina aditivada e tanque cheio",
+  totalSpentByKM: "Total gasto por KM",
+  totalFuelSpentByKM: "Total gasto com combustível por KM",
+  odometer: "Odômetro",
+  version: "Versão",
 };

@@ -7,7 +7,7 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
-import { vehicles as v, fuels as f, spendingTypes } from '../constants/fuel'
+import { fuels as f, spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
@@ -582,7 +582,7 @@ function FillingScreen({ theme, route, navigation }) {
       <View style={styles.splitRow}>
         <View style={{flex: 1}}>
           <TextInput
-            label='KM'
+            label={t('odometer')}
             value={km}
             onChangeText={text => {
               setKm(databaseIntegerFormat(text))

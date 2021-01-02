@@ -288,7 +288,7 @@ function SpendingScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         <TextInput
-          label='KM'
+          label={t('odometer')}
           value={km}
           onChangeText={text => {
             setKm(databaseIntegerFormat(text))
