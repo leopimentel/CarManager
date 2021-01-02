@@ -27,6 +27,7 @@ function SpendingScreen({ theme, route, navigation }) {
   const [km, setKm] = useState()
 
   const [observation, setObservation] = useState()
+  const [autoRepair, setAutoRepair] = useState()
   const [visibleDialog, setVisibleDialog] = useState(false)
   const [codGasto, setCodGasto] = useState()
   const [vehicles, setVehicles] = useState([])
@@ -70,7 +71,8 @@ function SpendingScreen({ theme, route, navigation }) {
            G.Valor,
            G.Observacao,
            G.KM,
-           G.CodVeiculo
+           G.CodVeiculo,
+           G.Oficina
            FROM Gasto G
            WHERE G.CodGasto = ?`,
           [route.params.CodGasto],
@@ -82,6 +84,7 @@ function SpendingScreen({ theme, route, navigation }) {
               setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
               setObservation(abastecimento.Observacao)
               setSpendingType(abastecimento.CodGastoTipo)
+              setAutoRepair(abastecimento.Oficina)
               if (abastecimento.KM) {
                 setKm(''+abastecimento.KM)
               }
@@ -160,6 +163,7 @@ function SpendingScreen({ theme, route, navigation }) {
     setFormErrors({
       price: [false, ''],
     })
+    setAutoRepair(null)
   }
 
   const saveSpending = () => {
@@ -173,8 +177,8 @@ function SpendingScreen({ theme, route, navigation }) {
     db.transaction(function(tx) {
       if (!codGasto) {
         tx.executeSql(
-            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km],
+            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair],
             function(_, res) {
               setLoading(false)
               setVisibleDialog(true)
@@ -185,9 +189,9 @@ function SpendingScreen({ theme, route, navigation }) {
       } else {
         tx.executeSql(
           `UPDATE Gasto
-            SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
+            SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
             WHERE CodGasto = ?`,
-          [vehicleId, dateSqlLite, spendingType, price, observation, km, codGasto],
+          [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto],
           function() {
             console.log(`Spending ${codGasto} updated`)
             setLoading(false)
@@ -305,6 +309,16 @@ function SpendingScreen({ theme, route, navigation }) {
           onChangeText={text => setObservation(text)}
           mode='outlined'
           placeholder={t('spendingObservation')}
+          style={{flex: 1}}
+        />
+      </View>
+
+      <View style={styles.splitRow}>
+        <TextInput label={t('autoRepair')}
+          value={autoRepair}
+          onChangeText={text => setAutoRepair(text)}
+          mode='outlined'
+          placeholder={t('autoRepairPlaceHolder')}
           style={{flex: 1}}
         />
       </View>

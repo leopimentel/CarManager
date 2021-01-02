@@ -8,6 +8,12 @@ const spendingTypes = [{
   index: '2', value: t('oil')
 },{
   index: '3', value: t('carRepair')
+},{
+  index: '4', value: t('carInsurance')
+},{
+  index: '5', value: t('tax'),
+},{
+  index: '6', value: t('toll')
 }];
 
 const timeFilter = [

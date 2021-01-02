@@ -45,6 +45,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     {title: t('spendingType'), style: {width: 100}},
     {title: 'km', style: {width: 65}},
     {title: t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
+    {title: t('autoRepair'), style: {width: 250, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
   const [selectedItems, setSelectedItems] = useState([]);
   const [totalKM, setTotalKM] = useState(0)
@@ -89,7 +90,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
               G.Valor,
               G.CodGastoTipo,
               G.Observacao,
-              COALESCE(A.KM, G.KM) AS KM
+              COALESCE(A.KM, G.KM) AS KM,
+              G.Oficina
               FROM Gasto G
               LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
               WHERE G.CodVeiculo = ?
@@ -127,6 +129,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
                   spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
                   spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
                   spending.Observacao,
+                  spending.Oficina
                 ]);
                 totalSumAcc += spending.Valor
 
@@ -357,7 +360,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
                <Text><Text style={{fontWeight: 'bold'}}>{tableHead[2].title}:</Text> {rowData[2]}</Text>
                <Text><Text style={{fontWeight: 'bold'}}>{tableHead[3].title}:</Text> {rowData[3]}</Text>
                <Text><Text style={{fontWeight: 'bold'}}>{tableHead[4].title}:</Text> {rowData[4]}</Text>
-               <Text><Text style={{fontWeight: 'bold'}}>{tableHead[5].title}:</Text> {rowData[5]}</Text>
+               {rowData[5] && <Text><Text style={{fontWeight: 'bold'}}>{tableHead[5].title}:</Text> {rowData[5]}</Text>}
+               {rowData[6] && <Text><Text style={{fontWeight: 'bold'}}>{tableHead[6].title}:</Text> {rowData[6]}</Text>}
              </Card.Content>
              <Card.Actions>
              <Button mode="contained" onPress={() => rowData[3] === t('fuel') ?

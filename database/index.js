@@ -116,7 +116,15 @@ const migrateUp = async (useMock = __DEV__) => {
             ${testData}
 
             `.split(';').map(statement => statement.trim()).filter(Boolean),
-        // 2: `DROP TABLE IF EXISTS XPTO6;`.split(';').map(statement => statement.trim()).filter(Boolean),
+        2: `INSERT OR IGNORE INTO GastoTipo (CodGastoTipo, Descricao) VALUES
+            (4, 'Seguro'),
+            (5, 'Imposto'),
+            (6, 'Pedágio'),
+            (7, 'Estacionamento');
+            
+            ALTER TABLE GASTO ADD COLUMN Oficina VARCHAR(255);
+            
+            `.split(';').map(statement => statement.trim()).filter(Boolean),
         // 3: `DROP TABLE IF EXISTS ABCD;`.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 

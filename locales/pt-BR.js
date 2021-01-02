@@ -98,4 +98,9 @@ export default {
   totalFuelSpentByKM: "Total gasto com combustível por KM",
   odometer: "Odômetro",
   version: "Versão",
+  toll: "Pedágio",
+  tax: "Imposto",
+  carInsurance: "Seguro",
+  autoRepair: "Oficina",
+  autoRepairPlaceHolder: "Auto elétrica VW",
 };
