@@ -103,4 +103,10 @@ export default {
   carInsurance: "Seguro",
   autoRepair: "Oficina",
   autoRepairPlaceHolder: "Auto elétrica VW",
+  newReminder: "Novo lembrete",
+  reminder: "Lembrete",
+  done: "Finalizado",
+  seeReminders: "Ver lembretes",
+  savedReminder: "Lembrete salvo",
+  reminders: "Lembretes",
 };

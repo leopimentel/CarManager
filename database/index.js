@@ -19,8 +19,10 @@ const databaseFilePath = `${FileSystem.documentDirectory}/SQLite/${databaseName}
 const migrateUp = async (useMock = __DEV__) => {
     let testData = ''
     let dropTablesStr = ''
+    let testData3 = ''
     if (useMock) {
         testData = mock()
+        testData3 = mock3()
         dropTablesStr = dropTables()
     }
 
@@ -125,7 +127,36 @@ const migrateUp = async (useMock = __DEV__) => {
             ALTER TABLE GASTO ADD COLUMN Oficina VARCHAR(255);
             
             `.split(';').map(statement => statement.trim()).filter(Boolean),
-        // 3: `DROP TABLE IF EXISTS ABCD;`.split(';').map(statement => statement.trim()).filter(Boolean)
+        3: `
+            create table if not exists LembreteTipo
+            (
+                CodLembreteTipo INTEGER PRIMARY KEY,
+                Descricao TEXT
+            );
+
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (1, 'Troca de óleo');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (2, 'Troca de filtro de óleo');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (3, 'Troca de filtro de combustível');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (4, 'Troca de filtro de ar do motor');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (5, 'Troca de filtro do ar condicionado');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (6, 'Revisão');
+            INSERT OR IGNORE INTO LembreteTipo (CodLembreteTipo, Descricao) VALUES (7, 'Manutenção');
+            
+            create table if not exists Lembrete
+            (
+                CodLembrete INTEGER PRIMARY KEY autoincrement,
+                CodVeiculo INTEGER,
+                DataCadastro TEXT,
+                CodLembreteTipo INTEGER,
+                KM INTEGER,
+                DataLembrete TEXT,
+                Observacao TEXT,
+                Finalizado INTEGER DEFAULT 0,
+                CodGasto INTEGER
+            );
+
+            ${testData3}
+            `.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 
     const migrateVersions = (tx, versionsToMigrate) => {
@@ -182,7 +213,19 @@ const dropTables = () => {
         DROP TABLE IF EXISTS GastoTipo;
 
         DROP TABLE IF EXISTS Veiculo;
+
+        DROP TABLE IF EXISTS Lembrete;
+
+        DROP TABLE IF EXISTS LembreteTipo;
     `;
+}
+
+const mock3 = () => {
+    return `
+    INSERT OR IGNORE INTO Lembrete (CodLembrete, CodVeiculo, DataCadastro,
+        CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) VALUES
+    (1, 1, date(strftime('%Y-%m-%d','now')), 1, 85900, date(strftime('%Y-%m-%d','now'), '+1 day'), 'Lembrete para não esquecer', 0, null);
+    `
 }
 
 const mock = () => {

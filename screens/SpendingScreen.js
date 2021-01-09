@@ -217,6 +217,11 @@ function SpendingScreen({ theme, route, navigation }) {
         <Dialog.Actions>
           <Button uppercase={false} mode="outlined" onPress={() => {
             setVisibleDialog(false)
+            navigation.navigate('Reminder', {CodGasto: codGasto, CodVeiculo: vehicleId})
+          }}>{t('newReminder')}</Button>
+
+          <Button uppercase={false} style={{marginLeft: 5}} mode="outlined" onPress={() => {
+            setVisibleDialog(false)
             navigation.navigate('Report', {CodVeiculo: vehicleId})
           }}>{t('seeReport')}</Button>
 

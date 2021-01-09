@@ -6,7 +6,7 @@ import Colors from './constants/Colors'
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { DefaultTheme, Provider as PaperProvider, Button } from 'react-native-paper';
 
 const Stack = createStackNavigator();
 
@@ -30,7 +30,11 @@ export default function App(_) {
         {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
         <NavigationContainer linking={LinkingConfiguration}>
           <Stack.Navigator>
-            <Stack.Screen name="Fuel" component={BottomTabNavigator} />
+            <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
+              headerRight: () => (
+                <Button icon="bell" onPress={() => navigation.navigate('Reminders') }/>
+              ),
+            })}/>
           </Stack.Navigator>
         </NavigationContainer>
       </View>

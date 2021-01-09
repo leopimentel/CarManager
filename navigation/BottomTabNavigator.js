@@ -6,6 +6,8 @@ import SpendingScreen from '../screens/SpendingScreen';
 import SpendingReportScreen from '../screens/SpendingReportScreen'
 import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ReminderScreen from '../screens/ReminderScreen';
+import RemindersScreen from '../screens/RemindersScreen';
 import { MaterialCommunityIcons, Entypo, Foundation, Feather } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
@@ -73,6 +75,21 @@ function BottomTabNavigator({ navigation, route }) {
           tabBarIcon: ({ focused }) => <Feather name="settings" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
+      <BottomTab.Screen
+        name="Reminder"
+        component={ReminderScreen}
+        options={{
+          tabBarButton: () => null
+        }}
+      />
+
+<BottomTab.Screen
+        name="Reminders"
+        component={RemindersScreen}
+        options={{
+          tabBarButton: () => null
+        }}
+      />
     </BottomTab.Navigator>
   );
 }
@@ -95,6 +112,10 @@ function getHeaderTitle(route) {
       return t('report');
     case 'Settings':
       return t('settings');
+    case 'Reminder':
+      return t('reminder');
+    case 'Reminders':
+      return t('reminders');
   }
 }
 
