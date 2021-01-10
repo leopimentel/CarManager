@@ -23,10 +23,20 @@ function RemindersScreen({ theme, route, navigation }) {
       tx.executeSql(
         `SELECT L.CodLembrete, L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
         L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto, LT.Descricao,
-        V.Descricao AS Veiculo
+        V.Descricao AS Veiculo,
+        (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
+        (
+          L.KM IS NOT NULL AND L.KM < (
+              SELECT 
+              MAX(COALESCE(A.KM, G.KM, 0)) 
+              FROM Gasto G
+              LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+          )
+      ) AS KMTriggered
         FROM Lembrete L
         INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
-        INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo`,
+        INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
+        ORDER BY DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
         [],
         function(_, results) {
           let aux = []
@@ -49,8 +59,8 @@ function RemindersScreen({ theme, route, navigation }) {
     <Card style={{borderColor: 'gray', borderWidth: 1, flex: 1, marginTop: 5, marginBottom: 5}}>
       <Card.Content>
         <Text><Text style={{fontWeight: 'bold'}}>{"Tipo do Lembrete"}:</Text> {item.Descricao}</Text>
-        <Text><Text style={{fontWeight: 'bold'}}>{"KM"}:</Text> {item.KM}</Text>
-        <Text><Text style={{fontWeight: 'bold'}}>{"Data do Lembrete"}:</Text> {fromDatabaseToUserDate(item.DataLembrete)}</Text>
+        <Text><Text style={{fontWeight: 'bold', color: item.KMTriggered ? 'red' : 'black'}}>{"KM"}:</Text> {item.KM}</Text>
+        <Text><Text style={{fontWeight: 'bold', color: item.DateTriggered ? 'red' : 'black'}}>{"Data do Lembrete"}:</Text> {fromDatabaseToUserDate(item.DataLembrete)}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Observação"}:</Text> {item.Observacao}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Finalizado"}:</Text> {item.Finalizado ? t('yes') : t('no')}</Text>
       <Text><Text style={{fontWeight: 'bold'}}>{"Veiculo"}:</Text> {ucfirst(item.Veiculo) }</Text>
