@@ -182,7 +182,7 @@ function SpendingScreen({ theme, route, navigation }) {
             function(_, res) {
               setLoading(false)
               setVisibleDialog(true)
-              clearForm()
+              setCodGasto(res.insertId)
               console.log(`Spending ${res.insertId} inserted `)
             }, handleDatabaseError
         );
@@ -196,7 +196,6 @@ function SpendingScreen({ theme, route, navigation }) {
             console.log(`Spending ${codGasto} updated`)
             setLoading(false)
             setVisibleDialog(true)
-            clearForm()
           }, handleDatabaseError
         )
      }
@@ -217,15 +216,24 @@ function SpendingScreen({ theme, route, navigation }) {
         <Dialog.Actions>
           <Button uppercase={false} mode="outlined" onPress={() => {
             setVisibleDialog(false)
-            navigation.navigate('Reminder', {CodGasto: codGasto, CodVeiculo: vehicleId})
+            navigation.navigate('Reminder', {
+              CodGasto: codGasto,
+              CodVeiculo: vehicleId,
+              CodLembrete: null
+            })
+            clearForm()
           }}>{t('newReminder')}</Button>
 
           <Button uppercase={false} style={{marginLeft: 5}} mode="outlined" onPress={() => {
             setVisibleDialog(false)
+            clearForm()
             navigation.navigate('Report', {CodVeiculo: vehicleId})
           }}>{t('seeReport')}</Button>
 
-          <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
+          <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => {
+            clearForm()
+            setVisibleDialog(false)
+            }}>{t('close')}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

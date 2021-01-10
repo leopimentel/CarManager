@@ -27,7 +27,7 @@ function ReminderScreen({ theme, route, navigation }) {
   const [observation, setObservation] = useState()  
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
-  const [done, setDone] = useState();
+  const [done, setDone] = useState(0);
   const [spendingId, setSpendingId] = useState();
   const [loading, setLoading] = useState(false)
   const [formErrors, setFormErrors] = useState({
@@ -77,9 +77,12 @@ function ReminderScreen({ theme, route, navigation }) {
         }
       )
     })
+    clearForm()
   }, [isFocused])
 
   useEffect(() => {
+    clearForm()
+    console.log('route params', route.params)
     if (route.params) {
       if (route.params.CodVeiculo){
         setVehicleId(route.params.CodVeiculo)
@@ -146,6 +149,7 @@ function ReminderScreen({ theme, route, navigation }) {
           [reminderId],
           function(tx) {
             console.log(`Reminder ${reminderId} removed`)
+            global.shouldNotify = true
             setVisibleDialog(true)
             setLoading(false)
             clearForm()
@@ -182,6 +186,7 @@ function ReminderScreen({ theme, route, navigation }) {
     setFormErrors({
       dateOrKm: [false, ''],
     })
+    setDone(0)
   }
 
   const save = () => {
@@ -194,14 +199,16 @@ function ReminderScreen({ theme, route, navigation }) {
     setLoading(true)
     db.transaction(function(tx) {
       if (!reminderId) {
+        console.log(vehicleId, new Date(), reminderType, km, dateSqlLite, observation, done, spendingId )
         tx.executeSql(
           `INSERT INTO Lembrete 
           (CodVeiculo, DataCadastro, CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) 
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [vehicleId, fromUserDateToDatabase(), reminderType, km, dateSqlLite, observation, done, spendingId],
+          [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId],
           function(tx, res) {
             console.log(`Reminder ${res.insertId} inserted`)
             clearForm()
+            global.shouldNotify = true
             setLoading(false)
             setVisibleDialog(true)
           }, handleDatabaseError
@@ -217,6 +224,7 @@ function ReminderScreen({ theme, route, navigation }) {
             setVisibleDialog(true)
             clearForm()
             setLoading(false)
+            global.shouldNotify = true
           }, handleDatabaseError
         );
       }

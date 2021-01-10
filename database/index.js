@@ -224,7 +224,7 @@ const mock3 = () => {
     return `
     INSERT OR IGNORE INTO Lembrete (CodLembrete, CodVeiculo, DataCadastro,
         CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) VALUES
-    (1, 1, date(strftime('%Y-%m-%d','now')), 1, 85900, date(strftime('%Y-%m-%d','now'), '+1 day'), 'Lembrete para não esquecer', 0, null);
+    (1, 1, date(strftime('%Y-%m-%d','now', 'localtime')), 1, 85900, date(strftime('%Y-%m-%d','now', 'localtime'), '+1 day'), 'Lembrete para não esquecer', 0, null);
     `
 }
 
@@ -745,14 +745,14 @@ const mock = () => {
     (245, 1, '2020-07-14 13:16:24', '2020-07-13', 1, 104.25, 'posto karaiba ', 161, null);
 
     UPDATE Abastecimento
-    SET Data_Abastecimento = date(strftime('%Y-%m-%d','now'),
+    SET Data_Abastecimento = date(strftime('%Y-%m-%d','now', 'localtime'),
     ('-' || cast(((select max(CodAbastecimento) from Abastecimento)-CodAbastecimento)*7 as text) || ' day'));
 
     UPDATE Gasto
     SET Data = (CASE WHEN CodGastoTipo = 1
-      THEN date(strftime('%Y-%m-%d', 'now'), ('-' || cast(((SELECT max(CodAbastecimento)
+      THEN date(strftime('%Y-%m-%d', 'now', 'localtime'), ('-' || cast(((SELECT max(CodAbastecimento)
                                                             FROM Abastecimento) - CodAbastecimento) * 7 AS TEXT) || ' day'))
-                ELSE date(strftime('%Y-%m-%d', 'now'), ('-' || cast(Gasto.CodGasto AS TEXT) || ' day')) END);
+                ELSE date(strftime('%Y-%m-%d', 'now', 'localtime'), ('-' || cast(Gasto.CodGasto AS TEXT) || ' day')) END);
     `;
 }
 

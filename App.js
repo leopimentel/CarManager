@@ -6,7 +6,8 @@ import Colors from './constants/Colors'
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
-import { DefaultTheme, Provider as PaperProvider, Button } from 'react-native-paper';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import Bell from './components/Bell'
 
 const Stack = createStackNavigator();
 
@@ -32,7 +33,7 @@ export default function App(_) {
           <Stack.Navigator>
             <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
               headerRight: () => (
-                <Button icon="bell" onPress={() => navigation.navigate('Reminders') }/>
+                <Bell onPress={() => navigation.navigate('Reminders') } />
               ),
             })}/>
           </Stack.Navigator>
