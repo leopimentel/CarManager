@@ -60,7 +60,7 @@ function RemindersScreen({ theme, route, navigation }) {
       <Card.Content>
         <Text><Text style={{fontWeight: 'bold'}}>{"Tipo do Lembrete"}:</Text> {item.Descricao}</Text>
         <Text><Text style={{fontWeight: 'bold', color: item.KMTriggered ? 'red' : 'black'}}>{"KM"}:</Text> {item.KM}</Text>
-        <Text><Text style={{fontWeight: 'bold', color: item.DateTriggered ? 'red' : 'black'}}>{"Data do Lembrete"}:</Text> {fromDatabaseToUserDate(item.DataLembrete)}</Text>
+        <Text><Text style={{fontWeight: 'bold', color: item.DateTriggered ? 'red' : 'black'}}>{"Data do Lembrete"}:</Text> {item.DataLembrete ? fromDatabaseToUserDate(item.DataLembrete) : ''}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Observação"}:</Text> {item.Observacao}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Finalizado"}:</Text> {item.Finalizado ? t('yes') : t('no')}</Text>
       <Text><Text style={{fontWeight: 'bold'}}>{"Veiculo"}:</Text> {ucfirst(item.Veiculo) }</Text>

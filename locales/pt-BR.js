@@ -109,4 +109,5 @@ export default {
   seeReminders: "Ver lembretes",
   savedReminder: "Lembrete salvo",
   reminders: "Lembretes",
+  dateOrKm: "Data ou odômetro não foram preenchidos"
 };

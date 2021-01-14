@@ -19,6 +19,7 @@ import { useIsFocused } from '@react-navigation/native'
 function ReminderScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
   const [date, setDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState()
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [reminderType, setReminderType] = useState(1)
   const [reminderTypes, setReminderTypes] = useState()
@@ -105,9 +106,9 @@ function ReminderScreen({ theme, route, navigation }) {
               if (results.rows.length) {
                 const reminder = results.rows.item(0)
                 console.log(reminder, moment(reminder.DataLembrete, 'YYYY-MM-DD').format(t('dateFormat')))
-                setDate(moment(reminder.DataLembrete, 'YYYY-MM-DD').toDate())
+                setSelectedDate(reminder.DataLembrete ? moment(reminder.DataLembrete, 'YYYY-MM-DD').toDate(): '')
                 setDone(reminder.Finalizado)
-                setKm(''+reminder.KM)
+                setKm(reminder.KM ? ''+reminder.KM : '')
                 setObservation(reminder.Observacao)
                 setSpendingId(reminder.CodGasto)
                 setVehicleId(reminder.CodVeiculo)
@@ -178,7 +179,7 @@ function ReminderScreen({ theme, route, navigation }) {
   }
 
   const clearForm = () => {
-    setDate(new Date())
+    setSelectedDate(null)
     setReminderId(null)
     setObservation(null)
     setKm(null)
@@ -190,12 +191,11 @@ function ReminderScreen({ theme, route, navigation }) {
   }
 
   const save = () => {
-    if ((!km || km < 0) && (!date)) {
-       setFormErrors({...formErrors, km: [true, t('errorMessage.km')]})
+    if ((!km || km < 0) && !selectedDate) {
+       setFormErrors({...formErrors, dateOrKm: [true, t('errorMessage.dateOrKm')]})
        return false
     }
-
-    const dateSqlLite = fromUserDateToDatabase(date)
+    const dateSqlLite = selectedDate ? fromUserDateToDatabase(selectedDate) : null
     setLoading(true)
     db.transaction(function(tx) {
       if (!reminderId) {
@@ -255,10 +255,12 @@ function ReminderScreen({ theme, route, navigation }) {
       {showDatePicker &&
         <DateTimePicker
           value={date}
+          minimumDate={new Date()}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onChange={(_, selectedDateTime) => {
             setShowDatePicker(!showDatePicker);
-            setDate(selectedDate || date)              
+            setSelectedDate(selectedDateTime)
+            setDate(selectedDateTime || date)              
           }}
         />}
       <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
@@ -283,7 +285,7 @@ function ReminderScreen({ theme, route, navigation }) {
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
             <TextInput
             label={t('date')}
-            value={fromDatabaseToUserDate(date)}
+            value={selectedDate ? fromDatabaseToUserDate(selectedDate): ''}
             mode='outlined'
             style={{flex: 1}}
             editable={false}
