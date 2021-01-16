@@ -8,6 +8,7 @@ import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LinkingConfiguration from './navigation/LinkingConfiguration';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
+import BellProvider from './providers/BellProvider'
 
 const Stack = createStackNavigator();
 
@@ -30,13 +31,15 @@ export default function App(_) {
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
         <NavigationContainer linking={LinkingConfiguration}>
-          <Stack.Navigator>
-            <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
-              headerRight: () => (
-                <Bell onPress={() => navigation.navigate('Reminders') } />
-              ),
-            })}/>
-          </Stack.Navigator>
+          <BellProvider>
+            <Stack.Navigator>
+              <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
+                headerRight: () => (
+                  <Bell onPress={() => navigation.navigate('Reminders') } />
+                ),
+              })}/>
+            </Stack.Navigator>
+          </BellProvider>
         </NavigationContainer>
       </View>
     </PaperProvider>

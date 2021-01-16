@@ -36,7 +36,7 @@ function RemindersScreen({ theme, route, navigation }) {
         FROM Lembrete L
         INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
         INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
-        ORDER BY DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
+        ORDER BY L.Finalizado ASC, DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
         [],
         function(_, results) {
           let aux = []
@@ -59,8 +59,8 @@ function RemindersScreen({ theme, route, navigation }) {
     <Card style={{borderColor: 'gray', borderWidth: 1, flex: 1, marginTop: 5, marginBottom: 5}}>
       <Card.Content>
         <Text><Text style={{fontWeight: 'bold'}}>{"Tipo do Lembrete"}:</Text> {item.Descricao}</Text>
-        <Text><Text style={{fontWeight: 'bold', color: item.KMTriggered ? 'red' : 'black'}}>{"KM"}:</Text> {item.KM}</Text>
-        <Text><Text style={{fontWeight: 'bold', color: item.DateTriggered ? 'red' : 'black'}}>{"Data do Lembrete"}:</Text> {item.DataLembrete ? fromDatabaseToUserDate(item.DataLembrete) : ''}</Text>
+        <Text><Text style={{fontWeight: 'bold', color: item.KMTriggered && !item.Finalizado ? 'red' : 'black'}}>{"KM"}:</Text> {item.KM}</Text>
+        <Text><Text style={{fontWeight: 'bold', color: item.DateTriggered && !item.Finalizado ? 'red' : 'black'}}>{"Data do Lembrete"}:</Text> {item.DataLembrete ? fromDatabaseToUserDate(item.DataLembrete) : ''}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Observação"}:</Text> {item.Observacao}</Text>
         <Text><Text style={{fontWeight: 'bold'}}>{"Finalizado"}:</Text> {item.Finalizado ? t('yes') : t('no')}</Text>
       <Text><Text style={{fontWeight: 'bold'}}>{"Veiculo"}:</Text> {ucfirst(item.Veiculo) }</Text>

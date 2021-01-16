@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Switch, Dialog, Portal } from 'react-native-paper';
@@ -15,6 +15,7 @@ import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
+import { AppContext } from "../providers/BellProvider";
 
 function ReminderScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -35,7 +36,7 @@ function ReminderScreen({ theme, route, navigation }) {
     dateOrKm: [false, ''],
   })
   const [visibleDialog, setVisibleDialog] = useState(false)
-  
+  const { notify } = useContext(AppContext);
   const isFocused = useIsFocused()
 
   useEffect(() => {
@@ -150,7 +151,7 @@ function ReminderScreen({ theme, route, navigation }) {
           [reminderId],
           function(tx) {
             console.log(`Reminder ${reminderId} removed`)
-            global.shouldNotify = true
+            notify()
             setVisibleDialog(true)
             setLoading(false)
             clearForm()
@@ -208,7 +209,7 @@ function ReminderScreen({ theme, route, navigation }) {
           function(tx, res) {
             console.log(`Reminder ${res.insertId} inserted`)
             clearForm()
-            global.shouldNotify = true
+            notify()
             setLoading(false)
             setVisibleDialog(true)
           }, handleDatabaseError
@@ -221,10 +222,10 @@ function ReminderScreen({ theme, route, navigation }) {
            [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId, reminderId],
           function(tx) {
             console.log(`Reminder ${reminderId} updated ${km}`)
+            notify()
             setVisibleDialog(true)
             clearForm()
             setLoading(false)
-            global.shouldNotify = true
           }, handleDatabaseError
         );
       }
