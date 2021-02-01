@@ -666,7 +666,7 @@ export default class MultiSelect extends Component {
               <View
                 style={[
                   styles.subSection,
-                  { paddingTop: 10, paddingBottom: 10 },
+                  { paddingTop: 10, paddingBottom: 0 },
                   styleDropdownMenuSubsection && styleDropdownMenuSubsection
                 ]}
               >
