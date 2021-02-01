@@ -35,7 +35,9 @@ export default function App(_) {
             <Stack.Navigator>
               <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
                 headerRight: () => (
-                  <Bell onPress={() => navigation.navigate('Reminders') } />
+                  <View style={{marginRight: 20}}>
+                    <Bell onPress={() => navigation.navigate('Reminders') } />
+                  </View>
                 ),
               })}/>
             </Stack.Navigator>

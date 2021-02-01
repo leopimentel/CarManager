@@ -5,10 +5,10 @@ export const colorPack = {
   primaryDark: Colors.primary,
   light: Colors.tabBar,
   textPrimary: '#525966',
-  placeholderTextColor: Colors.tableBorderColor,
+  placeholderTextColor: Colors.arrowMultiSelect,
   danger: Colors.errorBackground,
-  borderColor: Colors.tableBorderColor,
-  backgroundColor: Colors.tableBorderColor,
+  borderColor: Colors.arrowMultiSelect,
+  backgroundColor: Colors.arrowMultiSelect,
 };
 
 export default {
@@ -24,7 +24,7 @@ export default {
   subSection: {
     backgroundColor: colorPack.light,
     paddingLeft: 0,
-    paddingRight: 20,
+    paddingRight: 15,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -36,7 +36,7 @@ export default {
     backgroundColor: colorPack.backgroundColor,
   },
   indicator: {
-    fontSize: 30,
+    fontSize: 25,
     color: colorPack.placeholderTextColor,
   },
   selectedItem: {

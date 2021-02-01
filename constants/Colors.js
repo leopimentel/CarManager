@@ -25,5 +25,6 @@ export default {
   headerStyleBackgroundColor: '#fdc82f', //#ccc #2c30fb
   loadingColor: Colors.red800,
   loadingBackgroundColor: Colors.grey100,
-  negativeColor: 'red'
+  negativeColor: 'red',
+  arrowMultiSelect: Colors.grey600,
 };

@@ -133,7 +133,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
                 ]);
                 totalSumAcc += spending.Valor
 
-                if (spending.KM) {
+                if (spending.KM && observation.length === 0 && selectedItems.length === 0) {
                   if (temp.length === 1) {
                     minKm = maxKm = spending.KM 
                   } else {

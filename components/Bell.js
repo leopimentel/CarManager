@@ -7,8 +7,8 @@ import { AppContext } from "../providers/BellProvider";
 const styles = StyleSheet.create({
     badge: {
       position: 'absolute',
-      top: 4,
-      right: 0,
+      top: 10,
+      right: 3,
     }
 });
 
@@ -21,7 +21,7 @@ function Bell(props)
     }, [])
 
     return <>
-        <IconButton size={28} color={Colors.primary} icon="bell" onPress={() => props.onPress() }/>
+        <IconButton size={34} color={Colors.primary} icon="bell" onPress={() => props.onPress() }/>
         <Badge style={styles.badge}>{notificationCount}</Badge>
     </>
 }
