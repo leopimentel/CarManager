@@ -83,7 +83,7 @@ function SpendingScreen({ theme, route, navigation }) {
               setPrice(''+abastecimento.Valor)
               setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
               setObservation(abastecimento.Observacao)
-              setSpendingType(abastecimento.CodGastoTipo)
+              setSpendingType(''+abastecimento.CodGastoTipo)
               setAutoRepair(abastecimento.Oficina)
               if (abastecimento.KM) {
                 setKm(''+abastecimento.KM)
