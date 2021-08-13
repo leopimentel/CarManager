@@ -228,7 +228,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         />}
 
         {vehicles.length > 1 &&
-        <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }
@@ -260,7 +260,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Picker selectedValue={periodView} onValueChange={itemValue => {
+            <Picker style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
               if (itemValue != periodView) {
                 setPeriodView(itemValue)
                 choosePeriod(itemValue)

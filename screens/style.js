@@ -25,7 +25,8 @@ function getStyles(theme) {
         dataWrapper: { marginTop: -1 },
         row: { height: 50, backgroundColor: Colors.tableEvenRowColor, flexDirection: 'row' },
         btn: { backgroundColor: Colors.primary,  borderRadius: 2, justifyContent: 'center' },
-        btnText: { textAlign: 'center', color: '#fff' }
+        btnText: { textAlign: 'center', color: '#fff' },
+        picker: { height: 40, flex: 1, justifyContent: 'center' }
     });
 }
 

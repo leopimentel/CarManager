@@ -269,13 +269,13 @@ function ReminderScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  
         </Picker>}
 
-        {reminderTypes && <Picker label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
+        {reminderTypes && <Picker style={styles.picker} label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
           {
             reminderTypes.map(remindType => <Picker.Item label={ucfirst(remindType.value)} value={remindType.index} key={remindType.index}/>)
           }  

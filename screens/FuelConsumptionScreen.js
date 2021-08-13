@@ -341,7 +341,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  
@@ -349,7 +349,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
-            <Picker selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
+            <Picker style={styles.picker} selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
               {
                 fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
               }
@@ -357,7 +357,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Picker selectedValue={periodView} onValueChange={itemValue => {
+            <Picker style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
               if (itemValue != periodView) {
                 setPeriodView(itemValue)
                 setPeriod(itemValue)
