@@ -26,7 +26,7 @@ function RemindersScreen({ theme, route, navigation }) {
         V.Descricao AS Veiculo,
         (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
         (
-          L.KM IS NOT NULL AND L.KM < (
+          L.KM IS NOT NULL AND L.KM <= (
               SELECT 
               MAX(COALESCE(A.KM, G.KM, 0)) 
               FROM Gasto G
