@@ -28,8 +28,8 @@
     "expo-splash-screen": "~0.11.2",
     "expo-sqlite": "~9.2.1",
     "expo-updates": "~0.8.2",
-    "i18n-js": "^3.5.1",
-    "moment": "^2.25.3",
+    "i18n-js": "^3.8.0",
+    "moment": "^2.29.1",
     "prop-types": "^15.7.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -41,7 +41,7 @@
     "react-native-table-component": "^1.2.1",
     "react-native-tiny-toast": "^1.0.7",
     "react-native-web": "~0.13.12",
-    "react-number-format": "^4.4.1"
+    "react-number-format": "^4.7.3"
   },
   "devDependencies": {
     "jest-expo": "^42.0.0"
