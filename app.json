@@ -24,7 +24,7 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 13,
+      "versionCode": 14,
       "permissions": []
     },
     "ios": {
