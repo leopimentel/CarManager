@@ -253,7 +253,7 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
         {
           vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
         }  
@@ -274,7 +274,7 @@ function SpendingScreen({ theme, route, navigation }) {
           {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View style={{ flex: 1, marginLeft: 5 }}>
-          <Picker selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
+          <Picker style={styles.picker} selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
             {
               spendingTypesMinusFueling.map(spending => <Picker.Item label={spending.value} value={spending.index} key={spending.index}/>)
             }  
