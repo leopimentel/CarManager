@@ -159,7 +159,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                   if (nextFilling) {
                     accomplishedKm = nextFilling.KM - filling.KM
                     average = accomplishedKm / nextFilling.Litros
-                    costPerKm = average / filling.Valor_Litro
+                    costPerKm = filling.Valor_Litro / average
                   }
 
                   temp.push([
