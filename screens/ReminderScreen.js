@@ -327,15 +327,15 @@ function ReminderScreen({ theme, route, navigation }) {
       </View>
 
       <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={styles.fullTank}> {t('done')} </Text>
-          <Switch
-            value={done}
-            onValueChange={() => { setDone(!done); }}
-          />
-        </View>
+        <Text style={styles.fullTank}> {t('done')} </Text>
+        <Switch
+          value={done}
+          onValueChange={() => { setDone(!done); }}
+        />
+      </View>
 
       <View style={styles.splitRow}>
-        <Button style={{ flex: 1, marginTop: 10 }} labelStyle={{fontSize: 25}}
+        <Button style={{ flex: 1, marginTop: 5 }} labelStyle={{fontSize: 25}}
         uppercase={false} compact icon="content-save" mode="contained" onPress={() => save()}>
         {t('save')}
         </Button>
@@ -343,7 +343,7 @@ function ReminderScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         {reminderId &&
-          <Button style={{ flex: 1, marginTop: 10, marginRight: 5, backgroundColor: Colors.negativeColor }} labelStyle={{fontSize: 15}}
+          <Button style={{ flex: 1, marginTop: 10, marginBottom: 30, backgroundColor: Colors.negativeColor }} labelStyle={{fontSize: 15}}
           uppercase={false} compact icon="delete" mode="contained" onPress={() => remove()}>
           {t('delete')}
           </Button>
