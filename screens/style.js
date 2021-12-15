@@ -18,7 +18,7 @@ function getStyles(theme) {
             display: 'none'
         },
         dateLabel: { color: colors.placeholder, fontSize: 12, paddingTop: 5 },
-        fullTank: { color: colors.placeholder, paddingTop: 5, marginBottom: -10 },
+        fullTank: { color: colors.placeholder, paddingTop: 5, marginBottom: 0 },
         splitRow: {flexDirection: 'row', justifyContent:'space-between'},
         header: { height: 50, backgroundColor: Colors.tableHeaderColor },
         text: { textAlign: 'center', fontWeight: '100' },
