@@ -18,7 +18,7 @@ function getStyles(theme) {
             display: 'none'
         },
         dateLabel: { color: colors.placeholder, fontSize: 12, paddingTop: 5 },
-        fullTank: { color: colors.placeholder, paddingTop: 5 },
+        fullTank: { color: colors.placeholder, paddingTop: 5, marginBottom: -10 },
         splitRow: {flexDirection: 'row', justifyContent:'space-between'},
         header: { height: 50, backgroundColor: Colors.tableHeaderColor },
         text: { textAlign: 'center', fontWeight: '100' },
@@ -26,7 +26,7 @@ function getStyles(theme) {
         row: { height: 50, backgroundColor: Colors.tableEvenRowColor, flexDirection: 'row' },
         btn: { backgroundColor: Colors.primary,  borderRadius: 2, justifyContent: 'center' },
         btnText: { textAlign: 'center', color: '#fff' },
-        picker: { height: 40, flex: 1, justifyContent: 'center' }
+        picker: { flex: 1, justifyContent: 'center' }
     });
 }
 

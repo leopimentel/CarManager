@@ -337,7 +337,7 @@ function SpendingScreen({ theme, route, navigation }) {
       </View>
 
       <View style={styles.splitRow}>
-        <Button style={{ flex: 1, marginTop: 10 }} labelStyle={{fontSize: 25}}
+        <Button style={{ flex: 1, marginTop: 10, marginBottom: 20 }} labelStyle={{fontSize: 25}}
         uppercase={false} compact icon="content-save" mode="contained" onPress={() => saveSpending()}>
         {t('save')}
         </Button>

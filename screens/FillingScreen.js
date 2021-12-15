@@ -746,7 +746,7 @@ function FillingScreen({ theme, route, navigation }) {
       }
 
       <View style={styles.splitRow}>
-        <Button style={{ flex: 1, marginTop: 10 }} labelStyle={{fontSize: 25}}
+        <Button style={{ flex: 1, marginTop: 10, marginBottom: 0 }} labelStyle={{fontSize: 25}}
         uppercase={false} compact icon="content-save" mode="contained" onPress={() => saveFilling()}>
         {t('save')}
         </Button>
@@ -754,7 +754,7 @@ function FillingScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         {codAbastecimento &&
-          <Button style={{ flex: 1, marginTop: 10, marginRight: 5, backgroundColor: Colors.negativeColor }} labelStyle={{fontSize: 15}}
+          <Button style={{ flex: 1, marginTop: 10, backgroundColor: Colors.negativeColor }} labelStyle={{fontSize: 15}}
           uppercase={false} compact icon="delete" mode="contained" onPress={() => removeFilling()}>
           {t('delete')}
           </Button>
