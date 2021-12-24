@@ -385,6 +385,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
             isNumericString={true} thousandSeparator={thousandSeparator} 
             decimalSeparator={decimalSeparator} prefix={t('currency')} 
             renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
+          {selectedItems.length === 0 && totalKM > 0 && <Text>{t('totalKM')}: <NumberFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
         </View>
       </>}/>
     </View>
