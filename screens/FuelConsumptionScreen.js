@@ -81,7 +81,30 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const isFocused = useIsFocused()
 
   const setPeriod = (index) => {
-    setFillingPeriod(choosePeriodFromIndex(index))
+    if (index === 'all') {
+      db.transaction(function(tx) {
+        tx.executeSql(`
+            SELECT MIN(A.Data_Abastecimento) AS Data_Abastecimento
+            FROM Abastecimento A
+            WHERE A.CodVeiculo = ?              
+          `,
+          [vehicleId],
+          function(_, results) {
+            if (!results.rows.item(0)['Data_Abastecimento'])
+              return setFillingPeriod(choosePeriodFromIndex(index))
+            
+            setFillingPeriod({
+              startDate: moment(results.rows.item(0)['Data_Abastecimento'], 'YYYY-MM-DD').toDate(),
+              endDate: moment().toDate()
+            })
+          }, (_, error) => {
+            console.log(error)
+          }
+        )
+      });
+    } else {
+      setFillingPeriod(choosePeriodFromIndex(index))
+    }
   }
 
   useEffect(() => {
@@ -111,6 +134,10 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
             }
 
             const carId = vehicleId ? vehicleId : cars[0].index
+
+            if (!vehicleId) {
+              setVehicleId(carId)
+            }
 
             tx.executeSql(`
               SELECT A.CodAbastecimento,

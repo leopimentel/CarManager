@@ -44,6 +44,10 @@ const timeFilter = [
   {
     index: 'previous_year',
     value: t('previousYear')
+  },
+  {
+    index: 'all',
+    value: t('all')
   }
 ]
 

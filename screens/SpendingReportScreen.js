@@ -57,7 +57,30 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const isFocused = useIsFocused()
 
   const choosePeriod = (index) => {
-    setPeriod(choosePeriodFromIndex(index))
+    if (index === 'all') {
+      db.transaction(function(tx) {
+        tx.executeSql(`
+            SELECT MIN(G.Data) AS Data
+            FROM Gasto G
+            WHERE G.CodVeiculo = ?              
+          `,
+          [vehicleId],
+          function(_, results) {
+            if (!results.rows.item(0)['Data'])
+              return setPeriod(choosePeriodFromIndex(index))
+            
+            setPeriod({
+              startDate: moment(results.rows.item(0)['Data'], 'YYYY-MM-DD').toDate(),
+              endDate: moment().toDate()
+            })
+          }, (_, error) => {
+            console.log(error)
+          }
+        )
+      });
+    } else {
+      setPeriod(choosePeriodFromIndex(index))
+    }
   }
 
   useEffect(() => {
@@ -100,6 +123,9 @@ function SpendingReportScreen({ theme, route, navigation }) {
             `,
             [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
             function(_, results) {
+              if (!vehicleId)
+                setVehicleId(cars[0].index)
+
               let totalSumAcc = 0
               let minKm = 0
               let maxKm = 0
