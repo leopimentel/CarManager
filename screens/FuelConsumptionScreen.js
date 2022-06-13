@@ -71,9 +71,9 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     {title:t('value'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
     {title:t('total'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
     {title:t('average'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
-    {title:t('fullTank'), style: {width: 50}},
-    {title:t('milleage'), style: {width: 50}},
-    {title:t('currency') + t('milleage'), style: {width: 50}},
+    {title:t('fullTank'), style: {width: 70}},
+    {title:t('milleage'), style: {width: 70}},
+    {title:t('currency') + t('milleage'), style: {width: 70}},
     //{title:t('mixed'), style: {width: 100}},
     {title:t('observation'), style: {width: 500, paddingLeft: 5}, textStyle: {textAlign: 'left'}},
   ];
