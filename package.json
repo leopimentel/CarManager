@@ -27,7 +27,7 @@
     "expo-sharing": "~10.1.0",
     "expo-splash-screen": "~0.14.1",
     "expo-sqlite": "~10.1.0",
-    "expo-updates": "~0.11.6",
+    "expo-updates": "~0.11.7",
     "i18n-js": "^3.8.0",
     "moment": "^2.29.1",
     "prop-types": "^15.7.2",
