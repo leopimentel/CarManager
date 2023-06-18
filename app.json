@@ -31,6 +31,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.webmoderna.carManager",
       "buildNumber": "1.0.12"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0ee1323a-4c0e-48df-8b65-d82c5f6134bb"
+      }
     }
   }
 }
