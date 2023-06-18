@@ -21,7 +21,7 @@ function getStyles(theme) {
         fullTank: { color: colors.placeholder, paddingTop: 5, marginBottom: 0 },
         splitRow: {flexDirection: 'row', justifyContent:'space-between'},
         header: { height: 50, backgroundColor: Colors.tableHeaderColor },
-        text: { textAlign: 'center', fontWeight: '100' },
+        text: { textAlign: 'center', fontWeight: '300' },
         dataWrapper: { marginTop: -1 },
         row: { height: 50, backgroundColor: Colors.tableEvenRowColor, flexDirection: 'row' },
         btn: { backgroundColor: Colors.primary,  borderRadius: 2, justifyContent: 'center' },

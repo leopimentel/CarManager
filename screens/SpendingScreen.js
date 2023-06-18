@@ -249,7 +249,7 @@ function SpendingScreen({ theme, route, navigation }) {
           }}
         />}
       <Button style={{ backgroundColor: Colors.tintColor }} labelStyle={{fontSize: 20}}
-        uppercase={false} compact icon="cash-usd" mode="contained" onPress={() => clearForm()}>
+        uppercase={false} compact icon="currency-usd" mode="contained" onPress={() => clearForm()}>
         {t('new')}
       </Button>
 

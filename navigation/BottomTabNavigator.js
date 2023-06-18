@@ -24,7 +24,7 @@ function BottomTabNavigator({ navigation, route }) {
       headerTintColor: Colors.headerTintColor,
       headerStyle: {
         backgroundColor: Colors.headerStyleBackgroundColor,
-        height: 75
+        //height: 100
       }
     });
   }, [navigation, route]);
