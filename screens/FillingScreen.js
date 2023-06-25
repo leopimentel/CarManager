@@ -133,18 +133,22 @@ function FillingScreen({ theme, route, navigation }) {
   useEffect(() => {
     db.transaction(function(tx) {
       tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
         [],
         function(_, results) {
           let cars = []
-          if (results.rows.length) {
+          if (results.rows.length) {            
             for (let i = 0; i < results.rows.length; i++) {
               cars.push({
                 index: results.rows.item(i).CodVeiculo,
                 value: results.rows.item(i).Descricao
               });
+              console.log(results.rows.item(i))
             }            
           }
+          setVehicleId(cars[0].index)
           setVehicles(cars)
         }
       )
@@ -209,7 +213,9 @@ function FillingScreen({ theme, route, navigation }) {
     } else {
       db.transaction(function(tx) {
         tx.executeSql(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+          `SELECT V.CodVeiculo, V.Descricao, VP.CodVeiculo FROM Veiculo V
+           LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+           ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
           [],
           function(_, results) {
             if (results.rows.length) {
@@ -534,7 +540,15 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue =>  {
+          setVehicleId(itemValue)
+          db.transaction(function(tx) {
+            tx.executeSql(
+              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
+            )
+          })
+          console.log("Atualizou", itemValue)
+        }}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  

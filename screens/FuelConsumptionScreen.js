@@ -35,6 +35,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [totalKM, setTotalKM] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
+  console.log("FuelConsumptionScreen begin", vehicleId)
   const [greatestAverage, setGreatestAverage] = useState(0);
   const [lowestAverage, setLowestAverage] = useState(0);
   const [greatestAverageFullTank, setGreatestAverageFullTank] = useState(0);
@@ -81,6 +82,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const isFocused = useIsFocused()
 
   const setPeriod = (index) => {
+    console.log("at setperiod", vehicleId)
     if (index === 'all') {
       db.transaction(function(tx) {
         tx.executeSql(`
@@ -108,11 +110,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   }
 
   useEffect(() => {
-    setVehicleId(route.params?.CodVeiculo)
-  }, [route.params?.CodVeiculo])
-
-  useEffect(() => {
     if (!isFocused) {
+      console.log("FuelConsumptionScreen it is not focused", vehicleId)
       return
     }
 
@@ -120,24 +119,25 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
 
     db.transaction(function(tx) {
       tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
         [],
-        function(_, results) {
+        function(_, results) {          
           let cars = []
 
-          if (results.rows.length) {
+          if (results.rows.length) {            
             for (let i = 0; i < results.rows.length; i++) {
               cars.push({
                 index: results.rows.item(i).CodVeiculo,
                 value: results.rows.item(i).Descricao
               });
             }
+            console.log("FuelConsumptionScreen is focused VehicleId", vehicleId, "Cars[0]", cars[0].index)
+            const carId = cars[0].index
+            console.log("new VehicleId", carId)
 
-            const carId = vehicleId ? vehicleId : cars[0].index
-
-            if (!vehicleId) {
-              setVehicleId(carId)
-            }
+            setVehicleId(carId)
 
             tx.executeSql(`
               SELECT A.CodAbastecimento,
@@ -368,7 +368,16 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+          console.log("VehicleId will be changed to ", itemValue)
+          setVehicleId(itemValue)
+          db.transaction(function(tx) {
+            tx.executeSql(
+              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
+            )
+          })
+          console.log("VehicleId Updated to", itemValue)
+        }}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }  

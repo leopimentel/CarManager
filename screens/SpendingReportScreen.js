@@ -83,16 +83,14 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
   }
 
-  useEffect(() => {
-    setVehicleId(route.params?.CodVeiculo)
-  }, [route.params?.CodVeiculo])
-
   const search = useCallback(()=>{
     setLoading(true)
     
     db.transaction(function(tx) {
       tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V        
+        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
         [],
         function(_, results) {
           let cars = []
@@ -121,10 +119,9 @@ function SpendingReportScreen({ theme, route, navigation }) {
               AND G.Data >= ? AND G.Data <= ?
               ORDER BY G.Data DESC, G.KM DESC
             `,
-            [vehicleId ? vehicleId : cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
+            [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
             function(_, results) {
-              if (!vehicleId)
-                setVehicleId(cars[0].index)
+              setVehicleId(cars[0].index)
 
               let totalSumAcc = 0
               let minKm = 0
@@ -254,7 +251,15 @@ function SpendingReportScreen({ theme, route, navigation }) {
         />}
 
         {vehicles.length > 1 &&
-        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+          setVehicleId(itemValue)
+          db.transaction(function(tx) {
+            tx.executeSql(
+              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
+            )
+          })
+          console.log("VehicleId updated to", itemValue)
+        }}>
           {
             vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
           }

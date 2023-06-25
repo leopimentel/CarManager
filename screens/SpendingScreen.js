@@ -32,6 +32,7 @@ function SpendingScreen({ theme, route, navigation }) {
   const [codGasto, setCodGasto] = useState()
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
+  console.log("SpendingScreen, vehicleid", vehicleId)
   const [loading, setLoading] = useState(false)
   const [formErrors, setFormErrors] = useState({
     price: [false, ''],
@@ -40,9 +41,13 @@ function SpendingScreen({ theme, route, navigation }) {
   const isFocused = useIsFocused()
 
   useEffect(() => {
+    console.log("isFocused", isFocused)
+    console.log("vehicleid", vehicleId)
     db.transaction(function(tx) {
       tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
         [],
         function(_, results) {
           let cars = []
@@ -54,7 +59,9 @@ function SpendingScreen({ theme, route, navigation }) {
               });
             }
           }
-          setVehicles(cars)
+          console.log(cars)
+          setVehicleId(cars[0].index)
+          setVehicles(cars)          
         }
       )
     })
@@ -62,6 +69,7 @@ function SpendingScreen({ theme, route, navigation }) {
 
   useEffect(() => {
     if (route.params && route.params.CodGasto) {
+      console.log("codgasto, vehicleId", vehicleId)
       setLoading(true)
       db.transaction(function(tx) {
         tx.executeSql(
@@ -98,9 +106,11 @@ function SpendingScreen({ theme, route, navigation }) {
       })
     } else {
       db.transaction(function(tx) {
-
+      console.log("neesse else")
       tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+        ORDER BY VP.CodVeiculo IS NOT NULL`,
         [],
         function(_, results) {
           if (results.rows.length) {
@@ -253,7 +263,15 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => setVehicleId(itemValue)}>
+      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+        setVehicleId(itemValue)
+        db.transaction(function(tx) {
+          tx.executeSql(
+            `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
+          )
+        })
+        console.log("VehicleId updated to", itemValue)
+      }}>
         {
           vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
         }  

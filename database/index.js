@@ -156,6 +156,16 @@ const migrateUp = async (useMock = __DEV__) => {
             );
 
             ${testData3}
+            `.split(';').map(statement => statement.trim()).filter(Boolean),
+        4: `
+            create table if not exists VeiculoPrincipal
+            (
+                CodVeiculo INTEGER
+            );
+
+            insert into VeiculoPrincipal 
+            select CodVeiculo from veiculo limit 1;
+
             `.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 
@@ -213,6 +223,8 @@ const dropTables = () => {
         DROP TABLE IF EXISTS GastoTipo;
 
         DROP TABLE IF EXISTS Veiculo;
+
+        DROP TABLE IF EXISTS VeiculoPrincipal;
 
         DROP TABLE IF EXISTS Lembrete;
 
