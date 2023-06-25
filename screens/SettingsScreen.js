@@ -242,7 +242,7 @@ function SettingsScreen({ theme }) {
       </Portal>
 
       <ScrollView>
-        <Caption style={{textAlign: 'right'}}>{t('version')}: {Constants.manifest.version}</Caption>
+        <Caption style={{textAlign: 'right'}}>{t('version')}: {Constants.expoConfig.version}</Caption>
         <List.Section>
           <List.Subheader>{t('backupRestore')}</List.Subheader>
           <List.Item
