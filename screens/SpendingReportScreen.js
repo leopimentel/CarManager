@@ -120,9 +120,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               ORDER BY G.Data DESC, G.KM DESC
             `,
             [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
-            function(_, results) {
-              setVehicleId(cars[0].index)
-
+            function(_, results) {              
               let totalSumAcc = 0
               let minKm = 0
               let maxKm = 0
@@ -178,7 +176,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               setLoading(false)
             })
           }
-
+          setVehicleId(cars[0].index)
           setVehicles(cars)
         }
       )
