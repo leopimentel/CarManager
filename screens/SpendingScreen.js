@@ -110,7 +110,7 @@ function SpendingScreen({ theme, route, navigation }) {
       tx.executeSql(
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
         LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL`,
+        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
         [],
         function(_, results) {
           if (results.rows.length) {
