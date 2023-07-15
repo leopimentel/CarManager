@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.25",
+    "version": "1.0.28",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -25,7 +25,7 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 26,
+      "versionCode": 29,
       "permissions": []
     },
     "ios": {
@@ -40,6 +40,14 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "plugins": [
+      [
+        "expo-updates",
+        {
+          "username": "leopimentel"
+        }
+      ]
+    ]
   }
 }

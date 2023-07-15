@@ -18,6 +18,7 @@ import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import MultiSelect from '../components/react-native-multiple-select';
+import { exportTableToCSV } from '../utils/csv'
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -49,6 +50,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
   ];
   const [selectedItems, setSelectedItems] = useState([]);
   const [totalKM, setTotalKM] = useState(0)
+
+  const exportTable = async () => await exportTableToCSV(tableHead.map(row => row.title).slice(1), tableData.map(row => row.slice(1)), 'SpendingReport.csv')
 
   const onSelectedItemsChange = selectedItems => {
     setSelectedItems(selectedItems);
@@ -351,6 +354,10 @@ function SpendingReportScreen({ theme, route, navigation }) {
               icon={() => <MaterialCommunityIcons name='view-dashboard-outline' size={35} style={{color: mode === CARD_MODE ? 'green': 'black'}}/>}
               onPress={() => setMode(CARD_MODE)}
             >
+            </Button>            
+            <Button style={{ flex: 1, marginTop: 0, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+          uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
+          {t('export_sheet')}
             </Button>
         </View>
 

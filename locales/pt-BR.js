@@ -56,6 +56,7 @@ export default {
   close: 'Fechar',
   edit: 'Alterar',
   delete: 'Remover',
+  export_sheet: 'Exportar planilha',
   isTwoFuels: 'Dois combustíveis',
   clearFields: 'Limpar campos', 
   mine: 'Meu',

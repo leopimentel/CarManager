@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { withTheme, TextInput } from 'react-native-paper';
+import { withTheme, TextInput, Button } from 'react-native-paper';
 import { fuels as f, timeFilter, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { getStyles, toastError } from './style'
 import { t } from '../locales'
@@ -13,6 +13,7 @@ import { db } from '../database'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { ucfirst } from '../utils/string'
+import { exportTableToCSV } from '../utils/csv'
 import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
@@ -320,6 +321,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     </TouchableOpacity>
   );
 
+  const exportTable = async () => await exportTableToCSV(tableHead.map(row => row.title).slice(1), tableData.map(row => row.slice(1)), 'FuelConsumption.csv')
+
   const cellAverage = (data, index) => {
     var notFullTank = tableData[index][8] === t('no') || (index && tableData[index-1][8] === t('no'))
     return (
@@ -430,6 +433,15 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                 onPress={() => {setShowEndFillingDate(true)}}
               />
             </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.splitRow}>
+        <View style={{ flex: 1 }}>
+          <Button style={{ flex: 1, marginTop: 5, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+        uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
+        {t('export_sheet')}
+        </Button>
           </View>
         </View>
 
