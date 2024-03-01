@@ -51,9 +51,9 @@ function SettingsScreen({ theme }) {
     try {
       const uploadedFile = await DocumentPicker.getDocumentAsync()
 
-      if (uploadedFile.type === 'success' && uploadedFile.name === databaseName) {
+      if (uploadedFile.canceled === false && uploadedFile.assets[0].name === databaseName) {
         await FileSystem.copyAsync({
-          from: uploadedFile.uri,
+          from: uploadedFile.assets[0].uri,
           to: databaseFilePath
         })
 
@@ -61,7 +61,7 @@ function SettingsScreen({ theme }) {
 
         Alert.alert(t('successRestore'));
       } else {
-        console.log('Fail to upload file', uploadedFile, databaseName)
+        console.log(`Fail to upload file ${uploadedFile.canceled}`, uploadedFile, databaseName)
 
         setLoading(false)
 
