@@ -7,7 +7,7 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
-import { fuels as f, spendingTypes } from '../constants/fuel'
+import { fuels as f, spendingTypes, decimalSeparator, thousandSeparator } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
@@ -46,6 +46,7 @@ function FillingScreen({ theme, route, navigation }) {
   const [vehicleId, setVehicleId] = useState();
   const fuels = f;
   const [loading, setLoading] = useState(false)
+  const [discount, setDiscount] = useState()
   const [formErrors, setFormErrors] = useState({
     totalFuel: [false, ''],
     pricePerUnit: [false, ''],
@@ -54,6 +55,7 @@ function FillingScreen({ theme, route, navigation }) {
     totalFuel2: [false, ''],
     pricePerUnit2: [false, ''],
     litters2: [false, ''],
+    discount: [false, ''],
   })
   
   const isFocused = useIsFocused()
@@ -162,7 +164,7 @@ function FillingScreen({ theme, route, navigation }) {
         tx.executeSql(
           `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
            AC.Codigo, AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
-           CAST(AC.Litros AS TEXT) AS Litros, G.CodGasto, A.CodVeiculo
+           CAST(AC.Litros AS TEXT) AS Litros, CAST(AC.Desconto AS TEXT) AS Desconto, G.CodGasto, A.CodVeiculo
            FROM Abastecimento A
            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
            INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
@@ -186,6 +188,7 @@ function FillingScreen({ theme, route, navigation }) {
               setCodAbastecimentoCombustivel(abastecimento.Codigo)
               setVehicleId(abastecimento.CodVeiculo)
               setLitters(parseFloat(abastecimento.Litros).toFixed(3).toString())
+              setDiscount(abastecimento.Discount)
 
               if (results.rows.length === 2) {
                 const abastecimento2 = results.rows.item(1)
@@ -325,6 +328,7 @@ function FillingScreen({ theme, route, navigation }) {
       pricePerUnit2: [false, ''],
       litters: [false, ''],
       litters2: [false, ''],
+      discount: [false, ''],
     })
   }
 
@@ -388,13 +392,13 @@ function FillingScreen({ theme, route, navigation }) {
           function(tx, res) {
             const insertId = res.insertId
             tx.executeSql(
-              'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
-              [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel],
+              'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total, Desconto) VALUES (?, ?, ?, ?, ?, ?)',
+              [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel, discount],
               function(tx, res) {
                 const codAbastecimentoCombustivelInserted = res.insertId
                 tx.executeSql(
                   `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, insertId, codAbastecimentoCombustivelInserted, km],
+                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel - discount, observation, insertId, codAbastecimentoCombustivelInserted, km],
                   function(tx) {
                     if (!isTwoFuelTypes) {
                       console.log(`Filling ${insertId} inserted`)
@@ -435,10 +439,10 @@ function FillingScreen({ theme, route, navigation }) {
           function(tx) {
             tx.executeSql(
               `UPDATE Abastecimento_Combustivel
-               SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?
+               SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?, Desconto = ?
                WHERE Codigo = ?
                `,
-              [fuelType, litters, pricePerUnit, totalFuel, codAbastecimentoCombustivel],
+              [fuelType, litters, pricePerUnit, totalFuel, discount, codAbastecimentoCombustivel],
               function(tx) {
                 tx.executeSql(
                   `UPDATE Gasto
@@ -672,6 +676,17 @@ function FillingScreen({ theme, route, navigation }) {
             {formErrors.litters[1]}
           </HelperText>}
         </View>
+      </View>
+
+      <View style={styles.splitRow}>
+        <TextInput label={t('discount')}
+          value={discount}
+          onChangeText={text => setDiscount(text)}
+          mode='outlined'
+          placeholder={t('discount')}
+          style={{flex: 1}}
+        />
+        <Text>{t('totalWithDiscount')}: <NumberFormat value={totalFuel + totalFuel2 - discount} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
       </View>
 
       <View style={styles.splitRow}>

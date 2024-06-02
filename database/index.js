@@ -166,6 +166,10 @@ const migrateUp = async (useMock = __DEV__) => {
             insert into VeiculoPrincipal 
             select CodVeiculo from veiculo limit 1;
 
+            `.split(';').map(statement => statement.trim()).filter(Boolean),
+        5: `
+            ALTER TABLE Abastecimento_Combustivel ADD COLUMN Desconto FLOAT default 0;
+
             `.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 

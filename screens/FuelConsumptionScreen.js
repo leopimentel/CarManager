@@ -72,6 +72,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     {title:'KM', style: {width: 65}},
     {title:t('value'), style: {width: 50}, textStyle: {fontWeight: 'bold'}},
     {title:t('total'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
+    {title:t('discount'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
+    {title:t('totalWithDiscount'), style: {width: 70}, textStyle: {fontWeight: 'bold'}},
     {title:t('average'), style: {width: 60}, textStyle: {fontWeight: 'bold'}},
     {title:t('fullTank'), style: {width: 70}},
     {title:t('milleage'), style: {width: 70}},
@@ -149,7 +151,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
               GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
               SUM(AC.Litros) AS Litros,
               (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
-              SUM(AC.Total) AS Total
+              SUM(AC.Total) AS Total,
+              SUM(AC.Discount) As Discount
               FROM Abastecimento A
               INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
               WHERE A.CodVeiculo = ?
@@ -198,6 +201,8 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
                     filling.Valor_Litro.toFixed(2),
                     filling.Total.toFixed(2),
+                    filling.Discount.toFixed(2),
+                    (filling.Total - filling.Discount).toFixed(2),
                     average ? average.toFixed(2) : '',
                     filling.TanqueCheio ? t('yes'): t('no'),
                     accomplishedKm,
@@ -206,7 +211,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
                     filling.Observacao,
                   ]);
 
-                  totalSumAcc += filling.Total
+                  totalSumAcc += filling.Total - filling.Discount
                   if (average) {
                     totalAverageAcc += average
                     totalCount++
