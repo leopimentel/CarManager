@@ -4,19 +4,17 @@ import * as FileSystem from 'expo-file-system'
 const databaseName = 'carManager.db';
 
 const openDatabase = () => {
-    db = SQLite.openDatabase(databaseName);
+    db = SQLite.openDatabaseSync(databaseName);
     return db
 }
 
-let db = openDatabase()
+let db = openDatabase();
 
-const closeDatabase = () => {
-    db._db.close();
-}
+const closeDatabase = () => db.closeSync();
 
 const databaseFilePath = `${FileSystem.documentDirectory}/SQLite/${databaseName}`
 
-const migrateUp = async (useMock = __DEV__) => {
+const migrateUp = (useMock = __DEV__) => {
     let testData = ''
     let dropTablesStr = ''
     let testData3 = ''
@@ -173,26 +171,17 @@ const migrateUp = async (useMock = __DEV__) => {
             `.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 
-    const migrateVersions = (tx, versionsToMigrate) => {
+    const migrateVersions = (versionsToMigrate) => {
         versionsToMigrate.sort().map((version, idx) => {
-            let success = true
             for (let j = 0; j < migrations[version].length; j++) {
-                tx.executeSql(migrations[version][j], [], () => {
-                    console.log('statement success', migrations[version][j])
-                }, (_, error) => {
-                    console.log('statement error', migrations[version][j], error)
-                    success = false
-                    return true
-                });
+                db.execSync(migrations[version][j], []);
+                console.log('statement success', migrations[version][j])
             }
 
-            if (success && idx === versionsToMigrate.length - 1) {
+            if (idx === versionsToMigrate.length - 1) {
                 console.log('registering new version', version)
-                tx.executeSql('INSERT OR IGNORE INTO Versao (Versao) VALUES (?)', [version], (_, rows) => {
-                    console.log('Database version updated to ' + version, rows.insertId)
-                }, (_, error) => {
-                    console.log('Failed to update database version to ', version, error)
-                });
+                let row = db.runSync('INSERT OR IGNORE INTO Versao (Versao) VALUES (?)', [version])
+                console.log('Database version updated to ' + version, row.lastInsertRowId)
             }
         })
         if (!versionsToMigrate.length) {
@@ -200,16 +189,13 @@ const migrateUp = async (useMock = __DEV__) => {
         }
     }
 
-    db.transaction(tx => {
-        tx.executeSql('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', [], (_, results) => {
-            const dbVersion = useMock ? 0 : results.rows.item(0).Versao
-            console.log("Current database version is: " + dbVersion);
-            const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
-            migrateVersions(tx, versionsToMigrate)
-        }, () => {
-            const versionsToMigrate = Object.keys(migrations)
-            migrateVersions(tx, versionsToMigrate)
-        });
+    db.withTransactionSync(() => {
+        const results = db.getFirstSync('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', []);
+
+        const dbVersion = useMock ? 0 : results.Versao
+        console.log("Current database version is: " + dbVersion);
+        const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
+        migrateVersions(versionsToMigrate)
     })
 }
 const dropTables = () => {

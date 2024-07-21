@@ -22,36 +22,39 @@ function SettingsScreen({ theme }) {
 
   useEffect(() => {
     setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-        [],
-        function(_, results) {
-          if (results.rows.length) {
-            let cars = []
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
-            }
-            setVehicles(cars)
-          }
-          setLoading(false)
+    async function fetchData() {
+      let results = await db.getAllAsync(
+          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+          [])
+          
+      if (results.length) {
+        let cars = []
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
         }
-      )
-    })
+        setVehicles(cars)
+      }
+      setLoading(false)
+    }
+    fetchData()
   }, [])
 
   const importDatabase = async () => {
     setLoading(true)
-
-    closeDatabase()
+    try{
+      closeDatabase()
+    }catch(e){
+      console.log(e)
+    }
 
     try {
+      console.log("rararara")
       const uploadedFile = await DocumentPicker.getDocumentAsync()
 
-      if (uploadedFile.canceled === false && uploadedFile.assets[0].name === databaseName) {
+      if (uploadedFile.canceled === false) {
         await FileSystem.copyAsync({
           from: uploadedFile.assets[0].uri,
           to: databaseFilePath
@@ -80,78 +83,67 @@ function SettingsScreen({ theme }) {
     openDatabase()
   }
 
-  const insertVehicle = () => {
+  const insertVehicle = async () => {
     setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
+    let res = await db.runAsync(
         `INSERT INTO Veiculo (Descricao) VALUES (?)`,
-        [description],
-        function(tx, res) {
-          setVehicleId()
-          setDescription()
-          setVisibleDialog(false)
+        [description])
 
-          tx.executeSql(
-            `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-            [],
-            function(_, results) {
-              if (results.rows.length) {
-                let cars = []
-                for (let i = 0; i < results.rows.length; i++) {
-                  cars.push({
-                    index: results.rows.item(i).CodVeiculo,
-                    value: results.rows.item(i).Descricao
-                  });
-                }
-                setVehicles(cars)
-              }
-              setLoading(false)
-            }
-          )
-        }
-      )
-    })
+    setVehicleId()
+    setDescription()
+    setVisibleDialog(false)
+
+    let results = await db.getAllAsync(
+      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+      [])
+
+    if (results.length) {
+      let cars = []
+      for (const row of results) {
+        cars.push({
+          index: row.CodVeiculo,
+          value: row.Descricao
+        });
+      }
+      setVehicles(cars)
+    }
+    setLoading(false)
   }
 
   const deleteVehicle = () => {
-    const confirm = () => {
+    const confirm = async () => {
       setLoading(true) 
-      db.transaction(function(tx) {
-        tx.executeSql(
+      await db.withTransactionAsync(async function(tx) {
+        await db.runAsync(
           `DELETE FROM Veiculo WHERE CodVeiculo = ?`,
-          [vehicleId],
-          function(tx) {
-            console.log('Vehicle deleted')
-            setVehicleId()
-            setDescription()
-            setVisibleDialog(false)
-            tx.executeSql(`DELETE FROM Gasto WHERE CodVeiculo = ?`, [vehicleId])
-            tx.executeSql(`DELETE FROM Abastecimento_Combustivel 
-              WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`, [vehicleId]
-            )
-            tx.executeSql(`DELETE FROM Abastecimento WHERE CodVeiculo = ?`, [vehicleId])
-            
-            tx.executeSql(
-              `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-              [],
-              function(_, results) {
-                let cars = []
-                  
-                if (results.rows.length) {
-                  for (let i = 0; i < results.rows.length; i++) {
-                    cars.push({
-                      index: results.rows.item(i).CodVeiculo,
-                      value: results.rows.item(i).Descricao
-                    });
-                  }
-                  
-                }
-                setLoading(false)
-                setVehicles(cars)
-              }
-            )
-          }
+          [vehicleId])
+        console.log('Vehicle deleted')
+        setVehicleId()
+        setDescription()
+        setVisibleDialog(false)
+        await db.runAsync(`DELETE FROM Gasto WHERE CodVeiculo = ?`, [vehicleId])
+        await db.runAsync(`DELETE FROM Abastecimento_Combustivel 
+          WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`, [vehicleId]
         )
+        await db.runAsync(`DELETE FROM Abastecimento WHERE CodVeiculo = ?`, [vehicleId])
+        
+        let results = await db.getAllAsync(
+          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+          [])
+          
+        let cars = []
+          
+        if (results.length) {
+          for (const row of results) {
+            cars.push({
+              index: row.CodVeiculo,
+              value: row.Descricao
+            });
+          }
+          
+        }
+        setLoading(false)
+        setVehicles(cars)
       }) 
     }
 
@@ -167,37 +159,31 @@ function SettingsScreen({ theme }) {
     );
   }
 
-  const updateVehicle = () => {
+  const updateVehicle = async () => {
     setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
-        [description, vehicleId],
-        function(tx, res) {
-          setVehicleId()
-          setDescription()
-          setVisibleDialog(false)
+    await db.runAsync(
+      `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
+      [description, vehicleId])
+      
+    setVehicleId()
+    setDescription()
+    setVisibleDialog(false)
 
-          tx.executeSql(
-            `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-            [],
-            function(_, results) {
-              if (results.rows.length) {
-                let cars = []
-                for (let i = 0; i < results.rows.length; i++) {
-                  cars.push({
-                    index: results.rows.item(i).CodVeiculo,
-                    value: results.rows.item(i).Descricao
-                  });
-                }
-                setVehicles(cars)
-              }
-              setLoading(false)
-            }
-          )
-        }
-      )
-    })
+    let results = await db.getAllAsync(
+      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
+      [])
+
+    if (results.length) {
+      let cars = []
+      for (const row of results) {
+        cars.push({
+          index: row.CodVeiculo,
+          value: row.Descricao
+        });
+      }
+      setVehicles(cars)
+    }
+    setLoading(false)
   }
 
   if (loading) {

@@ -43,107 +43,97 @@ function SpendingScreen({ theme, route, navigation }) {
   useEffect(() => {
     console.log("isFocused", isFocused)
     console.log("vehicleid", vehicleId)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [],
-        function(_, results) {
-          let cars = []
-          if (results.rows.length) {
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
-            }
-          }
-          console.log(cars)
-          setVehicleId(cars[0].index)
-          setVehicles(cars)          
+    async function fetchData() {
+      let results = await db.getAllAsync(
+          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
+          [])
+      
+      let cars = []
+      if (results.length) {
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
         }
-      )
-    })
+      }
+      console.log(cars)
+      setVehicleId(cars[0].index)
+      setVehicles(cars)
+    }
+    fetchData()
   }, [isFocused])
 
   useEffect(() => {
-    if (route.params && route.params.CodGasto) {
-      console.log("codgasto, vehicleId", vehicleId)
-      setLoading(true)
-      db.transaction(function(tx) {
-        tx.executeSql(
-          `SELECT
-           G.Data,
-           G.CodGastoTipo,
-           G.Valor,
-           G.Observacao,
-           G.KM,
-           G.CodVeiculo,
-           G.Oficina
-           FROM Gasto G
-           WHERE G.CodGasto = ?`,
-          [route.params.CodGasto],
-          function(_, results) {
-            if (results.rows.length) {
-              const abastecimento = results.rows.item(0)
-              console.log(abastecimento)
-              setPrice(''+abastecimento.Valor)
-              setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
-              setObservation(abastecimento.Observacao)
-              setSpendingType(''+abastecimento.CodGastoTipo)
-              setAutoRepair(abastecimento.Oficina)
-              if (abastecimento.KM) {
-                setKm(''+abastecimento.KM)
-              }
-              setCodGasto(route.params.CodGasto)
-              setVehicleId(abastecimento.CodVeiculo)
-            }
-
-            setLoading(false)
+    async function fetchData() {
+      if (route.params && route.params.CodGasto) {
+        console.log("codgasto, vehicleId", vehicleId)
+        setLoading(true)
+        let results = await db.getAllAsync(
+            `SELECT
+             G.Data,
+             G.CodGastoTipo,
+             G.Valor,
+             G.Observacao,
+             G.KM,
+             G.CodVeiculo,
+             G.Oficina
+             FROM Gasto G
+             WHERE G.CodGasto = ?`,
+            [route.params.CodGasto])
+        
+        if (results.length) {
+          const abastecimento = results[0]
+          console.log(abastecimento)
+          setPrice(''+abastecimento.Valor)
+          setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
+          setObservation(abastecimento.Observacao)
+          setSpendingType(''+abastecimento.CodGastoTipo)
+          setAutoRepair(abastecimento.Oficina)
+          if (abastecimento.KM) {
+            setKm(''+abastecimento.KM)
           }
-        )
-      })
-    } else {
-      db.transaction(function(tx) {
-      console.log("neesse else")
-      tx.executeSql(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [],
-        function(_, results) {
-          if (results.rows.length) {
-            let cars = []
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
-            }
-            setVehicleId(cars[0].index)
-          }
+          setCodGasto(route.params.CodGasto)
+          setVehicleId(abastecimento.CodVeiculo)
         }
-      )
-      })
+
+        setLoading(false)
+      } else {
+        console.log("neesse else")
+        results = await db.getAllAsync(
+          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
+          [])
+          
+        if (results.length) {
+          let cars = []
+          for (const row of results) {
+            cars.push({
+              index: row.CodVeiculo,
+              value: row.Descricao
+            });
+          }
+          setVehicleId(cars[0].index)
+        }
+      }
     }
+    fetchData()
   }, [route.params])
 
   const removeSpending = () => {
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
       setLoading(true)
-      db.transaction(function(tx) {
-        tx.executeSql(
+      await db.runAsync(
           `DELETE FROM Gasto WHERE CodGasto = ?`,
-          [codGasto],
-          function() {
-            console.log(`Spending ${codGasto} removed`)
-            setVisibleDialog(true)
-            setLoading(false)
-            clearForm()
-          }, handleDatabaseError
-        )
-      })
+          [codGasto])
+          
+      console.log(`Spending ${codGasto} removed`)
+      setVisibleDialog(true)
+      setLoading(false)
+      clearForm()
     }
 
     Alert.alert(
@@ -158,12 +148,6 @@ function SpendingScreen({ theme, route, navigation }) {
     );
   }
 
-  const handleDatabaseError = function (_, error) {
-    console.log(error)
-    setLoading(false)
-    return true
-  }
-
   const clearForm = () => {
     setDate(new Date())
     setPrice(null)
@@ -176,7 +160,7 @@ function SpendingScreen({ theme, route, navigation }) {
     setAutoRepair(null)
   }
 
-  const saveSpending = () => {
+  const saveSpending = async () => {
     if (!price || price < 0) {
       setFormErrors({...formErrors, price: [true, t('errorMessage.totalFuel')]})
       return false
@@ -184,32 +168,24 @@ function SpendingScreen({ theme, route, navigation }) {
 
     const dateSqlLite = fromUserDateToDatabase(date)
     setLoading(true)
-    db.transaction(function(tx) {
-      if (!codGasto) {
-        tx.executeSql(
-            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair],
-            function(_, res) {
-              setLoading(false)
-              setVisibleDialog(true)
-              setCodGasto(res.insertId)
-              console.log(`Spending ${res.insertId} inserted `)
-            }, handleDatabaseError
-        );
-      } else {
-        tx.executeSql(
-          `UPDATE Gasto
-            SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
-            WHERE CodGasto = ?`,
-          [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto],
-          function() {
-            console.log(`Spending ${codGasto} updated`)
+    if (!codGasto) {
+      let res = await db.runAsync(
+          `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair])
             setLoading(false)
             setVisibleDialog(true)
-          }, handleDatabaseError
-        )
-     }
-    });
+            setCodGasto(res.lastInsertRowId)
+            console.log(`Spending ${res.lastInsertRowId} inserted `)
+    } else {
+      await db.runAsync(
+        `UPDATE Gasto
+          SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
+          WHERE CodGasto = ?`,
+        [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto])
+      console.log(`Spending ${codGasto} updated`)
+      setLoading(false)
+      setVisibleDialog(true)
+    }
   }
 
   if (loading) {
@@ -263,13 +239,11 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
         setVehicleId(itemValue)
-        db.transaction(function(tx) {
-          tx.executeSql(
+        await db.runAsync(
             `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-          )
-        })
+        )
         console.log("VehicleId updated to", itemValue)
       }}>
         {

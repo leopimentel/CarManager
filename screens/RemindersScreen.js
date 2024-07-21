@@ -19,40 +19,36 @@ function RemindersScreen({ theme, route, navigation }) {
 
   useEffect(() => {
     setLoading(true)
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `SELECT L.CodLembrete, L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
-        L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto, LT.Descricao,
-        V.Descricao AS Veiculo,
-        (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
-        (
-          L.KM IS NOT NULL AND L.KM <= (
-              SELECT 
-              MAX(COALESCE(A.KM, G.KM, 0)) 
-              FROM Gasto G
-              LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
-          )
-      ) AS KMTriggered
-        FROM Lembrete L
-        INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
-        INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
-        ORDER BY L.Finalizado ASC, DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
-        [],
-        function(_, results) {
-          let aux = []
-          if (results.rows.length) {
-            for (let i = 0; i < results.rows.length; i++) {
-              aux.push(results.rows.item(i));
-            }            
-          }
-          setReminders(aux)
-          setLoading(false)
-        },
-        function(error) {
-          console.error(error)
-        }
-      )
-    })
+    async function fetchData() {
+      let results = await db.getAllAsync(
+          `SELECT L.CodLembrete, L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
+          L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto, LT.Descricao,
+          V.Descricao AS Veiculo,
+          (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
+          (
+            L.KM IS NOT NULL AND L.KM <= (
+                SELECT 
+                MAX(COALESCE(A.KM, G.KM, 0)) 
+                FROM Gasto G
+                LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+            )
+        ) AS KMTriggered
+          FROM Lembrete L
+          INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
+          INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
+          ORDER BY L.Finalizado ASC, DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
+          [])
+          
+      let aux = []
+      if (results.length) {
+        for (const row of results) {
+          aux.push(row);
+        }            
+      }
+      setReminders(aux)
+      setLoading(false)
+    }
+    fetchData()
   }, [isFocused])
 
   const renderReminder = ({item}) => (

@@ -84,29 +84,23 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
 
   const isFocused = useIsFocused()
 
-  const setPeriod = (index) => {
+  const setPeriod = async (index) => {
     console.log("at setperiod", vehicleId)
     if (index === 'all') {
-      db.transaction(function(tx) {
-        tx.executeSql(`
+      let row = await db.getFirstAsync(`
             SELECT MIN(A.Data_Abastecimento) AS Data_Abastecimento
             FROM Abastecimento A
             WHERE A.CodVeiculo = ?              
           `,
-          [vehicleId],
-          function(_, results) {
-            if (!results.rows.item(0)['Data_Abastecimento'])
-              return setFillingPeriod(choosePeriodFromIndex(index))
+          [vehicleId])
+          
+      if (!row || !row['Data_Abastecimento'])
+        return setFillingPeriod(choosePeriodFromIndex(index))
             
-            setFillingPeriod({
-              startDate: moment(results.rows.item(0)['Data_Abastecimento'], 'YYYY-MM-DD').toDate(),
-              endDate: moment().toDate()
-            })
-          }, (_, error) => {
-            console.log(error)
-          }
-        )
-      });
+      setFillingPeriod({
+        startDate: moment(row['Data_Abastecimento'], 'YYYY-MM-DD').toDate(),
+        endDate: moment().toDate()
+      })
     } else {
       setFillingPeriod(choosePeriodFromIndex(index))
     }
@@ -120,198 +114,187 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
 
     setLoading(true)
 
-    db.transaction(function(tx) {
-      tx.executeSql(
+    async function fetchData(){
+      let results = await db.getAllAsync(
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
         LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
         ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [],
-        function(_, results) {          
-          let cars = []
+        [])
+      let cars = []
+console.log("sassss", cars)
+      if (results.length) {            
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
+        }
+        console.log("FuelConsumptionScreen is focused VehicleId", vehicleId, "Cars[0]", cars[0].index)
+        const carId = cars[0].index
+        console.log("new VehicleId", carId)
 
-          if (results.rows.length) {            
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
+        setVehicleId(carId)
+
+        results = await db.getAllAsync(`
+          SELECT A.CodAbastecimento,
+          A.Data_Abastecimento,
+          A.KM,
+          A.Observacao,
+          A.TanqueCheio,
+          GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
+          SUM(AC.Litros) AS Litros,
+          (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
+          SUM(AC.Total) AS Total,
+          COALESCE(SUM(AC.Desconto), 0) AS Desconto
+          FROM Abastecimento A
+          INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+          WHERE A.CodVeiculo = ?
+          AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
+          GROUP BY AC.CodAbastecimento
+          ORDER BY A.KM DESC
+        `,
+        [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)])
+
+        const callback = (nextFilling) => {
+          const temp = [];
+          let totalSumAcc = 0
+          let totalAverageAcc = 0
+          let totalCount = 0
+          let totalCountAccurate = 0
+          let totalAccurate = 0
+          let minKm = 0
+          let maxKm = 0
+          let greatestAverageAux = 0
+          let greatestAverageFullTankAux = 0
+          let lowestAverageAux = 0
+          let lowestAverageFullTankAux = 0
+          let auxAveragesPerFuel = initAveragesPerFuel()
+          console.log(results)
+          for (const [i, filling] of results.entries()) {
+            if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
+              continue
             }
-            console.log("FuelConsumptionScreen is focused VehicleId", vehicleId, "Cars[0]", cars[0].index)
-            const carId = cars[0].index
-            console.log("new VehicleId", carId)
 
-            setVehicleId(carId)
+            let accomplishedKm
+            let average
+            let costPerKm = 0
+            nextFilling = i === 0 ? nextFilling : results[(i - 1)]
+            if (nextFilling) {
+              accomplishedKm = nextFilling.KM - filling.KM
+              average = accomplishedKm / nextFilling.Litros
+              costPerKm = filling.Valor_Litro / average
+            }
+console.log("ararara ", filling.CodCombustivel, fuels)
+            temp.push([
+              filling.CodAbastecimento,
+              fromDatabaseToUserDate(filling.Data_Abastecimento),
+              filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(','),
+              filling.Litros.toFixed(2),
+              filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+              filling.Valor_Litro.toFixed(2),
+              filling.Total.toFixed(2),
+              filling.Desconto.toFixed(2),
+              (filling.Total - filling.Desconto).toFixed(2),
+              average ? average.toFixed(2) : '',
+              filling.TanqueCheio ? t('yes'): t('no'),
+              accomplishedKm,
+              costPerKm ? costPerKm.toFixed(2) : '',
+              //filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
+              filling.Observacao,
+            ]);
 
-            tx.executeSql(`
-              SELECT A.CodAbastecimento,
-              A.Data_Abastecimento,
-              A.KM,
-              A.Observacao,
-              A.TanqueCheio,
-              GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
-              SUM(AC.Litros) AS Litros,
-              (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
-              SUM(AC.Total) AS Total,
-              SUM(AC.Discount) As Discount
-              FROM Abastecimento A
-              INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-              WHERE A.CodVeiculo = ?
-              AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
-              GROUP BY AC.CodAbastecimento
-              ORDER BY A.KM DESC
-            `,
-            [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)],
-            function(tx, results) {
-              const callback = (nextFilling) => {
-                const temp = [];
-                let totalSumAcc = 0
-                let totalAverageAcc = 0
-                let totalCount = 0
-                let totalCountAccurate = 0
-                let totalAccurate = 0
-                let minKm = 0
-                let maxKm = 0
-                let greatestAverageAux = 0
-                let greatestAverageFullTankAux = 0
-                let lowestAverageAux = 0
-                let lowestAverageFullTankAux = 0
-                let auxAveragesPerFuel = initAveragesPerFuel()
+            totalSumAcc += filling.Total - filling.Desconto
+            if (average) {
+              totalAverageAcc += average
+              totalCount++
+              if (filling.TanqueCheio && nextFilling.TanqueCheio) {
+                totalAccurate += average
+                totalCountAccurate++
+                if (greatestAverageFullTankAux === 0 || average > greatestAverageFullTankAux) {
+                  greatestAverageFullTankAux = average
+                }
 
-                for (let i = 0; i < results.rows.length; i++) {
-                  const filling = results.rows.item(i)
-                  if (!filling.CodCombustivel.split(',').includes(''+fuelType) && fuelType !== 0) {
-                    continue
-                  }
-
-                  let accomplishedKm
-                  let average
-                  let costPerKm = 0
-                  nextFilling = i === 0 ? nextFilling : results.rows.item(i - 1)
-                  if (nextFilling) {
-                    accomplishedKm = nextFilling.KM - filling.KM
-                    average = accomplishedKm / nextFilling.Litros
-                    costPerKm = filling.Valor_Litro / average
-                  }
-
-                  temp.push([
-                    filling.CodAbastecimento,
-                    fromDatabaseToUserDate(filling.Data_Abastecimento),
-                    filling.CodCombustivel.split(',').map(cod => fuels[cod].value).join(', '),
-                    filling.Litros.toFixed(2),
-                    filling.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-                    filling.Valor_Litro.toFixed(2),
-                    filling.Total.toFixed(2),
-                    filling.Discount.toFixed(2),
-                    (filling.Total - filling.Discount).toFixed(2),
-                    average ? average.toFixed(2) : '',
-                    filling.TanqueCheio ? t('yes'): t('no'),
-                    accomplishedKm,
-                    costPerKm ? costPerKm.toFixed(2) : '',
-                    //filling.CodCombustivel.split(',').length > 1 ? t('yes') : t('no'),
-                    filling.Observacao,
-                  ]);
-
-                  totalSumAcc += filling.Total - filling.Discount
-                  if (average) {
-                    totalAverageAcc += average
-                    totalCount++
-                    if (filling.TanqueCheio && nextFilling.TanqueCheio) {
-                      totalAccurate += average
-                      totalCountAccurate++
-                      if (greatestAverageFullTankAux === 0 || average > greatestAverageFullTankAux) {
-                        greatestAverageFullTankAux = average
-                      }
-
-                      if (lowestAverageFullTankAux === 0 || average < lowestAverageFullTankAux) {
-                        lowestAverageFullTankAux = average
-                      }
-                      if(auxAveragesPerFuel[filling.CodCombustivel]) {
-                        auxAveragesPerFuel[filling.CodCombustivel] = {
-                          acc: auxAveragesPerFuel[filling.CodCombustivel].acc + average,
-                          count: ++auxAveragesPerFuel[filling.CodCombustivel].count
-                        }
-                      }
-                    }
-                    if (greatestAverageAux === 0 || average > greatestAverageAux) {
-                      greatestAverageAux = average
-                    }
-                    if (lowestAverageAux === 0 || average < lowestAverageAux) {
-                      lowestAverageAux = average
-                    }
-                  }
-
-                  if (fuelType === 0) {
-                    if (temp.length === 1) {
-                      minKm = maxKm = filling.KM 
-                    } else {
-                      if (filling.KM < minKm || minKm === 0) {
-                        minKm = filling.KM
-                      }
-
-                      if (filling.KM > maxKm || maxKm === 0) {
-                        maxKm = filling.KM
-                      }
-                    }
+                if (lowestAverageFullTankAux === 0 || average < lowestAverageFullTankAux) {
+                  lowestAverageFullTankAux = average
+                }
+                if(auxAveragesPerFuel[filling.CodCombustivel]) {
+                  auxAveragesPerFuel[filling.CodCombustivel] = {
+                    acc: auxAveragesPerFuel[filling.CodCombustivel].acc + average,
+                    count: ++auxAveragesPerFuel[filling.CodCombustivel].count
                   }
                 }
-                setTotalKM(maxKm - minKm)
-                setTableData(temp)
-                setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-                setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
-                setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
-                setLoading(false)
-                setGreatestAverage(greatestAverageAux.toFixed(2))
-                setGreatestAverageFullTank(greatestAverageFullTankAux.toFixed(2))
-                setLowestAverage(lowestAverageAux.toFixed(2))
-                setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
-                setAveragesPerFuelType(auxAveragesPerFuel)
               }
+              if (greatestAverageAux === 0 || average > greatestAverageAux) {
+                greatestAverageAux = average
+              }
+              if (lowestAverageAux === 0 || average < lowestAverageAux) {
+                lowestAverageAux = average
+              }
+            }
 
-              if (results.rows.length) {
-                tx.executeSql(`
-                  SELECT A.KM, AC.Litros
-                  FROM Abastecimento A
-                  INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-                  WHERE A.CodVeiculo = ?
-                  AND A.KM > ?
-                  ORDER BY A.KM
-                  LIMIT 1
-                `,
-                  [carId, results.rows.item(0).KM],
-                  (_, fillings) => {
-                    let nextFilling
-                    if (fillings.rows.length) {
-                      nextFilling = fillings.rows.item(0)
-                    }
-
-                    return callback(nextFilling)
-                  }, function(_, error) {
-                    console.log(error)
-                    setLoading(false)
-                  })
+            if (fuelType === 0) {
+              if (temp.length === 1) {
+                minKm = maxKm = filling.KM 
               } else {
-                setLoading(false)
-                setTableData([])
-                setTotalSum(0)
-                setTotalAverage(0)
-                setTotalKM(0)
-                setAccurateAverage(0)
-                setGreatestAverage(0)
-                setGreatestAverageFullTank(0)
-                setLowestAverage(0)
-                setLowestAverageFullTank(0)
-                setAveragesPerFuelType(av)
+                if (filling.KM < minKm || minKm === 0) {
+                  minKm = filling.KM
+                }
+
+                if (filling.KM > maxKm || maxKm === 0) {
+                  maxKm = filling.KM
+                }
               }
-            }, function(_, error) {
-              console.log(error)
-              setLoading(false)
-            })
+            }
+          }
+          setTotalKM(maxKm - minKm)
+          setTableData(temp)
+          setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+          setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
+          setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
+          setLoading(false)
+          setGreatestAverage(greatestAverageAux.toFixed(2))
+          setGreatestAverageFullTank(greatestAverageFullTankAux.toFixed(2))
+          setLowestAverage(lowestAverageAux.toFixed(2))
+          setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
+          setAveragesPerFuelType(auxAveragesPerFuel)
+        }
+console.log("aaaaaaa+")
+        if (results.length) {
+          let filling = await db.getFirstAsync(`
+            SELECT A.KM, AC.Litros
+            FROM Abastecimento A
+            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+            WHERE A.CodVeiculo = ?
+            AND A.KM > ?
+            ORDER BY A.KM
+            LIMIT 1
+          `,
+            [carId, results[0].KM])
+
+          let nextFilling
+          if (filling) {
+            nextFilling = filling
           }
 
-          setVehicles(cars)
+          callback(nextFilling)
+        } else {
+          setLoading(false)
+          setTableData([])
+          setTotalSum(0)
+          setTotalAverage(0)
+          setTotalKM(0)
+          setAccurateAverage(0)
+          setGreatestAverage(0)
+          setGreatestAverageFullTank(0)
+          setLowestAverage(0)
+          setLowestAverageFullTank(0)
+          setAveragesPerFuelType(av)
         }
-      )
-    })
+      }
+console.log("cars", cars)
+      setVehicles(cars) 
+    }
+    fetchData()
       
   }, [isFocused, fuelType, fillingPeriod, vehicleId]);
 
@@ -329,7 +312,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const exportTable = async () => await exportTableToCSV(tableHead.map(row => row.title).slice(1), tableData.map(row => row.slice(1)), 'FuelConsumption.csv')
 
   const cellAverage = (data, index) => {
-    var notFullTank = tableData[index][8] === t('no') || (index && tableData[index-1][8] === t('no'))
+    var notFullTank = tableData[index][10] === t('no') || (index && tableData[index-1][10] === t('no'))
     return (
       <Text style={{...styles.text}} onPress={()=>  
         notFullTank ? 
@@ -376,14 +359,12 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           console.log("VehicleId will be changed to ", itemValue)
           setVehicleId(itemValue)
-          db.transaction(function(tx) {
-            tx.executeSql(
+          await db.runAsync(
               `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            )
-          })
+            );
           console.log("VehicleId Updated to", itemValue)
         }}>
           {
@@ -453,16 +434,16 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
         <ScrollView horizontal>
           <View style={{marginTop: 5, marginBottom: 5}}>
             <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
-              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
+              <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={{...styles.text, ...{color: Colors.tableHeaderTextColor}}}/>
 
                 {tableData.map((rowData, index) => (
-                  <TableWrapper key={index} style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}>
+                  <TableWrapper key={index} style={{...styles.row, ...{backgroundColor: index%2 ? Colors.tableOddRowColor : Colors.tableEvenRowColor}}}>
                   {
                       <>
                       {rowData.map((cellData, cellIndex) => (
                         <Cell borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}
                         key={cellIndex} data={cellIndex === 0 ? cellEditRow(cellData, index) : 
-                          cellIndex === 7 ? cellAverage(cellData, index) : cellData}
+                          cellIndex === 9 ? cellAverage(cellData, index) : cellData}
                         textStyle={{...styles.text, ...tableHead[cellIndex].textStyle}}
                         style={tableHead[cellIndex].style} />
                       ))}
