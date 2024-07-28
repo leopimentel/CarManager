@@ -6,9 +6,8 @@ export const AppContext = createContext();
 const BellProvider = ({ children }) => {
   const [notificationCount, setNotificationCount] = useState(0);
   
-  const notify = () => {
-    db.transaction(function(tx) {
-      tx.executeSql(
+  const notify = async () => {
+    const result = await db.getFirstAsync(
       `
           SELECT COUNT(1) AS TotalReminders
           FROM Lembrete L
@@ -26,18 +25,10 @@ const BellProvider = ({ children }) => {
               )
           )
       `,
-      [],
-      function(_, results) {
-          if (results.rows.length) {
-            setNotificationCount(results.rows.item(0).TotalReminders)            
-          }
-      },
-      function(error) {
-          console.error(error)
-      }
-      )
-    })   
-  };
+      []);
+
+    setNotificationCount(result.TotalReminders)
+  }
 
   const value = { notificationCount, notify }
   

@@ -40,123 +40,111 @@ function ReminderScreen({ theme, route, navigation }) {
   const isFocused = useIsFocused()
 
   useEffect(() => {
-    db.transaction(function(tx) {
-      tx.executeSql(
-        `SELECT L.Descricao, L.CodLembreteTipo FROM LembreteTipo L`,
-        [],
-        function(_, results) {
-          let aux = []
-          if (results.rows.length) {
-            for (let i = 0; i < results.rows.length; i++) {
-              aux.push({
-                index: results.rows.item(i).CodLembreteTipo,
-                value: results.rows.item(i).Descricao
-              });
-            }            
-          }
-          setReminderTypes(aux)
-        }
-      )
-    })
+    async function fetchData() {
+      let results = await db.getAllAsync(
+          `SELECT L.Descricao, L.CodLembreteTipo FROM LembreteTipo L`,
+          [])
+          
+      let aux = []
+      if (results.length) {
+        for (const row of results) {
+          aux.push({
+            index: row.CodLembreteTipo,
+            value: row.Descricao
+          });
+        }            
+      }
+      setReminderTypes(aux)
+    }
+    fetchData()
   }, [])
 
   useEffect(() => {
-    db.transaction(function(tx) {
-      tx.executeSql(
+    async function fetchData() {
+      let results = await db.getAllAsync(
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-        [],
-        function(_, results) {
-          let cars = []
-          if (results.rows.length) {
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
-            }            
-          }
-          setVehicles(cars)
-        }
-      )
-    })
+        [])
+          
+      let cars = []
+      if (results.length) {
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
+        }            
+      }
+      setVehicles(cars)
+    }
+    fetchData()
     clearForm()
   }, [isFocused])
 
   useEffect(() => {
     clearForm()
     console.log('route params', route.params)
-    if (route.params) {      
-      if (route.params.CodGasto){
-        setSpendingId(route.params.CodGasto)
-      }
-      if (route.params.CodLembrete){
-        setReminderId(route.params.CodLembrete)
-        setLoading(true)
-        db.transaction(function(tx) {
-          tx.executeSql(
-            `SELECT
-              L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
-              L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto
-            FROM Lembrete L
-            WHERE L.CodLembrete = ?`,
-            [route.params.CodLembrete],
-            function(_, results) {
-              if (results.rows.length) {
-                const reminder = results.rows.item(0)
-                console.log(reminder, moment(reminder.DataLembrete, 'YYYY-MM-DD').format(t('dateFormat')))
-                setSelectedDate(reminder.DataLembrete ? moment(reminder.DataLembrete, 'YYYY-MM-DD').toDate(): '')
-                setDone(reminder.Finalizado)
-                setKm(reminder.KM ? ''+reminder.KM : '')
-                setObservation(reminder.Observacao)
-                setSpendingId(reminder.CodGasto)
-                setVehicleId(reminder.CodVeiculo)
-                setReminderType(reminder.CodLembreteTipo)
-            }
-            }
-          )
-          setLoading(false)
-        });
-      }      
-    } else {
-      db.transaction(function(tx) {
-        tx.executeSql(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [],
-          function(_, results) {
-            if (results.rows.length) {
-              let cars = []
-              for (let i = 0; i < results.rows.length; i++) {
-                cars.push({
-                  index: results.rows.item(i).CodVeiculo,
-                  value: results.rows.item(i).Descricao
-                });
-              }
-              setVehicleId(cars[0].index)
-            }
+    async function fetchData() {
+      if (route.params) {      
+        if (route.params.CodGasto){
+          setSpendingId(route.params.CodGasto)
+        }
+        if (route.params.CodLembrete){
+          setReminderId(route.params.CodLembrete)
+          setLoading(true)
+          let reminder = await db.getFirstAsync(
+              `SELECT
+                L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
+                L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto
+              FROM Lembrete L
+              WHERE L.CodLembrete = ?`,
+              [route.params.CodLembrete])
+              
+          if (reminder) {
+            console.log(reminder, moment(reminder.DataLembrete, 'YYYY-MM-DD').format(t('dateFormat')))
+            setSelectedDate(reminder.DataLembrete ? moment(reminder.DataLembrete, 'YYYY-MM-DD').toDate(): '')
+            setDone(reminder.Finalizado)
+            setKm(reminder.KM ? ''+reminder.KM : '')
+            setObservation(reminder.Observacao)
+            setSpendingId(reminder.CodGasto)
+            setVehicleId(reminder.CodVeiculo)
+            setReminderType(reminder.CodLembreteTipo)
           }
-        )
-      })
+          setLoading(false)
+        }      
+      } else {
+        let results = await db.getAllAsync(
+            `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
+            LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
+            ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
+            [])
+            
+        if (results.length) {
+          let cars = []
+          for (const row of results) {
+            cars.push({
+              index: row.CodVeiculo,
+              value: row.Descricao
+            });
+          }
+          setVehicleId(cars[0].index)
+        }
+      }
     }
+    fetchData()
   }, [route.params])
 
   const remove = () => {
-    const confirm = () => {
+    const confirm = async () => {
       setLoading(true)
-      db.transaction(function(tx) {
-        tx.executeSql(
+      await db.runAsync(
           `DELETE FROM Lembrete WHERE CodLembrete = ?`,
-          [reminderId],
-          function(tx) {
-            console.log(`Reminder ${reminderId} removed`)
-            notify()
-            setVisibleDialog(true)
-            setLoading(false)
-            clearForm()
-          }, handleDatabaseError
-        );
-      })
+          [reminderId])
+          
+      console.log(`Reminder ${reminderId} removed`)
+      notify()
+      setVisibleDialog(true)
+      setLoading(false)
+      clearForm()
     }
 
     Alert.alert(
@@ -172,12 +160,6 @@ function ReminderScreen({ theme, route, navigation }) {
     
   }
 
-  const handleDatabaseError = function (_, error) {
-    console.log(error)
-    setLoading(false)
-    return true
-  }
-
   const clearForm = () => {
     setSelectedDate(null)
     setReminderId(null)
@@ -190,45 +172,38 @@ function ReminderScreen({ theme, route, navigation }) {
     setDone(0)
   }
 
-  const save = () => {
+  const save = async () => {
     if ((!km || km < 0) && !selectedDate) {
        setFormErrors({...formErrors, dateOrKm: [true, t('errorMessage.dateOrKm')]})
        return false
     }
     const dateSqlLite = selectedDate ? fromUserDateToDatabase(selectedDate) : null
     setLoading(true)
-    db.transaction(function(tx) {
-      if (!reminderId) {
-        console.log(vehicleId, new Date(), reminderType, km, dateSqlLite, observation, done, spendingId )
-        tx.executeSql(
-          `INSERT INTO Lembrete 
-          (CodVeiculo, DataCadastro, CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId],
-          function(tx, res) {
-            console.log(`Reminder ${res.insertId} inserted`)
-            clearForm()
-            notify()
-            setLoading(false)
-            setVisibleDialog(true)
-          }, handleDatabaseError
-          );
-      } else {
-        tx.executeSql(
-          `UPDATE Lembrete
-           SET CodVeiculo = ?, DataCadastro = ?, CodLembreteTipo = ?, KM = ?, DataLembrete = ?, Observacao = ?, Finalizado = ?, CodGasto = ?
-           WHERE CodLembrete = ?`,
-           [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId, reminderId],
-          function(tx) {
-            console.log(`Reminder ${reminderId} updated ${km}`)
-            notify()
-            setVisibleDialog(true)
-            clearForm()
-            setLoading(false)
-          }, handleDatabaseError
-        );
-      }
-    });
+    if (!reminderId) {
+      console.log(vehicleId, new Date(), reminderType, km, dateSqlLite, observation, done, spendingId )
+      let res = await db.runAsync(
+        `INSERT INTO Lembrete 
+        (CodVeiculo, DataCadastro, CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId])
+
+      console.log(`Reminder ${res.lastInsertId} inserted`)
+      clearForm()
+      notify()
+      setLoading(false)
+      setVisibleDialog(true)
+    } else {
+      await db.runAsync(
+        `UPDATE Lembrete
+          SET CodVeiculo = ?, DataCadastro = ?, CodLembreteTipo = ?, KM = ?, DataLembrete = ?, Observacao = ?, Finalizado = ?, CodGasto = ?
+          WHERE CodLembrete = ?`,
+          [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId, reminderId])
+      console.log(`Reminder ${reminderId} updated ${km}`)
+      notify()
+      setVisibleDialog(true)
+      clearForm()
+      setLoading(false)
+    };
   }
 
   if (loading) {
@@ -268,13 +243,11 @@ function ReminderScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
-          db.transaction(function(tx) {
-            tx.executeSql(
-              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            )
-          })
+          await db.runAsync(
+            `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
+          )
           console.log("VehicleId updated to", itemValue)
         }}>
           {

@@ -17,7 +17,8 @@ import { Loading } from '../components/Loading'
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import MultiSelect from '../components/react-native-multiple-select';
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { exportTableToCSV } from '../utils/csv'
 
 function SpendingReportScreen({ theme, route, navigation }) {
@@ -59,131 +60,118 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
   const isFocused = useIsFocused()
 
-  const choosePeriod = (index) => {
+  const choosePeriod = async (index) => {
     if (index === 'all') {
-      db.transaction(function(tx) {
-        tx.executeSql(`
-            SELECT MIN(G.Data) AS Data
-            FROM Gasto G
-            WHERE G.CodVeiculo = ?              
-          `,
-          [vehicleId],
-          function(_, results) {
-            if (!results.rows.item(0)['Data'])
-              return setPeriod(choosePeriodFromIndex(index))
-            
-            setPeriod({
-              startDate: moment(results.rows.item(0)['Data'], 'YYYY-MM-DD').toDate(),
-              endDate: moment().toDate()
-            })
-          }, (_, error) => {
-            console.log(error)
-          }
-        )
-      });
+      let row = await db.getFirstAsync(`
+        SELECT MIN(G.Data) AS Data
+        FROM Gasto G
+        WHERE G.CodVeiculo = ?              
+      `,
+      [vehicleId])
+          
+      if (!row || !row['Data'])
+        return setPeriod(choosePeriodFromIndex(index))
+      
+      setPeriod({
+        startDate: moment(row['Data'], 'YYYY-MM-DD').toDate(),
+        endDate: moment().toDate()
+      })
     } else {
       setPeriod(choosePeriodFromIndex(index))
     }
   }
 
-  const search = useCallback(()=>{
+  const search = useCallback(async ()=>{
     setLoading(true)
     
-    db.transaction(function(tx) {
-      tx.executeSql(
+    let results = await db.getAllAsync(
         `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V        
         LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
         ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [],
-        function(_, results) {
-          let cars = []
+        [])
+
+    let cars = []
             
-          if (results.rows.length) {
-            for (let i = 0; i < results.rows.length; i++) {
-              cars.push({
-                index: results.rows.item(i).CodVeiculo,
-                value: results.rows.item(i).Descricao
-              });
+    if (results.length) {
+      for (const row of results) {
+        cars.push({
+          index: row.CodVeiculo,
+          value: row.Descricao
+        });
+      }
+
+      results = await db.getAllAsync(`
+        SELECT
+        G.CodAbastecimento,
+        G.CodGasto,
+        G.Data,
+        G.Valor,
+        G.CodGastoTipo,
+        G.Observacao,
+        COALESCE(A.KM, G.KM) AS KM,
+        G.Oficina
+        FROM Gasto G
+        LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+        WHERE G.CodVeiculo = ?
+        AND G.Data >= ? AND G.Data <= ?
+        ORDER BY G.Data DESC, G.KM DESC
+      `,
+      [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)])
+
+      let totalSumAcc = 0
+      let minKm = 0
+      let maxKm = 0
+      const temp = [];
+      for (const spending of results) {          
+        if (selectedItems.indexOf(''+spending.CodGastoTipo) === -1 && selectedItems.length !== 0) {
+          continue
+        }
+
+        if (observation) {
+          if (!spending.Observacao) {
+            continue
+          }
+          const str = observation.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+          const strDatabase = spending.Observacao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+          if (strDatabase.indexOf(str) === -1) {
+            continue
+          }
+        }
+
+        temp.push([
+          spending.CodAbastecimento || spending.CodGasto,
+          fromDatabaseToUserDate(spending.Data),
+          spending.Valor,
+          spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
+          spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
+          spending.Observacao,
+          spending.Oficina
+        ]);
+        totalSumAcc += spending.Valor
+
+        if (spending.KM && observation.length === 0 && selectedItems.length === 0) {
+          if (temp.length === 1) {
+            minKm = maxKm = spending.KM 
+          } else {
+            if (spending.KM < minKm || minKm === 0) {
+              minKm = spending.KM
             }
 
-            tx.executeSql(`
-              SELECT
-              G.CodAbastecimento,
-              G.CodGasto,
-              G.Data,
-              G.Valor,
-              G.CodGastoTipo,
-              G.Observacao,
-              COALESCE(A.KM, G.KM) AS KM,
-              G.Oficina
-              FROM Gasto G
-              LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
-              WHERE G.CodVeiculo = ?
-              AND G.Data >= ? AND G.Data <= ?
-              ORDER BY G.Data DESC, G.KM DESC
-            `,
-            [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)],
-            function(_, results) {              
-              let totalSumAcc = 0
-              let minKm = 0
-              let maxKm = 0
-              const temp = [];
-              for (let i = 0; i < results.rows.length; i++) {
-                const spending = results.rows.item(i)
-                
-                if (selectedItems.indexOf(''+spending.CodGastoTipo) === -1 && selectedItems.length !== 0) {
-                  continue
-                }
-
-                if (observation) {
-                  if (!spending.Observacao) {
-                    continue
-                  }
-                  const str = observation.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-                  const strDatabase = spending.Observacao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-                  if (strDatabase.indexOf(str) === -1) {
-                    continue
-                  }
-                }
-
-                temp.push([
-                  spending.CodAbastecimento || spending.CodGasto,
-                  fromDatabaseToUserDate(spending.Data),
-                  spending.Valor,
-                  spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
-                  spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
-                  spending.Observacao,
-                  spending.Oficina
-                ]);
-                totalSumAcc += spending.Valor
-
-                if (spending.KM && observation.length === 0 && selectedItems.length === 0) {
-                  if (temp.length === 1) {
-                    minKm = maxKm = spending.KM 
-                  } else {
-                    if (spending.KM < minKm || minKm === 0) {
-                      minKm = spending.KM
-                    }
-
-                    if (spending.KM > maxKm || maxKm === 0) {
-                      maxKm = spending.KM
-                    }
-                  }
-                }
-              }
-
-              setTableData(temp)
-              setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-              setTotalKM(maxKm - minKm)
-              
-              setLoading(false)
-            })
+            if (spending.KM > maxKm || maxKm === 0) {
+              maxKm = spending.KM
+            }
           }
-          setVehicleId(cars[0].index)
-          setVehicles(cars)
         }
-      )
-    })
+      }
+
+      setTableData(temp)
+      setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+      setTotalKM(maxKm - minKm)
+      
+      setLoading(false)
+    }
+    setVehicleId(cars[0].index)
+    setVehicles(cars)
   }, [period, selectedItems, observation, vehicleId]);
 
   useEffect(() => {
@@ -252,13 +240,11 @@ function SpendingReportScreen({ theme, route, navigation }) {
         />}
 
         {vehicles.length > 1 &&
-        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={itemValue => {
+        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
-          db.transaction(function(tx) {
-            tx.executeSql(
+          await db.runAsync(
               `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
             )
-          })
           console.log("VehicleId updated to", itemValue)
         }}>
           {
@@ -267,26 +253,27 @@ function SpendingReportScreen({ theme, route, navigation }) {
         </Picker>}
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5, marginLeft: 5 }}>
-            <MultiSelect
+            <SectionedMultiSelect
               items={spendingTypes}
-              fontSize={16}
+              IconRenderer={Icon}
               uniqueKey="index"
               displayKey="value"
               onSelectedItemsChange={onSelectedItemsChange}
               selectedItems={selectedItems}
               selectText={t('spending')}
+              confirmText={t('search')}
+              searchPlaceholderText={t('search') + '...'}
+              colors={{primary:Colors.primary}}
+              // fontSize={16}
               // onChangeInput={ (text)=> console.log(text)}
-              tagRemoveIconColor="#000"
-              tagBorderColor="#CCC"
-              textColor="#000"
-              tagTextColor="#000"
-              selectedItemTextColor="#000"
-              selectedItemIconColor="#000"
-              itemTextColor="#000"
-              searchInputStyle={{ color: '#000' }}
-              submitButtonColor={Colors.primary}
-              searchInputPlaceholderText={t('search') + '...'}
-              submitButtonText={t('search')}
+              // tagRemoveIconColor="#000"
+              // tagBorderColor="#CCC"
+              // textColor="#000"
+              // tagTextColor="#000"
+              // selectedItemTextColor="#000"
+              // selectedItemIconColor="#000"
+              // itemTextColor="#000"
+              // searchInputStyle={{ color: '#000' }}
            />
        
           </View>

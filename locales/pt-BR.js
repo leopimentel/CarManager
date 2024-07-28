@@ -17,10 +17,11 @@ export default {
   fuel: 'Combustível',
   pricePerUnit: 'Preço por litro',
   fillingTotal: 'Valor total',
+  fillingSubTotal: 'Subtotal',
   observation: 'Observação',
   fillingObservation: 'Posto Parada Perfeita',
   spendingObservation: '4 Pneus',
-  wrongAverageInfo: 'Média calculada pode estar errada pois este abastecimento ou o próximo não foi com tanque cheio.',
+  wrongAverageInfo: 'Média simbólica pois o abastecimento ou o próximo não foi com tanque cheio',
   fullTank: 'Tanque cheio',
   startDate: 'Data inicial',
   endDate: 'Data final',
@@ -110,5 +111,7 @@ export default {
   seeReminders: "Ver lembretes",
   savedReminder: "Lembrete salvo",
   reminders: "Lembretes",
-  dateOrKm: "Data ou odômetro não foram preenchidos"
+  dateOrKm: "Data ou odômetro não foram preenchidos",
+  discount: "Descontos",
+  totalWithDiscount: "Total com desconto",
 };
