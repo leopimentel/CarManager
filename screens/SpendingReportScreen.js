@@ -355,7 +355,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
 
                 {tableData.map((rowData, index) => (
-                  <TableWrapper key={index} style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}>
+                  <TableWrapper key={index} style={{...styles.row, ...{backgroundColor: index%2 ? Colors.tableOddRowColor : Colors.tableEvenRowColor}}}>
                   {
                       <>
                       {rowData.map((cellData, cellIndex) => (
