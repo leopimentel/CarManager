@@ -638,6 +638,7 @@ function FillingScreen({ theme, route, navigation }) {
           mode='outlined'
           placeholder={t('discount')}
           style={{flex: 1}}
+          keyboardType={'numeric'}
         />
       </View> }
 
@@ -651,7 +652,7 @@ function FillingScreen({ theme, route, navigation }) {
         />
       </View>
 
-      <Text>{t('totalWithDiscount')}: <NumberFormat value={(parseFloat(totalFuel) + parseFloat(totalFuel2) - parseFloat(discount)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+      <Text>{t('totalWithDiscount')}: <NumberFormat value={(parseFloat(totalFuel) + (totalFuel2 ? parseFloat(totalFuel2) : 0) - (discount ? parseFloat(discount) : 0)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
 
       {isTwoFuelTypes &&
       <>
