@@ -141,7 +141,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         temp.push([
           spending.CodAbastecimento || spending.CodGasto,
           fromDatabaseToUserDate(spending.Data),
-          spending.Valor,
+          spending.Valor.toFixed(2),
           spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
           spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
           spending.Observacao,
