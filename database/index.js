@@ -168,6 +168,10 @@ const migrateUp = (useMock = __DEV__) => {
         5: `
             ALTER TABLE Abastecimento_Combustivel ADD COLUMN Desconto FLOAT default 0;
 
+            `.split(';').map(statement => statement.trim()).filter(Boolean),
+        6: `
+            INSERT OR IGNORE INTO Combustivel (CodCombustivel, Descricao) VALUES (6, 'Etanol Aditivado');
+
             `.split(';').map(statement => statement.trim()).filter(Boolean)
     }
 

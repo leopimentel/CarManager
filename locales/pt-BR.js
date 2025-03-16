@@ -114,4 +114,6 @@ export default {
   dateOrKm: "Data ou odômetro não foram preenchidos",
   discount: "Descontos",
   totalWithDiscount: "Total com desconto",
+  parking: "Estacionamento",
+  additivatedEthanol: "Álcool aditivado"
 };

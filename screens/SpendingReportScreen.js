@@ -141,7 +141,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         temp.push([
           spending.CodAbastecimento || spending.CodGasto,
           fromDatabaseToUserDate(spending.Data),
-          spending.Valor,
+          spending.Valor.toFixed(2),
           spendingTypes.filter(spd => spd.index === (''+spending.CodGastoTipo))[0].value,
           spending.KM ? spending.KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '',
           spending.Observacao,
@@ -355,7 +355,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={[styles.text, {color: Colors.tableHeaderTextColor}]}/>
 
                 {tableData.map((rowData, index) => (
-                  <TableWrapper key={index} style={[styles.row, index%2 && {backgroundColor: Colors.tableOddRowColor}]}>
+                  <TableWrapper key={index} style={{...styles.row, ...{backgroundColor: index%2 ? Colors.tableOddRowColor : Colors.tableEvenRowColor}}}>
                   {
                       <>
                       {rowData.map((cellData, cellIndex) => (
