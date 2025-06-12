@@ -9,6 +9,7 @@ import LinkingConfiguration from './navigation/LinkingConfiguration';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
+import * as Linking from 'expo-linking';
 
 const Stack = createStackNavigator();
 
@@ -30,7 +31,20 @@ export default function App(_) {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
-        <NavigationContainer linking={LinkingConfiguration}>
+        <NavigationContainer linking={{
+          prefixes: [Linking.createURL('/')],
+          config: {
+            screens: {
+              Fuel: {
+                path: 'root',
+                screens: {
+                  Home: 'home',
+                  Links: 'links',
+                },
+              },
+            },
+          },
+        }}>
           <BellProvider>
             <Stack.Navigator>
               <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({

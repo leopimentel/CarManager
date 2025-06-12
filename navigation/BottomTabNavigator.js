@@ -20,7 +20,7 @@ function BottomTabNavigator({ navigation, route }) {
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
   React.useLayoutEffect(() => {
     navigation.setOptions({ 
-      headerTitle: getHeaderTitle(route), 
+      title: getHeaderTitle(route), 
       headerTintColor: Colors.headerTintColor,
       headerStyle: {
         backgroundColor: Colors.headerStyleBackgroundColor,
