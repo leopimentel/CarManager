@@ -334,8 +334,4 @@ function ReminderScreen({ theme, route, navigation }) {
   )
 }
 
-ReminderScreen.navigationOptions = {
-  header: null,
-};
-
 export default withTheme(ReminderScreen);

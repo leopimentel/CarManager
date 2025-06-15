@@ -749,8 +749,4 @@ function FillingScreen({ theme, route, navigation }) {
   )
 }
 
-FillingScreen.navigationOptions = {
-  header: null,
-};
-
 export default withTheme(FillingScreen);
