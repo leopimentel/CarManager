@@ -10,6 +10,10 @@ import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
 import * as Linking from 'expo-linking';
+import FillingScreen from './screens/FillingScreen';
+import ReminderScreen from './screens/ReminderScreen';
+import RemindersScreen from './screens/RemindersScreen';
+import { t } from './locales'
 
 const Stack = createStackNavigator();
 
@@ -30,36 +34,43 @@ export default function App(_) {
   return (
     <PaperProvider theme={theme}>
       <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
-        <NavigationContainer linking={{
-          prefixes: [Linking.createURL('/')],
-          config: {
-            screens: {
-              Fuel: {
-                path: 'root',
-                screens: {
-                  Home: 'home',
-                  Links: 'links',
-                },
-              },
-            },
-          },
-        }}>
+        <NavigationContainer>
           <BellProvider>
-            <Stack.Navigator>
-              <Stack.Screen name="Fuel" component={BottomTabNavigator} options={({navigation}) => ({
-                headerRight: () => (
-                  <View style={{marginRight: 20}}>
-                    <Bell onPress={() => navigation.navigate('Reminders') } />
-                  </View>
-                ),
-              })}/>
+            <Stack.Navigator initialRouteName="Filling">
+              <Stack.Screen name="Filling" component={BottomTabNavigator} options={({navigation}) => getOptionsNavigation(navigation)}/>
+              <Stack.Screen
+                name="Reminder"
+                component={ReminderScreen}
+                options={{          
+                  title: t('reminder'),
+                }}
+              />
+
+              <Stack.Screen
+                name="Reminders"
+                component={RemindersScreen}
+                title="lembretes"
+                options={{          
+                  title: t('reminders'),
+                }}
+              />
             </Stack.Navigator>
           </BellProvider>
         </NavigationContainer>
       </View>
     </PaperProvider>
   );
+
+  function getOptionsNavigation(navigation) {
+    return {
+      headerRight: () => (
+        <View style={{ marginRight: 20 }}>
+          <Bell onPress={() => navigation.navigate('Reminders', { screen: 'Reminders' })} />
+        </View>
+      ),
+      headerShown: true,
+    };
+  }
 }
 
 const styles = StyleSheet.create({

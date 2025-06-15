@@ -194,9 +194,7 @@ const migrateUp = (useMock = __DEV__) => {
     }
 
     db.withTransactionSync(() => {
-        const results = db.getFirstSync('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', []);
-
-        const dbVersion = useMock ? 0 : results.Versao
+        const dbVersion = useMock ? 0 : db.getFirstSync('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', []).Versao
         console.log("Current database version is: " + dbVersion);
         const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
         migrateVersions(versionsToMigrate)

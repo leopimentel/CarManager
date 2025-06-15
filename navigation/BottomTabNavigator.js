@@ -37,6 +37,7 @@ function BottomTabNavigator({ navigation, route }) {
         name="Fuel"
         component={FillingScreen}
         options={{
+          headerShown: false,
           title: t('fueling'),
           tabBarIcon: ({ focused }) => <MaterialCommunityIcons
           style={{ color: getFocusedColor(focused) }}
@@ -47,6 +48,7 @@ function BottomTabNavigator({ navigation, route }) {
         name="Consumption"
         component={FuelConsumptionScreen}
         options={{
+          headerShown: false,
           title: t('consumption'),
           tabBarIcon: ({ focused }) => <MaterialCommunityIcons name="numeric" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
@@ -55,6 +57,7 @@ function BottomTabNavigator({ navigation, route }) {
         name="Spending"
         component={SpendingScreen}
         options={{
+          headerShown: false,
           title: t('spending'),
           tabBarIcon: ({ focused }) => <Foundation name="dollar" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
@@ -63,6 +66,7 @@ function BottomTabNavigator({ navigation, route }) {
         name="Report"
         component={SpendingReportScreen}
         options={{
+          headerShown: false,
           title: t('report'),
           tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
@@ -71,11 +75,12 @@ function BottomTabNavigator({ navigation, route }) {
         name="Settings"
         component={SettingsScreen}
         options={{
+          headerShown: false,
           title: t('settings'),
           tabBarIcon: ({ focused }) => <Feather name="settings" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
         }}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Reminder"
         component={ReminderScreen}
         options={{
@@ -89,7 +94,7 @@ function BottomTabNavigator({ navigation, route }) {
         options={{
           tabBarButton: () => null
         }}
-      />
+      /> */}
     </BottomTab.Navigator>
   );
 }
