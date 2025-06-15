@@ -87,8 +87,4 @@ function RemindersScreen({ theme, route, navigation }) {
   )
 }
 
-// RemindersScreen.navigationOptions = {
-//   header: null,
-// };
-
 export default withTheme(RemindersScreen);

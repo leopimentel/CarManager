@@ -1,127 +1,72 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as React from 'react';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import FillingScreen from '../screens/FillingScreen';
 import SpendingScreen from '../screens/SpendingScreen';
 import SpendingReportScreen from '../screens/SpendingReportScreen'
 import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import ReminderScreen from '../screens/ReminderScreen';
-import RemindersScreen from '../screens/RemindersScreen';
 import { MaterialCommunityIcons, Entypo, Foundation, Feather } from '@expo/vector-icons';
 import { t } from '../locales'
 const BottomTab = createBottomTabNavigator();
-const INITIAL_ROUTE_NAME = 'Fuel';
 import Colors from '../constants/Colors';
 
 function BottomTabNavigator({ navigation, route }) {
-  // Set the header title on the parent stack navigator depending on the
-  // currently active tab. Learn more in the documentation:
-  // https://reactnavigation.org/docs/en/screen-options-resolution.html
-  React.useLayoutEffect(() => {
-    navigation.setOptions({ 
-      title: getHeaderTitle(route), 
-      headerTintColor: Colors.headerTintColor,
-      headerStyle: {
-        backgroundColor: Colors.headerStyleBackgroundColor,
-        //height: 100
-      }
-    });
-  }, [navigation, route]);
-
-  const iconSize = 30
-
   return (
-    <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
-      <BottomTab.Screen
-        name="Fuel"
-        component={FillingScreen}
+    <BottomTab.Navigator initialRouteName="Fuel">
+      <BottomTab.Screen name="Fuel" component={FillingScreen}
         options={{
-          headerShown: false,
-          title: t('fueling'),
-          tabBarIcon: ({ focused }) => <MaterialCommunityIcons
-          style={{ color: getFocusedColor(focused) }}
-          name="gas-station" size={iconSize}  />,
+          ...getCommonOptions('fueling'),
+          tabBarIcon: ({ focused }) => getIcon('MaterialCommunityIcons', "gas-station", focused),
         }}
       />
-      <BottomTab.Screen
-        name="Consumption"
-        component={FuelConsumptionScreen}
+      <BottomTab.Screen name="Consumption" component={FuelConsumptionScreen}
         options={{
-          headerShown: false,
-          title: t('consumption'),
-          tabBarIcon: ({ focused }) => <MaterialCommunityIcons name="numeric" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          ...getCommonOptions('consumption'),
+          tabBarIcon: ({ focused }) => getIcon('MaterialCommunityIcons', "numeric", focused),
         }}
       />
-      <BottomTab.Screen
-        name="Spending"
-        component={SpendingScreen}
+      <BottomTab.Screen name="Spending" component={SpendingScreen}
         options={{
-          headerShown: false,
-          title: t('spending'),
-          tabBarIcon: ({ focused }) => <Foundation name="dollar" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          ...getCommonOptions('spending'),
+          tabBarIcon: ({ focused }) => getIcon('Foundation', "dollar", focused),
         }}
       />
-      <BottomTab.Screen
-        name="Report"
-        component={SpendingReportScreen}
+      <BottomTab.Screen name="Report" component={SpendingReportScreen}
         options={{
-          headerShown: false,
-          title: t('report'),
-          tabBarIcon: ({ focused }) => <Entypo name="bar-graph" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          ...getCommonOptions('report'),
+          tabBarIcon: ({ focused }) => getIcon('Entypo', "bar-graph", focused),
         }}
       />
-      <BottomTab.Screen
-        name="Settings"
-        component={SettingsScreen}
+      <BottomTab.Screen name="Settings" component={SettingsScreen}
         options={{
-          headerShown: false,
-          title: t('settings'),
-          tabBarIcon: ({ focused }) => <Feather name="settings" size={iconSize} style={{ color: getFocusedColor(focused) }} />,
+          ...getCommonOptions('settings'),
+          tabBarIcon: ({ focused }) => getIcon('Feather', "settings", focused),
         }}
       />
-      {/* <BottomTab.Screen
-        name="Reminder"
-        component={ReminderScreen}
-        options={{
-          tabBarButton: () => null
-        }}
-      />
-
-<BottomTab.Screen
-        name="Reminders"
-        component={RemindersScreen}
-        options={{
-          tabBarButton: () => null
-        }}
-      /> */}
     </BottomTab.Navigator>
   );
 }
 
-function getFocusedColor(focused) {
-  return focused ? Colors.tabIconSelected : Colors.tabIconDefault
+function getCommonOptions(titleToTranslate) {
+  return {
+    headerShown: false,
+    title: t(titleToTranslate),
+  }
 }
 
-function getHeaderTitle(route) {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? INITIAL_ROUTE_NAME;
+function getIcon(type, name, focused) {
+  const iconSize = 30
+  if (type == 'MaterialCommunityIcons')
+    return <MaterialCommunityIcons name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
+  if (type == 'Foundation')
+    return <Foundation name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
+  if (type == 'Entypo')
+    return <Entypo name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
+  if (type == 'Feather')
+    return <Feather name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
+}
 
-  switch (routeName) {
-    case 'Fuel':
-      return t('fueling');
-    case 'Consumption':
-      return t('consumption');
-    case 'Spending':
-      return t('spending');
-    case 'Report':
-      return t('report');
-    case 'Settings':
-      return t('settings');
-    case 'Reminder':
-      return t('reminder');
-    case 'Reminders':
-      return t('reminders');
-  }
+function getFocusedColor(focused) {
+  return focused ? Colors.tabIconSelected : Colors.tabIconDefault
 }
 
 export default BottomTabNavigator

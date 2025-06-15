@@ -1,18 +1,16 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Colors from './constants/Colors'
 import useCachedResources from './hooks/useCachedResources';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
-import LinkingConfiguration from './navigation/LinkingConfiguration';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
-import * as Linking from 'expo-linking';
-import FillingScreen from './screens/FillingScreen';
 import ReminderScreen from './screens/ReminderScreen';
 import RemindersScreen from './screens/RemindersScreen';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+
 import { t } from './locales'
 
 const Stack = createStackNavigator();
@@ -36,21 +34,25 @@ export default function App(_) {
       <View style={styles.container}>
         <NavigationContainer>
           <BellProvider>
-            <Stack.Navigator initialRouteName="Filling">
-              <Stack.Screen name="Filling" component={BottomTabNavigator} options={({navigation}) => getOptionsNavigation(navigation)}/>
-              <Stack.Screen
-                name="Reminder"
-                component={ReminderScreen}
-                options={{          
+            <Stack.Navigator>
+              <Stack.Screen name="Filling" component={BottomTabNavigator} options={({navigation, route}) => { 
+                return {
+                  ...getOptionsNavigation(navigation),
+                  ...getHeaderStyles(),
+                  headerTitle: getHeaderTitle(route),
+                }}
+              }/>
+
+              <Stack.Screen name="Reminder" component={ReminderScreen}
+                options={{
+                  ...getHeaderStyles(),
                   title: t('reminder'),
                 }}
               />
 
-              <Stack.Screen
-                name="Reminders"
-                component={RemindersScreen}
-                title="lembretes"
-                options={{          
+              <Stack.Screen name="Reminders" component={RemindersScreen}
+                options={{
+                  ...getHeaderStyles(),          
                   title: t('reminders'),
                 }}
               />
@@ -61,6 +63,15 @@ export default function App(_) {
     </PaperProvider>
   );
 
+  function getHeaderStyles() {
+    return {
+      headerTintColor: Colors.headerTintColor,
+      headerStyle: {
+        backgroundColor: Colors.headerStyleBackgroundColor,
+      }
+    }
+  }
+
   function getOptionsNavigation(navigation) {
     return {
       headerRight: () => (
@@ -70,6 +81,28 @@ export default function App(_) {
       ),
       headerShown: true,
     };
+  }
+}
+
+function getHeaderTitle(route) {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? "Fuel";
+  console.log('Nome atual' + routeName)
+
+  switch (routeName) {
+    case 'Fuel':
+      return t('fueling');
+    case 'Consumption':
+      return t('consumption');
+    case 'Spending':
+      return t('spending');
+    case 'Report':
+      return t('report');
+    case 'Settings':
+      return t('settings');
+    case 'Reminder':
+      return t('reminder');
+    case 'Reminders':
+      return t('reminders');
   }
 }
 

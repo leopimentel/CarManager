@@ -348,8 +348,4 @@ function SpendingScreen({ theme, route, navigation }) {
   )
 }
 
-SpendingScreen.navigationOptions = {
-  header: null,
-};
-
 export default withTheme(SpendingScreen);
