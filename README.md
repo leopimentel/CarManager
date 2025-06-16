@@ -3,6 +3,7 @@ Run the App
 
 Upgrade expo SDK
 - expo upgrade
+- npx expo install expo@latest
 
 npx expo install --fix
 npx expo start --reset-cache

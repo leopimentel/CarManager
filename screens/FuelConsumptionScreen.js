@@ -258,7 +258,7 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
           setAveragesPerFuelType(auxAveragesPerFuel)
         }
-console.log("aaaaaaa+")
+
         if (results.length) {
           let filling = await db.getFirstAsync(`
             SELECT A.KM, AC.Litros

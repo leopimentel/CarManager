@@ -62,7 +62,7 @@ function getIcon(type, name, focused) {
   if (type == 'Entypo')
     return <Entypo name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
   if (type == 'Feather')
-    return <Feather name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
+    return <Feather name={name} size={iconSize-3} style={{ color: getFocusedColor(focused) }} />
 }
 
 function getFocusedColor(focused) {

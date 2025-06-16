@@ -21,7 +21,7 @@ function Bell(props)
     }, [])
 
     return <>
-        <IconButton size={34} color={Colors.primary} icon="bell" onPress={() => props.onPress() }/>
+        <IconButton size={34} iconColor={Colors.primary} icon="bell" onPress={() => props.onPress() }/>
         <Badge style={styles.badge}>{notificationCount}</Badge>
     </>
 }
