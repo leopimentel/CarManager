@@ -122,7 +122,7 @@ const migrateUp = (useMock = __DEV__) => {
             (6, 'Pedágio'),
             (7, 'Estacionamento');
             
-            ALTER TABLE GASTO ADD COLUMN Oficina VARCHAR(255);
+            ALTER TABLE Gasto ADD COLUMN Oficina VARCHAR(255);
             
             `.split(';').map(statement => statement.trim()).filter(Boolean),
         3: `
@@ -162,7 +162,7 @@ const migrateUp = (useMock = __DEV__) => {
             );
 
             insert into VeiculoPrincipal 
-            select CodVeiculo from veiculo limit 1;
+            select CodVeiculo from Veiculo limit 1;
 
             `.split(';').map(statement => statement.trim()).filter(Boolean),
         5: `
@@ -194,7 +194,14 @@ const migrateUp = (useMock = __DEV__) => {
     }
 
     db.withTransactionSync(() => {
-        const dbVersion = useMock ? 0 : db.getFirstSync('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', []).Versao
+        const dbVersion = 0
+        if (!useMock) {
+            try {
+                dbVersion = db.getFirstSync('SELECT Versao FROM Versao ORDER BY Versao DESC LIMIT 1', []).Versao
+            } catch{
+                
+            }
+        }
         console.log("Current database version is: " + dbVersion);
         const versionsToMigrate = Object.keys(migrations).filter(migration => migration > dbVersion)
         migrateVersions(versionsToMigrate)
