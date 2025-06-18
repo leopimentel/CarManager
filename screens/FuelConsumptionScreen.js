@@ -433,7 +433,7 @@ console.log("cars", cars)
 
         <ScrollView horizontal>
           <View style={{marginTop: 5, marginBottom: 5}}>
-            <Table borderStyle={{borderWidth: 1, borderColor: Colors.tableBorderColor}}>
+            <Table>
               <Row data={tableHead.map(row => row.title)} style={styles.header} widthArr={tableHead.map(row => row.style.width)} textStyle={{...styles.text, ...{color: Colors.tableHeaderTextColor}}}/>
 
                 {tableData.map((rowData, index) => (
