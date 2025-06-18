@@ -16,7 +16,7 @@ import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -652,7 +652,7 @@ function FillingScreen({ theme, route, navigation }) {
         />
       </View>
 
-      <Text>{t('totalWithDiscount')}: <NumberFormat value={(parseFloat(totalFuel) + (totalFuel2 ? parseFloat(totalFuel2) : 0) - (discount ? parseFloat(discount) : 0)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+      <Text>{t('totalWithDiscount')}: <NumericFormat value={(parseFloat(totalFuel) + (totalFuel2 ? parseFloat(totalFuel2) : 0) - (discount ? parseFloat(discount) : 0)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
 
       {isTwoFuelTypes &&
       <>

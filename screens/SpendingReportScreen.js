@@ -14,7 +14,7 @@ import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
@@ -402,13 +402,13 @@ function SpendingReportScreen({ theme, route, navigation }) {
         </>
       }
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('total')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
-          {totalKM > 0 && <Text>{t('totalSpentByKM')}: <NumberFormat 
+          <Text>{t('total')}: <NumericFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          {totalKM > 0 && <Text>{t('totalSpentByKM')}: <NumericFormat 
             value={(totalSum / totalKM).toFixed(2)} displayType={'text'} 
             isNumericString={true} thousandSeparator={thousandSeparator} 
             decimalSeparator={decimalSeparator} prefix={t('currency')} 
             renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
-          {selectedItems.length === 0 && totalKM > 0 && <Text>{t('totalKM')}: <NumberFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
+          {selectedItems.length === 0 && totalKM > 0 && <Text>{t('totalKM')}: <NumericFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
         </View>
       </>}/>
     </View>

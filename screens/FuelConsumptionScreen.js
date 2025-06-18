@@ -15,7 +15,7 @@ import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex }
 import { ucfirst } from '../utils/string'
 import { exportTableToCSV } from '../utils/csv'
 import { Loading } from '../components/Loading'
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -458,17 +458,17 @@ console.log("cars", cars)
         </ScrollView>
 
         <View style={{ flex: 1, marginTop: 5 }}>
-          <Text>{t('totalSpent')}: <NumberFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
-          {totalKM > 0 && <Text>{t('totalKM')}: <NumberFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
-          {totalKM > 0 && <Text>{t('totalFuelSpentByKM')}: <NumberFormat value={(totalSum / totalKM).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
-          {/* <Text>{t('averageOfAverages')}: <NumberFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
-          <Text>{t('averageOfAveragesAccurate')}: <NumberFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
-          {/* <Text>{t('greatestAverage')}: <NumberFormat value={greatestAverage} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
-          <Text>{t('greatestAverageFullTank')}: <NumberFormat value={greatestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
-          {/* <Text>{t('lowestAverage')}: <NumberFormat value={lowestAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
-          <Text>{t('lowestAverageFullTank')}: <NumberFormat value={lowestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('totalSpent')}: <NumericFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          {totalKM > 0 && <Text>{t('totalKM')}: <NumericFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
+          {totalKM > 0 && <Text>{t('totalFuelSpentByKM')}: <NumericFormat value={(totalSum / totalKM).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
+          {/* <Text>{t('averageOfAverages')}: <NumericFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
+          <Text>{t('averageOfAveragesAccurate')}: <NumericFormat value={accurateAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          {/* <Text>{t('greatestAverage')}: <NumericFormat value={greatestAverage} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
+          <Text>{t('greatestAverageFullTank')}: <NumericFormat value={greatestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          {/* <Text>{t('lowestAverage')}: <NumericFormat value={lowestAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}
+          <Text>{t('lowestAverageFullTank')}: <NumericFormat value={lowestAverageFullTank} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           {Object.keys(averagesPerFuelType).map(key => (
-            averagesPerFuelType[key].count>0 && <Text key={key}>{t('averageOfAverages' + key)}: <NumberFormat value={(averagesPerFuelType[key].acc / averagesPerFuelType[key].count).toFixed(2)}
+            averagesPerFuelType[key].count>0 && <Text key={key}>{t('averageOfAverages' + key)}: <NumericFormat value={(averagesPerFuelType[key].acc / averagesPerFuelType[key].count).toFixed(2)}
                 isNumericString={true} displayType={'text'} 
                 thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} 
                 suffix=' KM/L'

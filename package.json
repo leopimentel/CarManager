@@ -41,7 +41,7 @@
     "react-native-simple-toast": "^3.3.1",
     "react-native-table-component": "^1.2.1",
     "react-native-web": "^0.20.0",
-    "react-number-format": "^4.7.3"
+    "react-number-format": "^5.0.0"
   },
   "devDependencies": {
     "jest-expo": "^53.0.0"
