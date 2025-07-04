@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.35",
+    "version": "1.0.36",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -25,7 +25,7 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 36,
+      "versionCode": 37,
       "permissions": []
     },
     "ios": {
