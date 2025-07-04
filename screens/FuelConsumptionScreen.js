@@ -9,7 +9,7 @@ import { getStyles, toastError } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { db } from '../database'
+import { fetchVehicles, fetchEarliestFillingDate, fetchFuelConsumptionData, fetchNextFillingAfterKM, updatePrimaryVehicle } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { ucfirst } from '../utils/string'
@@ -87,12 +87,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const setPeriod = async (index) => {
     console.log("at setperiod", vehicleId)
     if (index === 'all') {
-      let row = await db.getFirstAsync(`
-            SELECT MIN(A.Data_Abastecimento) AS Data_Abastecimento
-            FROM Abastecimento A
-            WHERE A.CodVeiculo = ?              
-          `,
-          [vehicleId])
+      let row = await fetchEarliestFillingDate(vehicleId);
           
       if (!row || !row['Data_Abastecimento'])
         return setFillingPeriod(choosePeriodFromIndex(index))
@@ -115,11 +110,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     setLoading(true)
 
     async function fetchData(){
-      let results = await db.getAllAsync(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [])
+      let results = await fetchVehicles();
       let cars = []
 console.log("sassss", cars)
       if (results.length) {            
@@ -135,25 +126,7 @@ console.log("sassss", cars)
 
         setVehicleId(carId)
 
-        results = await db.getAllAsync(`
-          SELECT A.CodAbastecimento,
-          A.Data_Abastecimento,
-          A.KM,
-          A.Observacao,
-          A.TanqueCheio,
-          GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
-          SUM(AC.Litros) AS Litros,
-          (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
-          SUM(AC.Total) AS Total,
-          COALESCE(SUM(AC.Desconto), 0) AS Desconto
-          FROM Abastecimento A
-          INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-          WHERE A.CodVeiculo = ?
-          AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
-          GROUP BY AC.CodAbastecimento
-          ORDER BY A.KM DESC
-        `,
-        [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)])
+        results = await fetchFuelConsumptionData(carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate));
 
         const callback = (nextFilling) => {
           const temp = [];
@@ -260,16 +233,7 @@ console.log("ararara ", filling.CodCombustivel, fuels)
         }
 
         if (results.length) {
-          let filling = await db.getFirstAsync(`
-            SELECT A.KM, AC.Litros
-            FROM Abastecimento A
-            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-            WHERE A.CodVeiculo = ?
-            AND A.KM > ?
-            ORDER BY A.KM
-            LIMIT 1
-          `,
-            [carId, results[0].KM])
+          let filling = await fetchNextFillingAfterKM(carId, results[0].KM);
 
           let nextFilling
           if (filling) {
@@ -362,9 +326,7 @@ console.log("cars", cars)
         {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           console.log("VehicleId will be changed to ", itemValue)
           setVehicleId(itemValue)
-          await db.runAsync(
-              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            );
+          await updatePrimaryVehicle(itemValue);
           console.log("VehicleId Updated to", itemValue)
         }}>
           {

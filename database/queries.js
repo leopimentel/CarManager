@@ -181,3 +181,81 @@ export const updatePrimaryVehicle = async (vehicleId) => {
     [vehicleId]
   );
 };
+
+// Fetch the earliest filling date for a vehicle
+export const fetchEarliestFillingDate = async (vehicleId) => {
+  return await db.getFirstAsync(
+    `SELECT MIN(A.Data_Abastecimento) AS Data_Abastecimento
+     FROM Abastecimento A
+     WHERE A.CodVeiculo = ?`,
+    [vehicleId]
+  );
+};
+
+// Fetch fuel consumption data for a vehicle within a date range
+export const fetchFuelConsumptionData = async (vehicleId, startDate, endDate) => {
+  return await db.getAllAsync(
+    `SELECT A.CodAbastecimento,
+        A.Data_Abastecimento,
+        A.KM,
+        A.Observacao,
+        A.TanqueCheio,
+        GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
+        SUM(AC.Litros) AS Litros,
+        (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
+        SUM(AC.Total) AS Total,
+        COALESCE(SUM(AC.Desconto), 0) AS Desconto
+     FROM Abastecimento A
+     INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+     WHERE A.CodVeiculo = ?
+     AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
+     GROUP BY AC.CodAbastecimento
+     ORDER BY A.KM DESC`,
+    [vehicleId, startDate, endDate]
+  );
+};
+
+// Fetch the next filling after a specific KM for a vehicle
+export const fetchNextFillingAfterKM = async (vehicleId, km) => {
+  return await db.getFirstAsync(
+    `SELECT A.KM, AC.Litros
+     FROM Abastecimento A
+     INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
+     WHERE A.CodVeiculo = ?
+     AND A.KM > ?
+     ORDER BY A.KM
+     LIMIT 1`,
+    [vehicleId, km]
+  );
+};
+
+// Fetch the earliest spending date for a vehicle
+export const fetchEarliestSpendingDate = async (vehicleId) => {
+  return await db.getFirstAsync(
+    `SELECT MIN(G.Data) AS Data
+     FROM Gasto G
+     WHERE G.CodVeiculo = ?`,
+    [vehicleId]
+  );
+};
+
+// Fetch spending report data for a vehicle within a date range
+export const fetchSpendingReportData = async (vehicleId, startDate, endDate) => {
+  return await db.getAllAsync(
+    `SELECT
+        G.CodAbastecimento,
+        G.CodGasto,
+        G.Data,
+        G.Valor,
+        G.CodGastoTipo,
+        G.Observacao,
+        COALESCE(A.KM, G.KM) AS KM,
+        G.Oficina
+     FROM Gasto G
+     LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+     WHERE G.CodVeiculo = ?
+     AND G.Data >= ? AND G.Data <= ?
+     ORDER BY G.Data DESC, G.KM DESC`,
+    [vehicleId, startDate, endDate]
+  );
+};
