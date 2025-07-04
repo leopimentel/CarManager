@@ -16,7 +16,7 @@ import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -498,7 +498,7 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue =>  {
+        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue =>  {
           setVehicleId(itemValue)
           await db.runAsync(`UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`)
           console.log("Atualizou", itemValue)
@@ -532,7 +532,7 @@ function FillingScreen({ theme, route, navigation }) {
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
-          <Picker style={styles.picker} selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
+          <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
             {
               fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
             }  
@@ -652,13 +652,13 @@ function FillingScreen({ theme, route, navigation }) {
         />
       </View>
 
-      <Text>{t('totalWithDiscount')}: <NumberFormat value={(parseFloat(totalFuel) + (totalFuel2 ? parseFloat(totalFuel2) : 0) - (discount ? parseFloat(discount) : 0)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+      <Text>{t('totalWithDiscount')}: <NumericFormat value={(parseFloat(totalFuel) + (totalFuel2 ? parseFloat(totalFuel2) : 0) - (discount ? parseFloat(discount) : 0)).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
 
       {isTwoFuelTypes &&
       <>
         <View style={{...styles.splitRow, marginTop:10}}>
           <View style={{ flex: 1 }}>
-            <Picker style={styles.picker} selectedValue={fuelType2} onValueChange={itemValue => setFuelType2(itemValue)}>
+            <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={fuelType2} onValueChange={itemValue => setFuelType2(itemValue)}>
               {
                 fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
               }

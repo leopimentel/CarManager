@@ -3,14 +3,17 @@ Run the App
 
 Upgrade expo SDK
 - expo upgrade
+- npx expo install expo@latest
 
-npx expo install --fix
+npx expo install --check #check compatibility and packages which need to be updated
+npx expo install --fix #update invalid package version
 npx expo start --reset-cache
 npx expo install react-native-simple-toast
 npx expo uninstall react-native-tiny-toast
 
 Android Play Store build (generates .aab file to upload on Android Play Store)
 - eas build -p android --profile production
+- eas build -p android --profile preview
 - expo build:android -t app-bundle (old, do not use)
 
 Publish OTA
@@ -18,6 +21,8 @@ Publish OTA
 - eas update --channel production --message "Testando eas update"
 - expo publish (old, do not use)
 
+Updates eas
+- npm install -g eas-cli
 
 
 https://docs.expo.dev/versions/latest/sdk/sqlite/#getallasynctsource-params
