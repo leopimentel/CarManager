@@ -359,7 +359,7 @@ console.log("cars", cars)
           }}
         />}
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
+        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           console.log("VehicleId will be changed to ", itemValue)
           setVehicleId(itemValue)
           await db.runAsync(
@@ -374,7 +374,7 @@ console.log("cars", cars)
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
-            <Picker style={styles.picker} selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
+            <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={fuelType} onValueChange={itemValue => setFuelType(itemValue)}>
               {
                 fuels.map(fuel => <Picker.Item label={fuel.value} value={fuel.index} key={fuel.index}/>)
               }
@@ -382,7 +382,7 @@ console.log("cars", cars)
           </View>
 
           <View style={{ flex: 1 }}>
-            <Picker style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
+            <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
               if (itemValue != periodView) {
                 setPeriodView(itemValue)
                 setPeriod(itemValue)

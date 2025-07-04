@@ -243,7 +243,7 @@ function ReminderScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
+        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
           await db.runAsync(
             `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
@@ -255,7 +255,7 @@ function ReminderScreen({ theme, route, navigation }) {
           }  
         </Picker>}
 
-        {reminderTypes && <Picker style={styles.picker} label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
+        {reminderTypes && <Picker dropdownIconColor="#000" style={styles.picker} label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
           {
             reminderTypes.map(remindType => <Picker.Item label={ucfirst(remindType.value)} value={remindType.index} key={remindType.index}/>)
           }  

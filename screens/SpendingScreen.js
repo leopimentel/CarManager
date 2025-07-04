@@ -239,7 +239,7 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
+      {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
         setVehicleId(itemValue)
         await db.runAsync(
             `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
@@ -266,7 +266,7 @@ function SpendingScreen({ theme, route, navigation }) {
           {/* <Dropdown label={t('vehicle')} data={vehicles} value='Meu'/> */}
         </View>
         <View style={{ flex: 1, marginLeft: 5 }}>
-          <Picker style={styles.picker} selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
+          <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={spendingType} onValueChange={itemValue => setSpendingType(itemValue)}>
             {
               spendingTypesMinusFueling.map(spending => <Picker.Item label={spending.value} value={spending.index} key={spending.index}/>)
             }  

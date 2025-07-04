@@ -240,7 +240,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         />}
 
         {vehicles.length > 1 &&
-        <Picker style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
+        <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
           await db.runAsync(
               `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
@@ -279,7 +279,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Picker style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
+            <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
               if (itemValue != periodView) {
                 setPeriodView(itemValue)
                 choosePeriod(itemValue)
