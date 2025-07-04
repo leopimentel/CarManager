@@ -5,7 +5,7 @@ import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'rea
 import { getStyles } from './style'
 import { t } from '../locales'
 import { fetchVehicles, insertVehicleDb, updateVehicleDb, deleteVehicleDb } from '../database/queries'
-import { databaseFilePath, databaseName, openDatabase, closeDatabase, db } from '../database'
+import { databaseFilePath, databaseName, openDatabase, closeDatabase } from '../database'
 import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
@@ -69,7 +69,7 @@ function SettingsScreen({ theme }) {
 
         Alert.alert(t('failRestore'));
       }
-    } catch (e){}
+    } catch {}
 
     openDatabase()
   }
@@ -78,7 +78,7 @@ function SettingsScreen({ theme }) {
     closeDatabase()
     try{
       await Sharing.shareAsync(databaseFilePath);
-    } catch (e){}
+    } catch {}
     openDatabase()
   }
 

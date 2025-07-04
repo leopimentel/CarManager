@@ -9,7 +9,6 @@ import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { db } from '../database'
 import { fetchVehicles, fetchEarliestSpendingDate, fetchSpendingReportData, updatePrimaryVehicle } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
@@ -17,9 +16,8 @@ import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons as Icon } from '@expo/vector-icons';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { exportTableToCSV } from '../utils/csv'
 
 function SpendingReportScreen({ theme, route, navigation }) {
@@ -148,7 +146,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
     setVehicleId(cars[0].index)
     setVehicles(cars)
-  }, [period, selectedItems, observation, vehicleId]);
+  }, [period, selectedItems, observation]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -156,7 +154,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
     
     search()
-  }, [isFocused, period, selectedItems, vehicleId]);
+  }, [isFocused, period, selectedItems, vehicleId, search]);
 
   const cellEditRow = (rowData) => {
     const isFuel = rowData[3] === t('fuel')
@@ -254,7 +252,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
           <View style={{ flex: 1 }}>
             <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
-              if (itemValue != periodView) {
+              if (itemValue !== periodView) {
                 setPeriodView(itemValue)
                 choosePeriod(itemValue)
               }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {Picker} from '@react-native-picker/picker';
@@ -31,14 +31,14 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [fuelType, setFuelType] = useState(0)
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
-  const [totalAverage, setTotalAverage] = useState(0)
+  // const [totalAverage, setTotalAverage] = useState(0)
   const [accurateAverage, setAccurateAverage] = useState(0)
   const [totalKM, setTotalKM] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
   console.log("FuelConsumptionScreen begin", vehicleId)
-  const [greatestAverage, setGreatestAverage] = useState(0);
-  const [lowestAverage, setLowestAverage] = useState(0);
+  // const [greatestAverage, setGreatestAverage] = useState(0);
+  // const [lowestAverage, setLowestAverage] = useState(0);
   const [greatestAverageFullTank, setGreatestAverageFullTank] = useState(0);
   const [lowestAverageFullTank, setLowestAverageFullTank] = useState(0);
 
@@ -53,14 +53,16 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     return variable;
   }
 
-  let av = initAveragesPerFuel();  
+  let av = useMemo(() => initAveragesPerFuel(), []);  
 
   const [averagesPerFuelType , setAveragesPerFuelType] = useState(av);
 
-  const fuels = [{
-    index: 0,
-    value: t('all')
-  }, ...f];
+  const fuels = useMemo(() => {
+      return [{
+      index: 0,
+      value: t('all')
+    }, ...f]
+  }, []);
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
@@ -131,8 +133,8 @@ console.log("sassss", cars)
         const callback = (nextFilling) => {
           const temp = [];
           let totalSumAcc = 0
-          let totalAverageAcc = 0
-          let totalCount = 0
+          // let totalAverageAcc = 0
+          // let totalCount = 0
           let totalCountAccurate = 0
           let totalAccurate = 0
           let minKm = 0
@@ -178,8 +180,8 @@ console.log("ararara ", filling.CodCombustivel, fuels)
 
             totalSumAcc += filling.Total - filling.Desconto
             if (average) {
-              totalAverageAcc += average
-              totalCount++
+              // totalAverageAcc += average
+              // totalCount++
               if (filling.TanqueCheio && nextFilling.TanqueCheio) {
                 totalAccurate += average
                 totalCountAccurate++
@@ -222,12 +224,12 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setTotalKM(maxKm - minKm)
           setTableData(temp)
           setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-          setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
+          // setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
           setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
           setLoading(false)
-          setGreatestAverage(greatestAverageAux.toFixed(2))
+          // setGreatestAverage(greatestAverageAux.toFixed(2))
           setGreatestAverageFullTank(greatestAverageFullTankAux.toFixed(2))
-          setLowestAverage(lowestAverageAux.toFixed(2))
+          // setLowestAverage(lowestAverageAux.toFixed(2))
           setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
           setAveragesPerFuelType(auxAveragesPerFuel)
         }
@@ -245,12 +247,12 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setLoading(false)
           setTableData([])
           setTotalSum(0)
-          setTotalAverage(0)
+          // setTotalAverage(0)
           setTotalKM(0)
           setAccurateAverage(0)
-          setGreatestAverage(0)
+          // setGreatestAverage(0)
           setGreatestAverageFullTank(0)
-          setLowestAverage(0)
+          // setLowestAverage(0)
           setLowestAverageFullTank(0)
           setAveragesPerFuelType(av)
         }
@@ -260,7 +262,7 @@ console.log("cars", cars)
     }
     fetchData()
       
-  }, [isFocused, fuelType, fillingPeriod, vehicleId]);
+  }, [isFocused, fuelType, fillingPeriod, vehicleId, av, fuels]);
 
   const cellEditRow = (data) => (
     <TouchableOpacity onPress={() => {
@@ -276,7 +278,7 @@ console.log("cars", cars)
   const exportTable = async () => await exportTableToCSV(tableHead.map(row => row.title).slice(1), tableData.map(row => row.slice(1)), 'FuelConsumption.csv')
 
   const cellAverage = (data, index) => {
-    var notFullTank = tableData[index][10] === t('no') || (index && tableData[index-1][10] === t('no'))
+    let notFullTank = tableData[index][10] === t('no') || (index && tableData[index-1][10] === t('no'))
     return (
       <Text style={{...styles.text}} onPress={()=>  
         notFullTank ? 
@@ -345,7 +347,7 @@ console.log("cars", cars)
 
           <View style={{ flex: 1 }}>
             <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
-              if (itemValue != periodView) {
+              if (itemValue !== periodView) {
                 setPeriodView(itemValue)
                 setPeriod(itemValue)
               }

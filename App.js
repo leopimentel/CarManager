@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, View } from 'react-native';
 import Colors from './constants/Colors'
@@ -9,7 +9,6 @@ import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
 import ReminderScreen from './screens/ReminderScreen';
 import RemindersScreen from './screens/RemindersScreen';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import { t } from './locales'
 

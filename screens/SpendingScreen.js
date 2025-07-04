@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Dialog, Portal } from 'react-native-paper';
+import { withTheme, Button, TextInput, Dialog, Portal, HelperText } from 'react-native-paper';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
 import { fetchVehicles, fetchSpendingById, saveSpendingDb, deleteSpending, updatePrimaryVehicle } from '../database/queries'
 import { spendingTypes } from '../constants/fuel'
-import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
@@ -61,7 +59,7 @@ function SpendingScreen({ theme, route, navigation }) {
       setVehicles(cars)
     }
     fetchData()
-  }, [isFocused])
+  }, [isFocused, vehicleId])
 
   useEffect(() => {
     async function fetchData() {
@@ -102,7 +100,7 @@ function SpendingScreen({ theme, route, navigation }) {
       }
     }
     fetchData()
-  }, [route.params])
+  }, [route.params, vehicleId])
 
   const removeSpending = () => {
     const confirmDelete = async () => {

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList } from 'react-native';
-import { withTheme, Button } from 'react-native-paper';
+import { withTheme, Button, Card } from 'react-native-paper';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
 import { fetchReminders } from '../database/queries'
-import { Card } from 'react-native-paper';
 import { fromDatabaseToUserDate } from '../utils/date'
 import { Loading } from '../components/Loading'
 import { useIsFocused } from '@react-navigation/native'

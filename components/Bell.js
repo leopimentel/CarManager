@@ -18,7 +18,7 @@ function Bell(props)
     
     useEffect(() => {
         notify()
-    }, [])
+    }, [notify])
 
     return <>
         <IconButton size={34} iconColor={Colors.primary} icon="bell" onPress={() => props.onPress() }/>

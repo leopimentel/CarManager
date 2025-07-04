@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Switch, Dialog, Portal } from 'react-native-paper';
+import { withTheme, Button, TextInput, Switch, Dialog, Portal, HelperText } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
 import { fetchVehicles, fetchFillingById, saveFillingDb, deleteFilling, updatePrimaryVehicle } from '../database/queries'
-import { fuels as f, spendingTypes, decimalSeparator, thousandSeparator } from '../constants/fuel'
-import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
+import { fuels as f, decimalSeparator, thousandSeparator } from '../constants/fuel'
+import { fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
