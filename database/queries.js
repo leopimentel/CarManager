@@ -385,7 +385,7 @@ export const fetchReminders = async () => {
 };
 
 // Insert a new vehicle
-export const insertVehicle = async (description) => {
+export const insertVehicleDb = async (description) => {
   let res = await db.runAsync(
     `INSERT INTO Veiculo (Descricao) VALUES (?)`,
     [description]
@@ -394,7 +394,7 @@ export const insertVehicle = async (description) => {
 };
 
 // Update a vehicle's description
-export const updateVehicle = async (vehicleId, description) => {
+export const updateVehicleDb = async (vehicleId, description) => {
   return await db.runAsync(
     `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
     [description, vehicleId]
@@ -402,7 +402,7 @@ export const updateVehicle = async (vehicleId, description) => {
 };
 
 // Delete a vehicle and associated data
-export const deleteVehicle = async (vehicleId) => {
+export const deleteVehicleDb = async (vehicleId) => {
   return await db.withTransactionAsync(async (tx) => {
     await db.runAsync(
       `DELETE FROM Veiculo WHERE CodVeiculo = ?`,

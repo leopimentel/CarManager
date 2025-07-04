@@ -4,6 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'react-native-paper';
 import { getStyles } from './style'
 import { t } from '../locales'
+import { fetchVehicles, insertVehicleDb, updateVehicleDb, deleteVehicleDb } from '../database/queries'
 import { databaseFilePath, databaseName, openDatabase, closeDatabase, db } from '../database'
 import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
@@ -23,9 +24,7 @@ function SettingsScreen({ theme }) {
   useEffect(() => {
     setLoading(true)
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-          [])
+      let results = await fetchVehicles();
           
       if (results.length) {
         let cars = []
@@ -85,18 +84,13 @@ function SettingsScreen({ theme }) {
 
   const insertVehicle = async () => {
     setLoading(true)
-    let res = await db.runAsync(
-        `INSERT INTO Veiculo (Descricao) VALUES (?)`,
-        [description])
+    await insertVehicleDb(description);
 
     setVehicleId()
     setDescription()
     setVisibleDialog(false)
 
-    let results = await db.getAllAsync(
-      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-      [])
-
+    let results = await fetchVehicles();
     if (results.length) {
       let cars = []
       for (const row of results) {
@@ -112,39 +106,25 @@ function SettingsScreen({ theme }) {
 
   const deleteVehicle = () => {
     const confirm = async () => {
-      setLoading(true) 
-      await db.withTransactionAsync(async function(tx) {
-        await db.runAsync(
-          `DELETE FROM Veiculo WHERE CodVeiculo = ?`,
-          [vehicleId])
-        console.log('Vehicle deleted')
-        setVehicleId()
-        setDescription()
-        setVisibleDialog(false)
-        await db.runAsync(`DELETE FROM Gasto WHERE CodVeiculo = ?`, [vehicleId])
-        await db.runAsync(`DELETE FROM Abastecimento_Combustivel 
-          WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`, [vehicleId]
-        )
-        await db.runAsync(`DELETE FROM Abastecimento WHERE CodVeiculo = ?`, [vehicleId])
-        
-        let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-          [])
-          
-        let cars = []
-          
-        if (results.length) {
-          for (const row of results) {
-            cars.push({
-              index: row.CodVeiculo,
-              value: row.Descricao
-            });
-          }
-          
+      setLoading(true)
+      await deleteVehicleDb(vehicleId);
+      console.log('Vehicle deleted');
+      setVehicleId()
+      setDescription()
+      setVisibleDialog(false)
+      
+      let results = await fetchVehicles();
+      let cars = []
+      if (results.length) {
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
         }
-        setLoading(false)
-        setVehicles(cars)
-      }) 
+      }
+      setLoading(false)
+      setVehicles(cars)
     }
 
     Alert.alert(
@@ -161,18 +141,13 @@ function SettingsScreen({ theme }) {
 
   const updateVehicle = async () => {
     setLoading(true)
-    await db.runAsync(
-      `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
-      [description, vehicleId])
+    await updateVehicleDb(vehicleId, description);
       
     setVehicleId()
     setDescription()
     setVisibleDialog(false)
 
-    let results = await db.getAllAsync(
-      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-      [])
-
+    let results = await fetchVehicles();
     if (results.length) {
       let cars = []
       for (const row of results) {
