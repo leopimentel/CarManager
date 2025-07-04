@@ -7,6 +7,7 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
+import { fetchVehicles, fetchReminderTypes, fetchReminderById, saveReminder, deleteReminder, updatePrimaryVehicle } from '../database/queries'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
@@ -41,9 +42,7 @@ function ReminderScreen({ theme, route, navigation }) {
 
   useEffect(() => {
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT L.Descricao, L.CodLembreteTipo FROM LembreteTipo L`,
-          [])
+      let results = await fetchReminderTypes();
           
       let aux = []
       if (results.length) {
@@ -61,9 +60,7 @@ function ReminderScreen({ theme, route, navigation }) {
 
   useEffect(() => {
     async function fetchData() {
-      let results = await db.getAllAsync(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-        [])
+      let results = await fetchVehicles();
           
       let cars = []
       if (results.length) {
@@ -91,13 +88,7 @@ function ReminderScreen({ theme, route, navigation }) {
         if (route.params.CodLembrete){
           setReminderId(route.params.CodLembrete)
           setLoading(true)
-          let reminder = await db.getFirstAsync(
-              `SELECT
-                L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
-                L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto
-              FROM Lembrete L
-              WHERE L.CodLembrete = ?`,
-              [route.params.CodLembrete])
+          let reminder = await fetchReminderById(route.params.CodLembrete);
               
           if (reminder) {
             console.log(reminder, moment(reminder.DataLembrete, 'YYYY-MM-DD').format(t('dateFormat')))
@@ -112,11 +103,7 @@ function ReminderScreen({ theme, route, navigation }) {
           setLoading(false)
         }      
       } else {
-        let results = await db.getAllAsync(
-            `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-            LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-            ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-            [])
+        let results = await fetchVehicles();
             
         if (results.length) {
           let cars = []
@@ -136,9 +123,7 @@ function ReminderScreen({ theme, route, navigation }) {
   const remove = () => {
     const confirm = async () => {
       setLoading(true)
-      await db.runAsync(
-          `DELETE FROM Lembrete WHERE CodLembrete = ?`,
-          [reminderId])
+      await deleteReminder(reminderId);
           
       console.log(`Reminder ${reminderId} removed`)
       notify()
@@ -177,33 +162,23 @@ function ReminderScreen({ theme, route, navigation }) {
        setFormErrors({...formErrors, dateOrKm: [true, t('errorMessage.dateOrKm')]})
        return false
     }
-    const dateSqlLite = selectedDate ? fromUserDateToDatabase(selectedDate) : null
     setLoading(true)
-    if (!reminderId) {
-      console.log(vehicleId, new Date(), reminderType, km, dateSqlLite, observation, done, spendingId )
-      let res = await db.runAsync(
-        `INSERT INTO Lembrete 
-        (CodVeiculo, DataCadastro, CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId])
-
-      console.log(`Reminder ${res.lastInsertId} inserted`)
-      clearForm()
-      notify()
-      setLoading(false)
-      setVisibleDialog(true)
-    } else {
-      await db.runAsync(
-        `UPDATE Lembrete
-          SET CodVeiculo = ?, DataCadastro = ?, CodLembreteTipo = ?, KM = ?, DataLembrete = ?, Observacao = ?, Finalizado = ?, CodGasto = ?
-          WHERE CodLembrete = ?`,
-          [vehicleId, fromUserDateToDatabase(new Date()), reminderType, km, dateSqlLite, observation, done, spendingId, reminderId])
-      console.log(`Reminder ${reminderId} updated ${km}`)
-      notify()
-      setVisibleDialog(true)
-      clearForm()
-      setLoading(false)
+    const data = {
+      vehicleId,
+      dateCadastro: new Date(),
+      reminderType,
+      km,
+      dateLembrete: selectedDate,
+      observation,
+      done,
+      spendingId
     };
+    let savedReminderId = await saveReminder(data, !!reminderId, reminderId);
+    console.log(`Reminder ${savedReminderId} ${reminderId ? 'updated' : 'inserted'} ${km}`);
+    clearForm()
+    notify()
+    setVisibleDialog(true)
+    setLoading(false)
   }
 
   if (loading) {
@@ -245,9 +220,7 @@ function ReminderScreen({ theme, route, navigation }) {
 
         {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
-          await db.runAsync(
-            `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-          )
+          await updatePrimaryVehicle(itemValue);
           console.log("VehicleId updated to", itemValue)
         }}>
           {

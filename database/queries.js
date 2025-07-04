@@ -307,3 +307,119 @@ export const deleteSpending = async (codGasto) => {
     [codGasto]
   );
 };
+
+// Fetch all reminder types
+export const fetchReminderTypes = async () => {
+  return await db.getAllAsync(
+    `SELECT L.Descricao, L.CodLembreteTipo FROM LembreteTipo L`,
+    []
+  );
+};
+
+// Fetch reminder details by CodLembrete
+export const fetchReminderById = async (codLembrete) => {
+  return await db.getFirstAsync(
+    `SELECT
+       L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
+       L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto
+     FROM Lembrete L
+     WHERE L.CodLembrete = ?`,
+    [codLembrete]
+  );
+};
+
+// Save a new reminder or update an existing one
+export const saveReminder = async (data, isUpdate = false, codLembrete = null) => {
+  const { vehicleId, dateCadastro, reminderType, km, dateLembrete, observation, done, spendingId } = data;
+  const dateCadastroSqlLite = fromUserDateToDatabase(dateCadastro);
+  const dateLembreteSqlLite = dateLembrete ? fromUserDateToDatabase(dateLembrete) : null;
+
+  if (!isUpdate) {
+    let res = await db.runAsync(
+      `INSERT INTO Lembrete 
+       (CodVeiculo, DataCadastro, CodLembreteTipo, KM, DataLembrete, Observacao, Finalizado, CodGasto) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [vehicleId, dateCadastroSqlLite, reminderType, km, dateLembreteSqlLite, observation, done, spendingId]
+    );
+    return res.lastInsertRowId;
+  } else {
+    await db.runAsync(
+      `UPDATE Lembrete
+       SET CodVeiculo = ?, DataCadastro = ?, CodLembreteTipo = ?, KM = ?, DataLembrete = ?, Observacao = ?, Finalizado = ?, CodGasto = ?
+       WHERE CodLembrete = ?`,
+      [vehicleId, dateCadastroSqlLite, reminderType, km, dateLembreteSqlLite, observation, done, spendingId, codLembrete]
+    );
+    return codLembrete;
+  }
+};
+
+// Delete a reminder by CodLembrete
+export const deleteReminder = async (codLembrete) => {
+  return await db.runAsync(
+    `DELETE FROM Lembrete WHERE CodLembrete = ?`,
+    [codLembrete]
+  );
+};
+
+// Fetch all reminders with associated data
+export const fetchReminders = async () => {
+  return await db.getAllAsync(
+    `SELECT L.CodLembrete, L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
+     L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto, LT.Descricao,
+     V.Descricao AS Veiculo,
+     (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
+     (
+       L.KM IS NOT NULL AND L.KM <= (
+           SELECT 
+           MAX(COALESCE(A.KM, G.KM, 0)) 
+           FROM Gasto G
+           LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+       )
+     ) AS KMTriggered
+     FROM Lembrete L
+     INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
+     INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
+     ORDER BY L.Finalizado ASC, DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
+    []
+  );
+};
+
+// Insert a new vehicle
+export const insertVehicle = async (description) => {
+  let res = await db.runAsync(
+    `INSERT INTO Veiculo (Descricao) VALUES (?)`,
+    [description]
+  );
+  return res.lastInsertRowId;
+};
+
+// Update a vehicle's description
+export const updateVehicle = async (vehicleId, description) => {
+  return await db.runAsync(
+    `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
+    [description, vehicleId]
+  );
+};
+
+// Delete a vehicle and associated data
+export const deleteVehicle = async (vehicleId) => {
+  return await db.withTransactionAsync(async (tx) => {
+    await db.runAsync(
+      `DELETE FROM Veiculo WHERE CodVeiculo = ?`,
+      [vehicleId]
+    );
+    await db.runAsync(
+      `DELETE FROM Gasto WHERE CodVeiculo = ?`,
+      [vehicleId]
+    );
+    await db.runAsync(
+      `DELETE FROM Abastecimento_Combustivel 
+       WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`,
+      [vehicleId]
+    );
+    await db.runAsync(
+      `DELETE FROM Abastecimento WHERE CodVeiculo = ?`,
+      [vehicleId]
+    );
+  });
+};
