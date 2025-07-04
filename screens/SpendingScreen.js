@@ -8,6 +8,7 @@ import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
 import { db } from '../database'
+import { fetchVehicles, fetchSpendingById, saveSpendingDb, deleteSpending, updatePrimaryVehicle } from '../database/queries'
 import { spendingTypes } from '../constants/fuel'
 import { HelperText } from 'react-native-paper';
 import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
@@ -44,11 +45,7 @@ function SpendingScreen({ theme, route, navigation }) {
     console.log("isFocused", isFocused)
     console.log("vehicleid", vehicleId)
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [])
+      let results = await fetchVehicles();
       
       let cars = []
       if (results.length) {
@@ -71,21 +68,9 @@ function SpendingScreen({ theme, route, navigation }) {
       if (route.params && route.params.CodGasto) {
         console.log("codgasto, vehicleId", vehicleId)
         setLoading(true)
-        let results = await db.getAllAsync(
-            `SELECT
-             G.Data,
-             G.CodGastoTipo,
-             G.Valor,
-             G.Observacao,
-             G.KM,
-             G.CodVeiculo,
-             G.Oficina
-             FROM Gasto G
-             WHERE G.CodGasto = ?`,
-            [route.params.CodGasto])
+        let abastecimento = await fetchSpendingById(route.params.CodGasto);
         
-        if (results.length) {
-          const abastecimento = results[0]
+        if (abastecimento) {
           console.log(abastecimento)
           setPrice(''+abastecimento.Valor)
           setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
@@ -102,11 +87,7 @@ function SpendingScreen({ theme, route, navigation }) {
         setLoading(false)
       } else {
         console.log("neesse else")
-        results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [])
+        let results = await fetchVehicles();
           
         if (results.length) {
           let cars = []
@@ -126,9 +107,7 @@ function SpendingScreen({ theme, route, navigation }) {
   const removeSpending = () => {
     const confirmDelete = async () => {
       setLoading(true)
-      await db.runAsync(
-          `DELETE FROM Gasto WHERE CodGasto = ?`,
-          [codGasto])
+      await deleteSpending(codGasto);
           
       console.log(`Spending ${codGasto} removed`)
       setVisibleDialog(true)
@@ -166,26 +145,21 @@ function SpendingScreen({ theme, route, navigation }) {
       return false
     }
 
-    const dateSqlLite = fromUserDateToDatabase(date)
     setLoading(true)
-    if (!codGasto) {
-      let res = await db.runAsync(
-          `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair])
-            setLoading(false)
-            setVisibleDialog(true)
-            setCodGasto(res.lastInsertRowId)
-            console.log(`Spending ${res.lastInsertRowId} inserted `)
-    } else {
-      await db.runAsync(
-        `UPDATE Gasto
-          SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
-          WHERE CodGasto = ?`,
-        [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto])
-      console.log(`Spending ${codGasto} updated`)
-      setLoading(false)
-      setVisibleDialog(true)
-    }
+    const data = {
+      vehicleId,
+      date,
+      spendingType,
+      price,
+      observation,
+      km,
+      autoRepair
+    };
+    let savedCodGasto = await saveSpendingDb(data, !!codGasto, codGasto);
+    setLoading(false)
+    setVisibleDialog(true)
+    setCodGasto(savedCodGasto)
+    console.log(`Spending ${savedCodGasto} ${codGasto ? 'updated' : 'inserted'}`)
   }
 
   if (loading) {
@@ -241,9 +215,7 @@ function SpendingScreen({ theme, route, navigation }) {
 
       {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
         setVehicleId(itemValue)
-        await db.runAsync(
-            `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-        )
+        await updatePrimaryVehicle(itemValue);
         console.log("VehicleId updated to", itemValue)
       }}>
         {

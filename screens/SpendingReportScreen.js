@@ -10,6 +10,7 @@ import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
 import { db } from '../database'
+import { fetchVehicles, fetchEarliestSpendingDate, fetchSpendingReportData, updatePrimaryVehicle } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
 import { ucfirst } from '../utils/string'
@@ -62,12 +63,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
   const choosePeriod = async (index) => {
     if (index === 'all') {
-      let row = await db.getFirstAsync(`
-        SELECT MIN(G.Data) AS Data
-        FROM Gasto G
-        WHERE G.CodVeiculo = ?              
-      `,
-      [vehicleId])
+      let row = await fetchEarliestSpendingDate(vehicleId);
           
       if (!row || !row['Data'])
         return setPeriod(choosePeriodFromIndex(index))
@@ -84,11 +80,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const search = useCallback(async ()=>{
     setLoading(true)
     
-    let results = await db.getAllAsync(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V        
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [])
+    let results = await fetchVehicles();
 
     let cars = []
             
@@ -100,23 +92,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         });
       }
 
-      results = await db.getAllAsync(`
-        SELECT
-        G.CodAbastecimento,
-        G.CodGasto,
-        G.Data,
-        G.Valor,
-        G.CodGastoTipo,
-        G.Observacao,
-        COALESCE(A.KM, G.KM) AS KM,
-        G.Oficina
-        FROM Gasto G
-        LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
-        WHERE G.CodVeiculo = ?
-        AND G.Data >= ? AND G.Data <= ?
-        ORDER BY G.Data DESC, G.KM DESC
-      `,
-      [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)])
+      results = await fetchSpendingReportData(cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate));
 
       let totalSumAcc = 0
       let minKm = 0
@@ -242,9 +218,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         {vehicles.length > 1 &&
         <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
           setVehicleId(itemValue)
-          await db.runAsync(
-              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            )
+          await updatePrimaryVehicle(itemValue);
           console.log("VehicleId updated to", itemValue)
         }}>
           {

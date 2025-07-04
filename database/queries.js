@@ -259,3 +259,51 @@ export const fetchSpendingReportData = async (vehicleId, startDate, endDate) => 
     [vehicleId, startDate, endDate]
   );
 };
+
+// Fetch spending details by CodGasto
+export const fetchSpendingById = async (codGasto) => {
+  return await db.getFirstAsync(
+    `SELECT
+       G.Data,
+       G.CodGastoTipo,
+       G.Valor,
+       G.Observacao,
+       G.KM,
+       G.CodVeiculo,
+       G.Oficina
+     FROM Gasto G
+     WHERE G.CodGasto = ?`,
+    [codGasto]
+  );
+};
+
+// Save a new spending or update an existing one
+export const saveSpendingDb = async (data, isUpdate = false, codGasto = null) => {
+  const { vehicleId, date, spendingType, price, observation, km, autoRepair } = data;
+  const dateSqlLite = fromUserDateToDatabase(date);
+
+  if (!isUpdate) {
+    let res = await db.runAsync(
+      `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair]
+    );
+    return res.lastInsertRowId;
+  } else {
+    await db.runAsync(
+      `UPDATE Gasto
+       SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
+       WHERE CodGasto = ?`,
+      [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto]
+    );
+    return codGasto;
+  }
+};
+
+// Delete a spending by CodGasto
+export const deleteSpending = async (codGasto) => {
+  return await db.runAsync(
+    `DELETE FROM Gasto WHERE CodGasto = ?`,
+    [codGasto]
+  );
+};
