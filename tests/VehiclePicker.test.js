@@ -1,4 +1,4 @@
-// Simplified test for VehiclePicker component
+// Unit test for VehiclePicker component
 import React from 'react';
 import VehiclePicker from '../components/VehiclePicker';
 
@@ -14,6 +14,24 @@ jest.mock('../locales', () => ({
 jest.mock('../utils/string', () => ({
   ucfirst: jest.fn((str) => str.charAt(0).toUpperCase() + str.slice(1)),
 }));
+
+// Mock the Picker component to test onValueChange
+// jest.mock('@react-native-picker/picker', () => {
+//   const Picker = ({ children, selectedValue, onValueChange, testID, style }) => {
+//     // Simulate a component that can trigger onValueChange for testing
+//     const mockChange = (value) => {
+//       if (onValueChange) {
+//         onValueChange(value);
+//       }
+//     };
+//     return {
+//       props: { children, selectedValue, testID, style },
+//       mockChange, // Expose a method to simulate value change
+//     };
+//   };
+//   Picker.Item = ({ label, value }) => ({ label, value });
+//   return { Picker };
+// });
 
 describe('VehiclePicker', () => {
   const mockSetVehicleId = jest.fn();
@@ -55,5 +73,18 @@ describe('VehiclePicker', () => {
       style: {},
     });
     expect(result).toBeDefined();
+  });
+
+  it('handles value change and updates vehicle ID', async () => {
+    const result = VehiclePicker({
+      vehicles: vehicles,
+      vehicleId: 1,
+      setVehicleId: mockSetVehicleId,
+      style: {},
+    });
+    // Simulate value change to cover lines 19 and 20
+    await result.props.onValueChange(2);
+    expect(mockSetVehicleId).toHaveBeenCalledWith(2);
+    expect(require('../database/queries').updatePrimaryVehicle).toHaveBeenCalledWith(2);
   });
 });

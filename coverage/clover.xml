@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1751731223511" clover="3.2.0">
-  <project timestamp="1751731223511" name="All files">
-    <metrics statements="1125" coveredstatements="5" conditionals="491" coveredconditionals="2" methods="290" coveredmethods="2" elements="1906" coveredelements="9" complexity="0" loc="1125" ncloc="1125" packages="10" files="28" classes="28"/>
+<coverage generated="1751731818168" clover="3.2.0">
+  <project timestamp="1751731818168" name="All files">
+    <metrics statements="1125" coveredstatements="7" conditionals="491" coveredconditionals="2" methods="290" coveredmethods="3" elements="1906" coveredelements="12" complexity="0" loc="1125" ncloc="1125" packages="10" files="28" classes="28"/>
     <package name="CarManager">
       <metrics statements="24" coveredstatements="0" conditionals="11" coveredconditionals="0" methods="7" coveredmethods="0"/>
       <file name="App.js" path="/Users/leonardopimentelferreira/Projects/CarManager/App.js">
@@ -36,7 +36,7 @@
       </file>
     </package>
     <package name="CarManager.components">
-      <metrics statements="14" coveredstatements="5" conditionals="4" coveredconditionals="2" methods="7" coveredmethods="2"/>
+      <metrics statements="14" coveredstatements="7" conditionals="4" coveredconditionals="2" methods="7" coveredmethods="3"/>
       <file name="Bell.js" path="/Users/leonardopimentelferreira/Projects/CarManager/components/Bell.js">
         <metrics statements="6" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="0"/>
         <line num="7" count="0" type="stmt"/>
@@ -51,14 +51,14 @@
         <line num="6" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
       <file name="VehiclePicker.js" path="/Users/leonardopimentelferreira/Projects/CarManager/components/VehiclePicker.js">
-        <metrics statements="7" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="2"/>
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
         <line num="7" count="1" type="stmt"/>
-        <line num="8" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="8" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="9" count="2" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
-        <line num="25" count="3" type="stmt"/>
+        <line num="12" count="2" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="25" count="6" type="stmt"/>
       </file>
     </package>
     <package name="CarManager.constants">
