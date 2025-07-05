@@ -9,16 +9,16 @@ import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { fetchVehicles, fetchEarliestSpendingDate, fetchSpendingReportData, updatePrimaryVehicle } from '../database/queries'
+import { fetchVehicles, fetchEarliestSpendingDate, fetchSpendingReportData } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
-import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons, MaterialIcons as Icon } from '@expo/vector-icons';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import { exportTableToCSV } from '../utils/csv'
+import VehiclePicker from '../components/VehiclePicker';
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -213,16 +213,13 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 &&
-        <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-          setVehicleId(itemValue)
-          await updatePrimaryVehicle(itemValue);
-          console.log("VehicleId updated to", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }
-        </Picker>}
+        <VehiclePicker
+          vehicles={vehicles}
+          vehicleId={vehicleId}
+          setVehicleId={setVehicleId}
+          style={styles.picker}
+        />
+        
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5, marginLeft: 5 }}>
             <SectionedMultiSelect
