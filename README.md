@@ -21,6 +21,9 @@ Publish OTA
 - eas update --channel production --message "Testando eas update"
 - expo publish (old, do not use)
 
+Show Lint
+yarn lint
+
 Updates eas
 - npm install -g eas-cli
 
