@@ -9,15 +9,15 @@ import { getStyles, toastError } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { fetchVehicles, fetchEarliestFillingDate, fetchFuelConsumptionData, fetchNextFillingAfterKM, updatePrimaryVehicle } from '../database/queries'
+import { fetchVehicles, fetchEarliestFillingDate, fetchFuelConsumptionData, fetchNextFillingAfterKM } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
-import { ucfirst } from '../utils/string'
 import { exportTableToCSV } from '../utils/csv'
 import { Loading } from '../components/Loading'
 import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import VehiclePicker from '../components/VehiclePicker';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -325,16 +325,12 @@ console.log("cars", cars)
           }}
         />}
 
-        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-          console.log("VehicleId will be changed to ", itemValue)
-          setVehicleId(itemValue)
-          await updatePrimaryVehicle(itemValue);
-          console.log("VehicleId Updated to", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>}
+        <VehiclePicker
+          vehicles={vehicles}
+          vehicleId={vehicleId}
+          setVehicleId={setVehicleId}
+          style={styles.picker}
+        />
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>

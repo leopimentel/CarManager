@@ -7,14 +7,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { fetchVehicles, fetchSpendingById, saveSpendingDb, deleteSpending, updatePrimaryVehicle } from '../database/queries'
+import { fetchVehicles, fetchSpendingById, saveSpendingDb, deleteSpending } from '../database/queries'
 import { spendingTypes } from '../constants/fuel'
 import { fromDatabaseToUserDate } from '../utils/date'
-import { ucfirst } from '../utils/string'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import { useIsFocused } from '@react-navigation/native'
+import VehiclePicker from '../components/VehiclePicker';
 
 function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -211,15 +211,12 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-        setVehicleId(itemValue)
-        await updatePrimaryVehicle(itemValue);
-        console.log("VehicleId updated to", itemValue)
-      }}>
-        {
-          vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-        }  
-      </Picker>}
+      <VehiclePicker
+        vehicles={vehicles}
+        vehicleId={vehicleId}
+        setVehicleId={setVehicleId}
+        style={styles.picker}
+      />
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>

@@ -6,7 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { fetchVehicles, fetchReminderTypes, fetchReminderById, saveReminder, deleteReminder, updatePrimaryVehicle } from '../database/queries'
+import { fetchVehicles, fetchReminderTypes, fetchReminderById, saveReminder, deleteReminder } from '../database/queries'
 import { fromDatabaseToUserDate } from '../utils/date'
 import { ucfirst } from '../utils/string'
 import { databaseIntegerFormat } from '../utils/number'
@@ -15,6 +15,7 @@ import Colors from '../constants/Colors';
 import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 import { AppContext } from "../providers/BellProvider";
+import VehiclePicker from '../components/VehiclePicker';
 
 function ReminderScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -216,15 +217,12 @@ function ReminderScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-          setVehicleId(itemValue)
-          await updatePrimaryVehicle(itemValue);
-          console.log("VehicleId updated to", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>}
+        <VehiclePicker
+          vehicles={vehicles}
+          vehicleId={vehicleId}
+          setVehicleId={setVehicleId}
+          style={styles.picker}
+        />
 
         {reminderTypes && <Picker dropdownIconColor="#000" style={styles.picker} label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
           {
