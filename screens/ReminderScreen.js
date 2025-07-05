@@ -16,6 +16,7 @@ import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 import { AppContext } from "../providers/BellProvider";
 import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert } from '../utils/alert';
 
 function ReminderScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -131,16 +132,7 @@ function ReminderScreen({ theme, route, navigation }) {
       clearForm()
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirm()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirm());
     
   }
 

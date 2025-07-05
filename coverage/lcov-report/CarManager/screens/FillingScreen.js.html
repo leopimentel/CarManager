@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/230</span>
+                <span class='fraction'>0/229</span>
             </div>
         
             
@@ -664,15 +664,7 @@
 <a name='L599'></a><a href='#L599'>599</a>
 <a name='L600'></a><a href='#L600'>600</a>
 <a name='L601'></a><a href='#L601'>601</a>
-<a name='L602'></a><a href='#L602'>602</a>
-<a name='L603'></a><a href='#L603'>603</a>
-<a name='L604'></a><a href='#L604'>604</a>
-<a name='L605'></a><a href='#L605'>605</a>
-<a name='L606'></a><a href='#L606'>606</a>
-<a name='L607'></a><a href='#L607'>607</a>
-<a name='L608'></a><a href='#L608'>608</a>
-<a name='L609'></a><a href='#L609'>609</a>
-<a name='L610'></a><a href='#L610'>610</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L602'></a><a href='#L602'>602</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -692,6 +684,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -885,7 +878,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -893,18 +885,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1299,6 +1283,7 @@ import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 import { NumericFormat } from 'react-number-format';
 import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert, showMessageAlert } from '../utils/alert';
 &nbsp;
 function <span class="fstat-no" title="function not covered" >FillingScreen(</span>{ theme, route, navigation }) {
   const styles = <span class="cstat-no" title="statement not covered" >getStyles(theme)</span>
@@ -1504,16 +1489,7 @@ function <span class="fstat-no" title="function not covered" >FillingScreen(</sp
 <span class="cstat-no" title="statement not covered" >      clearForm()</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    Alert.alert(</span>
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >confirmFilling()</span>
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+<span class="cstat-no" title="statement not covered" >    showConfirmAlert(t('confirmDelete'), '', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >confirmFilling())</span>;</span>
   }
 &nbsp;
   const clearForm = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
@@ -1567,7 +1543,7 @@ function <span class="fstat-no" title="function not covered" >FillingScreen(</sp
     }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (Math.abs(litters * pricePerUnit - totalFuel) &gt; 0.01) {</span>
-<span class="cstat-no" title="statement not covered" >      Alert.alert(t('errorMessage.computedTotalValue'));</span>
+<span class="cstat-no" title="statement not covered" >      showMessageAlert(t('errorMessage.computedTotalValue'));</span>
 <span class="cstat-no" title="statement not covered" >      return false</span>
     }
 &nbsp;
@@ -1588,7 +1564,7 @@ function <span class="fstat-no" title="function not covered" >FillingScreen(</sp
       }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (Math.abs(litters2 * pricePerUnit2 - totalFuel2) &gt; 0.01) {</span>
-<span class="cstat-no" title="statement not covered" >        Alert.alert(t('errorMessage.computedTotalValue'));</span>
+<span class="cstat-no" title="statement not covered" >        showMessageAlert(t('errorMessage.computedTotalValue'));</span>
 <span class="cstat-no" title="statement not covered" >        return false</span>
       }
     }
@@ -1897,7 +1873,7 @@ export default withTheme(FillingScreen);
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-05T17:51:11.922Z
+                at 2025-07-05T18:06:10.903Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

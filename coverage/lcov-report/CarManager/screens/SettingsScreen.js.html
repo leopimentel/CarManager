@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/104</span>
+                <span class='fraction'>0/103</span>
             </div>
         
             
@@ -298,15 +298,7 @@
 <a name='L233'></a><a href='#L233'>233</a>
 <a name='L234'></a><a href='#L234'>234</a>
 <a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a>
-<a name='L237'></a><a href='#L237'>237</a>
-<a name='L238'></a><a href='#L238'>238</a>
-<a name='L239'></a><a href='#L239'>239</a>
-<a name='L240'></a><a href='#L240'>240</a>
-<a name='L241'></a><a href='#L241'>241</a>
-<a name='L242'></a><a href='#L242'>242</a>
-<a name='L243'></a><a href='#L243'>243</a>
-<a name='L244'></a><a href='#L244'>244</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L236'></a><a href='#L236'>236</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -322,6 +314,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -431,20 +424,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -563,6 +547,7 @@ import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system'
 import Constants from 'expo-constants';
+import { showMessageAlert, showConfirmAlert } from '../utils/alert';
 &nbsp;
 function <span class="fstat-no" title="function not covered" >SettingsScreen(</span>{ theme }) {
   const styles = <span class="cstat-no" title="statement not covered" >getStyles(theme)</span>
@@ -612,13 +597,13 @@ function <span class="fstat-no" title="function not covered" >SettingsScreen(</s
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        setLoading(false)</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        Alert.alert(t('successRestore'));</span>
+<span class="cstat-no" title="statement not covered" >        showMessageAlert(t('successRestore'));</span>
       } else {
 <span class="cstat-no" title="statement not covered" >        console.log(`Fail to upload file ${uploadedFile.canceled}`, uploadedFile, databaseName)</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        setLoading(false)</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        Alert.alert(t('failRestore'));</span>
+<span class="cstat-no" title="statement not covered" >        showMessageAlert(t('failRestore'));</span>
       }
     } catch {}
 &nbsp;
@@ -678,16 +663,7 @@ function <span class="fstat-no" title="function not covered" >SettingsScreen(</s
 <span class="cstat-no" title="statement not covered" >      setVehicles(cars)</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    Alert.alert(</span>
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >confirm()</span>
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+<span class="cstat-no" title="statement not covered" >    showConfirmAlert(t('confirmDelete'), '', <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >confirm())</span>;</span>
   }
 &nbsp;
   const updateVehicle = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
@@ -799,7 +775,7 @@ export default withTheme(SettingsScreen);
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-05T17:51:11.922Z
+                at 2025-07-05T18:06:10.903Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

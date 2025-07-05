@@ -12,6 +12,7 @@ import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system'
 import Constants from 'expo-constants';
+import { showMessageAlert, showConfirmAlert } from '../utils/alert';
 
 function SettingsScreen({ theme }) {
   const styles = getStyles(theme)
@@ -61,13 +62,13 @@ function SettingsScreen({ theme }) {
 
         setLoading(false)
 
-        Alert.alert(t('successRestore'));
+        showMessageAlert(t('successRestore'));
       } else {
         console.log(`Fail to upload file ${uploadedFile.canceled}`, uploadedFile, databaseName)
 
         setLoading(false)
 
-        Alert.alert(t('failRestore'));
+        showMessageAlert(t('failRestore'));
       }
     } catch {}
 
@@ -127,16 +128,7 @@ function SettingsScreen({ theme }) {
       setVehicles(cars)
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirm()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirm());
   }
 
   const updateVehicle = async () => {

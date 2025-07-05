@@ -15,6 +15,7 @@ import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import { useIsFocused } from '@react-navigation/native'
 import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert } from '../utils/alert';
 
 function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -113,16 +114,7 @@ function SpendingScreen({ theme, route, navigation }) {
       clearForm()
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirmDelete()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirmDelete());
   }
 
   const clearForm = () => {

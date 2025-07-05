@@ -16,6 +16,7 @@ import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 import { NumericFormat } from 'react-number-format';
 import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert, showMessageAlert } from '../utils/alert';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -221,16 +222,7 @@ function FillingScreen({ theme, route, navigation }) {
       clearForm()
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirmFilling()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirmFilling());
   }
 
   const clearForm = () => {
@@ -284,7 +276,7 @@ function FillingScreen({ theme, route, navigation }) {
     }
 
     if (Math.abs(litters * pricePerUnit - totalFuel) > 0.01) {
-      Alert.alert(t('errorMessage.computedTotalValue'));
+      showMessageAlert(t('errorMessage.computedTotalValue'));
       return false
     }
 
@@ -305,7 +297,7 @@ function FillingScreen({ theme, route, navigation }) {
       }
 
       if (Math.abs(litters2 * pricePerUnit2 - totalFuel2) > 0.01) {
-        Alert.alert(t('errorMessage.computedTotalValue'));
+        showMessageAlert(t('errorMessage.computedTotalValue'));
         return false
       }
     }
