@@ -9,6 +9,7 @@ npm-debug.*
 *.orig.*
 web-build/
 dist/**/*
+coverage/
 
 # macOS
 .DS_Store

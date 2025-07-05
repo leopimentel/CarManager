@@ -6,8 +6,9 @@ import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { MaterialCommunityIcons, Entypo, Foundation, Feather } from '@expo/vector-icons';
 import { t } from '../locales'
-const BottomTab = createBottomTabNavigator();
 import Colors from '../constants/Colors';
+
+const BottomTab = createBottomTabNavigator();
 
 function BottomTabNavigator({ navigation, route }) {
   return (
@@ -55,13 +56,13 @@ function getCommonOptions(titleToTranslate) {
 
 function getIcon(type, name, focused) {
   const iconSize = 30
-  if (type == 'MaterialCommunityIcons')
+  if (type === 'MaterialCommunityIcons')
     return <MaterialCommunityIcons name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
-  if (type == 'Foundation')
+  if (type === 'Foundation')
     return <Foundation name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
-  if (type == 'Entypo')
+  if (type === 'Entypo')
     return <Entypo name={name} size={iconSize} style={{ color: getFocusedColor(focused) }} />
-  if (type == 'Feather')
+  if (type === 'Feather')
     return <Feather name={name} size={iconSize-3} style={{ color: getFocusedColor(focused) }} />
 }
 

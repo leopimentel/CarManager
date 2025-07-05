@@ -30,7 +30,7 @@ const exportTableToCSV = async (tableHead, tableData, csvFileName, encoding = 'u
     
     try{
         await Sharing.shareAsync(fuelConsumptionDir);
-    } catch (e) {
+    } catch {
     }
 }
 

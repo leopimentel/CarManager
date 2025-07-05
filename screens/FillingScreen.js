@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, Alert } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Switch, Dialog, Portal } from 'react-native-paper';
+import { withTheme, Button, TextInput, Switch, Dialog, Portal, HelperText } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
-import { fuels as f, spendingTypes, decimalSeparator, thousandSeparator } from '../constants/fuel'
-import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
-import { ucfirst } from '../utils/string'
+import { fetchVehicles, fetchFillingById, saveFillingDb, deleteFilling } from '../database/queries'
+import { fuels as f, decimalSeparator, thousandSeparator } from '../constants/fuel'
+import { fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import {Picker} from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native'
 import { NumericFormat } from 'react-number-format';
+import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert, showMessageAlert } from '../utils/alert';
 
 function FillingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -135,11 +135,7 @@ function FillingScreen({ theme, route, navigation }) {
 
   useEffect(() => {
     async function fetchData() {
-        let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [])
+        let results = await fetchVehicles();
         
         let cars = []
         if (results.length) {            
@@ -161,62 +157,46 @@ function FillingScreen({ theme, route, navigation }) {
     async function fetchData() {
       if (route.params && route.params.CodAbastecimento) {
         setLoading(true)
-        let results = await db.getAllAsync(
-          `SELECT A.Data_Abastecimento, CAST(A.KM AS TEXT) AS KM, A.Observacao, A.TanqueCheio,
-            AC.Codigo, AC.CodCombustivel, CAST(AC.Valor_Litro AS TEXT) AS Valor_Litro, CAST(AC.Total AS TEXT) AS Total,
-            CAST(AC.Litros AS TEXT) AS Litros, CAST(AC.Desconto AS TEXT) AS Desconto, G.CodGasto, A.CodVeiculo
-            FROM Abastecimento A
-            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-            INNER JOIN Gasto G ON G.CodAbastecimento = AC.CodAbastecimento
-            AND (G.Codigo_Abastecimento_Combustivel IS NULL OR
-              G.Codigo_Abastecimento_Combustivel IS NOT NULL AND G.Codigo_Abastecimento_Combustivel = AC.Codigo)
-            WHERE A.CodAbastecimento = ?
-            ORDER BY AC.Codigo`,
-          [route.params.CodAbastecimento])
+        let results = await fetchFillingById(route.params.CodAbastecimento);
 
-          if (results.length) {
-            const abastecimento = results[0]
-            setCodAbastecimento(route.params.CodAbastecimento)
-            setTotalFuel(abastecimento.Total)
-            setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').toDate())
-            setPricePerUnit(parseFloat(abastecimento.Valor_Litro).toFixed(3).toString())
-            setObservation(abastecimento.Observacao)
-            setFuelType(abastecimento.CodCombustivel)
-            setKm(abastecimento.KM)
-            setFullTank(abastecimento.TanqueCheio)
-            setCodGasto(abastecimento.CodGasto)
-            setCodAbastecimentoCombustivel(abastecimento.Codigo)
-            setVehicleId(abastecimento.CodVeiculo)
-            setLitters(parseFloat(abastecimento.Litros).toFixed(3).toString())
-            setDiscount(abastecimento.Desconto)
+        if (results.length) {
+          const abastecimento = results[0]
+          setCodAbastecimento(route.params.CodAbastecimento)
+          setTotalFuel(abastecimento.Total)
+          setFillingDate(moment(abastecimento.Data_Abastecimento, 'YYYY-MM-DD').toDate())
+          setPricePerUnit(parseFloat(abastecimento.Valor_Litro).toFixed(3).toString())
+          setObservation(abastecimento.Observacao)
+          setFuelType(abastecimento.CodCombustivel)
+          setKm(abastecimento.KM)
+          setFullTank(abastecimento.TanqueCheio)
+          setCodGasto(abastecimento.CodGasto)
+          setCodAbastecimentoCombustivel(abastecimento.Codigo)
+          setVehicleId(abastecimento.CodVeiculo)
+          setLitters(parseFloat(abastecimento.Litros).toFixed(3).toString())
+          setDiscount(abastecimento.Desconto)
 
-            if (results.length === 2) {
-              const abastecimento2 = results[1]
-              setTotalFuel2(abastecimento2.Total)
-              setPricePerUnit2(parseFloat(abastecimento2.Valor_Litro).toFixed(3).toString())
-              setFuelType2(abastecimento2.CodCombustivel)
-              setCodGasto2(abastecimento2.CodGasto)
-              setCodAbastecimentoCombustivel2(abastecimento2.Codigo)
-              setIsTwoFuelTypes(true)
-              setLitters2(parseFloat(abastecimento2.Litros).toFixed(3).toString())
-            } else {
-              setTotalFuel2(0)
-              setPricePerUnit2(null)
-              setCodGasto2(null)
-              setCodAbastecimentoCombustivel2(null)
-              setIsTwoFuelTypes(false)
-              setLitters2(null)
-            }
+          if (results.length === 2) {
+            const abastecimento2 = results[1]
+            setTotalFuel2(abastecimento2.Total)
+            setPricePerUnit2(parseFloat(abastecimento2.Valor_Litro).toFixed(3).toString())
+            setFuelType2(abastecimento2.CodCombustivel)
+            setCodGasto2(abastecimento2.CodGasto)
+            setCodAbastecimentoCombustivel2(abastecimento2.Codigo)
+            setIsTwoFuelTypes(true)
+            setLitters2(parseFloat(abastecimento2.Litros).toFixed(3).toString())
+          } else {
+            setTotalFuel2(0)
+            setPricePerUnit2(null)
+            setCodGasto2(null)
+            setCodAbastecimentoCombustivel2(null)
+            setIsTwoFuelTypes(false)
+            setLitters2(null)
           }
+        }
 
-          setLoading(false)
+        setLoading(false)
       } else {
-        let results = await db.getAllAsync(
-            `SELECT V.CodVeiculo, V.Descricao, VP.CodVeiculo FROM Veiculo V
-             LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-             ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-            []
-        )
+        let results = await fetchVehicles();
         if (results.length) {
           let cars = []
           for (const row of results) {
@@ -235,49 +215,14 @@ function FillingScreen({ theme, route, navigation }) {
   const removeFilling = () => {
     const confirmFilling = async () => {
       setLoading(true)
-      await db.withTransactionAsync(async function(tx) {
-        await db.runAsync(
-          `DELETE FROM Abastecimento WHERE CodAbastecimento = ?`,
-          [codAbastecimento])
-          
-        await db.runAsync(
-          'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
-          [codAbastecimentoCombustivel])
-
-        await db.runAsync(`DELETE FROM Gasto WHERE CodGasto = ?`, [codGasto])
-                  
-        if (!codAbastecimentoCombustivel2) {
-          console.log(`Filling ${codAbastecimento} removed`)
-          setVisibleDialog(true)
-          setLoading(false)
-          clearForm()
-        } else {
-          await db.runAsync(
-            'DELETE FROM Abastecimento_Combustivel WHERE Codigo = ?',
-            [codAbastecimentoCombustivel2])
-              
-          await db.runAsync(
-              `DELETE FROM Gasto WHERE CodGasto = ?`,
-              [codGasto2])
-
-          console.log(`Filling ${codAbastecimento} removed`)
-          setVisibleDialog(true)
-          setLoading(false)
-          clearForm()
-        }
-      })
+      await deleteFilling(codAbastecimento, codAbastecimentoCombustivel, codGasto, codAbastecimentoCombustivel2, codGasto2);
+      console.log(`Filling ${codAbastecimento} removed`)
+      setVisibleDialog(true)
+      setLoading(false)
+      clearForm()
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirmFilling()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirmFilling());
   }
 
   const clearForm = () => {
@@ -331,8 +276,7 @@ function FillingScreen({ theme, route, navigation }) {
     }
 
     if (Math.abs(litters * pricePerUnit - totalFuel) > 0.01) {
-      //setFormErrors({...formErrors, litters: [true, t('errorMessage.computedTotalValue')]})
-      Alert.alert(t('errorMessage.computedTotalValue'));
+      showMessageAlert(t('errorMessage.computedTotalValue'));
       return false
     }
 
@@ -353,114 +297,22 @@ function FillingScreen({ theme, route, navigation }) {
       }
 
       if (Math.abs(litters2 * pricePerUnit2 - totalFuel2) > 0.01) {
-        //setFormErrors({...formErrors, litters2: [true, t('errorMessage.computedTotalValue')]})
-        Alert.alert(t('errorMessage.computedTotalValue'));
+        showMessageAlert(t('errorMessage.computedTotalValue'));
         return false
       }
     }
 
-    const fillingDateSqlLite = fromUserDateToDatabase(fillingDate)
     setLoading(true)
-    await db.withTransactionAsync(async function(tx) {
-      if (!codAbastecimento) {
-        let res = await db.runAsync(
-          `INSERT INTO Abastecimento (CodVeiculo, Data_Abastecimento, KM, Observacao, TanqueCheio) VALUES (?, ?, ?, ?, ?)`,
-          [vehicleId, fillingDateSqlLite, km, observation, isFullTank])
-
-        let insertId = res.lastInsertRowId
-        res = await db.runAsync(
-          'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total, Desconto) VALUES (?, ?, ?, ?, ?, ?)',
-            // 'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
-          [insertId, fuelType, totalFuel/pricePerUnit, pricePerUnit, totalFuel, discount])
-              
-        const codAbastecimentoCombustivelInserted = res.lastInsertRowId
-        await db.runAsync(
-          `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel - discount, observation, insertId, codAbastecimentoCombustivelInserted, km])
-          
-        if (!isTwoFuelTypes) {
-          console.log(`Filling ${insertId} inserted`)
-          setLoading(false)
-          setVisibleDialog(true)
-          clearForm()
-        } else {
-          res = await db.runAsync(
-            'INSERT INTO Abastecimento_Combustivel (CodAbastecimento, CodCombustivel, Litros, Valor_Litro, Total) VALUES (?, ?, ?, ?, ?)',
-            [insertId, fuelType2, totalFuel2/pricePerUnit2, pricePerUnit2, totalFuel2])
-                        
-          const codAbastecimentoCombustivelInserted2 = res.lastInsertRowId
-          await db.runAsync(
-            `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, insertId, codAbastecimentoCombustivelInserted2, km])
-            
-          console.log(`Filling ${insertId} inserted`)
-          clearForm()
-          setLoading(false)
-          setVisibleDialog(true)
-        }
-      } else {
-        await db.runAsync(
-          `UPDATE Abastecimento
-           SET CodVeiculo = ?, Data_Abastecimento = ?, KM = ?, Observacao = ?, TanqueCheio = ?
-           WHERE CodAbastecimento = ?`,
-          [vehicleId, fillingDateSqlLite, km, observation, isFullTank, codAbastecimento])
-
-        await db.runAsync(
-          `UPDATE Abastecimento_Combustivel
-            SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?, Desconto = ?
-            WHERE Codigo = ?
-            `,
-          [fuelType, litters, pricePerUnit, totalFuel, discount, codAbastecimentoCombustivel])
-              
-        await db.runAsync(
-                  `UPDATE Gasto
-                   SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
-                   WHERE CodGasto = ?`,
-                  [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, km, codGasto])
-
-        if (!codAbastecimentoCombustivel2) {
-          console.log(`Filling ${codAbastecimento} updated ${km}`)
-          setVisibleDialog(true)
-          clearForm()
-          setLoading(false)
-        } else {
-          if (isTwoFuelTypes) {
-            await db.runAsync(
-              `UPDATE Abastecimento_Combustivel
-                SET CodCombustivel = ?, Litros = ?, Valor_Litro = ?, Total = ?
-                WHERE Codigo = ?
-                `,
-              [fuelType2, litters2, pricePerUnit2, totalFuel2, codAbastecimentoCombustivel2])
-
-            await db.runAsync(
-              `UPDATE Gasto
-                SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
-                WHERE CodGasto = ?`,
-              [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel2, observation, km, codGasto2])
-
-            console.log(`Filling ${codAbastecimento} updated`)
-            setVisibleDialog(true)
-            clearForm()
-            setLoading(false)
-          } else {
-            await db.runAsync(
-              `DELETE FROM Abastecimento_Combustivel
-                WHERE Codigo = ?
-                `,
-              [codAbastecimentoCombustivel2])
-                          
-            await db.runAsync(
-              `DELETE FROM Gasto WHERE CodGasto = ?`,
-              [codGasto2])
-              
-            console.log(`Filling ${codAbastecimento} updated`)
-            setVisibleDialog(true)
-            clearForm()
-            setLoading(false)
-          }
-        }
-      }
-    });
+    const data = {
+      vehicleId, fillingDate, km, observation, isFullTank, totalFuel, pricePerUnit, fuelType, discount,
+      litters, isTwoFuelTypes, totalFuel2, pricePerUnit2, fuelType2, litters2, codAbastecimentoCombustivel,
+      codGasto, codAbastecimentoCombustivel2, codGasto2
+    };
+    await saveFillingDb(data, !!codAbastecimento, codAbastecimento);
+    console.log(`Filling ${codAbastecimento || 'new'} ${codAbastecimento ? 'updated' : 'inserted'}`)
+    setVisibleDialog(true)
+    clearForm()
+    setLoading(false)
   }
 
   if (loading) {
@@ -498,15 +350,12 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue =>  {
-          setVehicleId(itemValue)
-          await db.runAsync(`UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`)
-          console.log("Atualizou", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>}
+      <VehiclePicker
+        vehicles={vehicles}
+        vehicleId={vehicleId}
+        setVehicleId={setVehicleId}
+        style={styles.picker}
+      />
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {Picker} from '@react-native-picker/picker';
@@ -9,15 +9,15 @@ import { getStyles, toastError } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { db } from '../database'
+import { fetchVehicles, fetchEarliestFillingDate, fetchFuelConsumptionData, fetchNextFillingAfterKM } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
-import { ucfirst } from '../utils/string'
 import { exportTableToCSV } from '../utils/csv'
 import { Loading } from '../components/Loading'
 import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import VehiclePicker from '../components/VehiclePicker';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -31,14 +31,14 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [fuelType, setFuelType] = useState(0)
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
-  const [totalAverage, setTotalAverage] = useState(0)
+  // const [totalAverage, setTotalAverage] = useState(0)
   const [accurateAverage, setAccurateAverage] = useState(0)
   const [totalKM, setTotalKM] = useState(0)
   const [vehicles, setVehicles] = useState([])
   const [vehicleId, setVehicleId] = useState();
   console.log("FuelConsumptionScreen begin", vehicleId)
-  const [greatestAverage, setGreatestAverage] = useState(0);
-  const [lowestAverage, setLowestAverage] = useState(0);
+  // const [greatestAverage, setGreatestAverage] = useState(0);
+  // const [lowestAverage, setLowestAverage] = useState(0);
   const [greatestAverageFullTank, setGreatestAverageFullTank] = useState(0);
   const [lowestAverageFullTank, setLowestAverageFullTank] = useState(0);
 
@@ -53,14 +53,16 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     return variable;
   }
 
-  let av = initAveragesPerFuel();  
+  let av = useMemo(() => initAveragesPerFuel(), []);  
 
   const [averagesPerFuelType , setAveragesPerFuelType] = useState(av);
 
-  const fuels = [{
-    index: 0,
-    value: t('all')
-  }, ...f];
+  const fuels = useMemo(() => {
+      return [{
+      index: 0,
+      value: t('all')
+    }, ...f]
+  }, []);
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
@@ -87,12 +89,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const setPeriod = async (index) => {
     console.log("at setperiod", vehicleId)
     if (index === 'all') {
-      let row = await db.getFirstAsync(`
-            SELECT MIN(A.Data_Abastecimento) AS Data_Abastecimento
-            FROM Abastecimento A
-            WHERE A.CodVeiculo = ?              
-          `,
-          [vehicleId])
+      let row = await fetchEarliestFillingDate(vehicleId);
           
       if (!row || !row['Data_Abastecimento'])
         return setFillingPeriod(choosePeriodFromIndex(index))
@@ -115,11 +112,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
     setLoading(true)
 
     async function fetchData(){
-      let results = await db.getAllAsync(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [])
+      let results = await fetchVehicles();
       let cars = []
 console.log("sassss", cars)
       if (results.length) {            
@@ -135,31 +128,13 @@ console.log("sassss", cars)
 
         setVehicleId(carId)
 
-        results = await db.getAllAsync(`
-          SELECT A.CodAbastecimento,
-          A.Data_Abastecimento,
-          A.KM,
-          A.Observacao,
-          A.TanqueCheio,
-          GROUP_CONCAT(AC.CodCombustivel) AS CodCombustivel,
-          SUM(AC.Litros) AS Litros,
-          (SUM(AC.Total) / SUM(AC.Litros)) AS Valor_Litro,
-          SUM(AC.Total) AS Total,
-          COALESCE(SUM(AC.Desconto), 0) AS Desconto
-          FROM Abastecimento A
-          INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-          WHERE A.CodVeiculo = ?
-          AND A.Data_Abastecimento >= ? AND A.Data_Abastecimento <= ?
-          GROUP BY AC.CodAbastecimento
-          ORDER BY A.KM DESC
-        `,
-        [carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate)])
+        results = await fetchFuelConsumptionData(carId, fromUserDateToDatabase(fillingPeriod.startDate), fromUserDateToDatabase(fillingPeriod.endDate));
 
         const callback = (nextFilling) => {
           const temp = [];
           let totalSumAcc = 0
-          let totalAverageAcc = 0
-          let totalCount = 0
+          // let totalAverageAcc = 0
+          // let totalCount = 0
           let totalCountAccurate = 0
           let totalAccurate = 0
           let minKm = 0
@@ -205,8 +180,8 @@ console.log("ararara ", filling.CodCombustivel, fuels)
 
             totalSumAcc += filling.Total - filling.Desconto
             if (average) {
-              totalAverageAcc += average
-              totalCount++
+              // totalAverageAcc += average
+              // totalCount++
               if (filling.TanqueCheio && nextFilling.TanqueCheio) {
                 totalAccurate += average
                 totalCountAccurate++
@@ -249,27 +224,18 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setTotalKM(maxKm - minKm)
           setTableData(temp)
           setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
-          setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
+          // setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
           setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
           setLoading(false)
-          setGreatestAverage(greatestAverageAux.toFixed(2))
+          // setGreatestAverage(greatestAverageAux.toFixed(2))
           setGreatestAverageFullTank(greatestAverageFullTankAux.toFixed(2))
-          setLowestAverage(lowestAverageAux.toFixed(2))
+          // setLowestAverage(lowestAverageAux.toFixed(2))
           setLowestAverageFullTank(lowestAverageFullTankAux.toFixed(2))
           setAveragesPerFuelType(auxAveragesPerFuel)
         }
 
         if (results.length) {
-          let filling = await db.getFirstAsync(`
-            SELECT A.KM, AC.Litros
-            FROM Abastecimento A
-            INNER JOIN Abastecimento_Combustivel AC ON AC.CodAbastecimento = A.CodAbastecimento
-            WHERE A.CodVeiculo = ?
-            AND A.KM > ?
-            ORDER BY A.KM
-            LIMIT 1
-          `,
-            [carId, results[0].KM])
+          let filling = await fetchNextFillingAfterKM(carId, results[0].KM);
 
           let nextFilling
           if (filling) {
@@ -281,12 +247,12 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setLoading(false)
           setTableData([])
           setTotalSum(0)
-          setTotalAverage(0)
+          // setTotalAverage(0)
           setTotalKM(0)
           setAccurateAverage(0)
-          setGreatestAverage(0)
+          // setGreatestAverage(0)
           setGreatestAverageFullTank(0)
-          setLowestAverage(0)
+          // setLowestAverage(0)
           setLowestAverageFullTank(0)
           setAveragesPerFuelType(av)
         }
@@ -296,7 +262,7 @@ console.log("cars", cars)
     }
     fetchData()
       
-  }, [isFocused, fuelType, fillingPeriod, vehicleId]);
+  }, [isFocused, fuelType, fillingPeriod, vehicleId, av, fuels]);
 
   const cellEditRow = (data) => (
     <TouchableOpacity onPress={() => {
@@ -312,7 +278,7 @@ console.log("cars", cars)
   const exportTable = async () => await exportTableToCSV(tableHead.map(row => row.title).slice(1), tableData.map(row => row.slice(1)), 'FuelConsumption.csv')
 
   const cellAverage = (data, index) => {
-    var notFullTank = tableData[index][10] === t('no') || (index && tableData[index-1][10] === t('no'))
+    let notFullTank = tableData[index][10] === t('no') || (index && tableData[index-1][10] === t('no'))
     return (
       <Text style={{...styles.text}} onPress={()=>  
         notFullTank ? 
@@ -359,18 +325,12 @@ console.log("cars", cars)
           }}
         />}
 
-        {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-          console.log("VehicleId will be changed to ", itemValue)
-          setVehicleId(itemValue)
-          await db.runAsync(
-              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            );
-          console.log("VehicleId Updated to", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }  
-        </Picker>}
+        <VehiclePicker
+          vehicles={vehicles}
+          vehicleId={vehicleId}
+          setVehicleId={setVehicleId}
+          style={styles.picker}
+        />
 
         <View style={{ ...styles.splitRow}}>          
           <View style={{ flex: 1, marginRight: 5 }}>
@@ -383,7 +343,7 @@ console.log("cars", cars)
 
           <View style={{ flex: 1 }}>
             <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
-              if (itemValue != periodView) {
+              if (itemValue !== periodView) {
                 setPeriodView(itemValue)
                 setPeriod(itemValue)
               }

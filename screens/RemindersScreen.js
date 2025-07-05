@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList } from 'react-native';
-import { withTheme, Button } from 'react-native-paper';
+import { withTheme, Button, Card } from 'react-native-paper';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
-import { Card } from 'react-native-paper';
+import { fetchReminders } from '../database/queries'
 import { fromDatabaseToUserDate } from '../utils/date'
 import { Loading } from '../components/Loading'
 import { useIsFocused } from '@react-navigation/native'
@@ -20,24 +19,7 @@ function RemindersScreen({ theme, route, navigation }) {
   useEffect(() => {
     setLoading(true)
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT L.CodLembrete, L.CodVeiculo, L.DataCadastro, L.CodLembreteTipo,
-          L.KM, L.DataLembrete, L.Observacao, L.Finalizado, L.CodGasto, LT.Descricao,
-          V.Descricao AS Veiculo,
-          (L.DataLembrete IS NOT NULL AND date('now', 'localtime') >= L.DataLembrete) AS DateTriggered,
-          (
-            L.KM IS NOT NULL AND L.KM <= (
-                SELECT 
-                MAX(COALESCE(A.KM, G.KM, 0)) 
-                FROM Gasto G
-                LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
-            )
-        ) AS KMTriggered
-          FROM Lembrete L
-          INNER JOIN LembreteTipo LT ON LT.CodLembreteTipo = L.CodLembreteTipo
-          INNER JOIN Veiculo V ON V.CodVeiculo = L.CodVeiculo
-          ORDER BY L.Finalizado ASC, DateTriggered DESC, KMTriggered DESC, L.DataCadastro DESC`,
-          [])
+      let results = await fetchReminders();
           
       let aux = []
       if (results.length) {
