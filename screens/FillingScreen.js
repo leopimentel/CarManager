@@ -358,12 +358,12 @@ function FillingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        <VehiclePicker
-          vehicles={vehicles}
-          vehicleId={vehicleId}
-          setVehicleId={setVehicleId}
-          style={styles.picker}
-        />
+      <VehiclePicker
+        vehicles={vehicles}
+        vehicleId={vehicleId}
+        setVehicleId={setVehicleId}
+        style={styles.picker}
+      />
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>

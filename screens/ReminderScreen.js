@@ -217,12 +217,12 @@ function ReminderScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-        <VehiclePicker
-          vehicles={vehicles}
-          vehicleId={vehicleId}
-          setVehicleId={setVehicleId}
-          style={styles.picker}
-        />
+      <VehiclePicker
+        vehicles={vehicles}
+        vehicleId={vehicleId}
+        setVehicleId={setVehicleId}
+        style={styles.picker}
+      />
 
         {reminderTypes && <Picker dropdownIconColor="#000" style={styles.picker} label={t('type')} selectedValue={reminderType} onValueChange={itemValue => setReminderType(itemValue)}>
           {
