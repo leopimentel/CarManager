@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1751732015787" clover="3.2.0">
-  <project timestamp="1751732015787" name="All files">
-    <metrics statements="1125" coveredstatements="7" conditionals="491" coveredconditionals="2" methods="290" coveredmethods="3" elements="1906" coveredelements="12" complexity="0" loc="1125" ncloc="1125" packages="10" files="28" classes="28"/>
+<coverage generated="1751737872005" clover="3.2.0">
+  <project timestamp="1751737872005" name="All files">
+    <metrics statements="1125" coveredstatements="13" conditionals="491" coveredconditionals="2" methods="290" coveredmethods="6" elements="1906" coveredelements="21" complexity="0" loc="1125" ncloc="1125" packages="10" files="28" classes="28"/>
     <package name="CarManager">
       <metrics statements="24" coveredstatements="0" conditionals="11" coveredconditionals="0" methods="7" coveredmethods="0"/>
       <file name="App.js" path="/Users/leonardopimentelferreira/Projects/CarManager/App.js">
@@ -248,17 +248,17 @@
       </file>
     </package>
     <package name="CarManager.locales">
-      <metrics statements="5" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
       <file name="en-US.js" path="/Users/leonardopimentelferreira/Projects/CarManager/locales/en-US.js">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       </file>
       <file name="index.js" path="/Users/leonardopimentelferreira/Projects/CarManager/locales/index.js">
-        <metrics statements="5" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="31" count="0" type="stmt"/>
-        <line num="34" count="0" type="stmt"/>
-        <line num="37" count="0" type="stmt"/>
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="37" count="2" type="stmt"/>
       </file>
       <file name="pt-BR.js" path="/Users/leonardopimentelferreira/Projects/CarManager/locales/pt-BR.js">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
@@ -1183,7 +1183,7 @@
       </file>
     </package>
     <package name="CarManager.utils">
-      <metrics statements="44" coveredstatements="0" conditionals="14" coveredconditionals="0" methods="12" coveredmethods="0"/>
+      <metrics statements="44" coveredstatements="1" conditionals="14" coveredconditionals="0" methods="12" coveredmethods="1"/>
       <file name="csv.js" path="/Users/leonardopimentelferreira/Projects/CarManager/utils/csv.js">
         <metrics statements="14" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="6" coveredmethods="0"/>
         <line num="12" count="0" type="stmt"/>
@@ -1237,8 +1237,8 @@
         <line num="7" count="0" type="stmt"/>
       </file>
       <file name="string.js" path="/Users/leonardopimentelferreira/Projects/CarManager/utils/string.js">
-        <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="1" count="0" type="stmt"/>
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="6" type="stmt"/>
       </file>
     </package>
   </project>

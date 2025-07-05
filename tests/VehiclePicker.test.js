@@ -7,13 +7,13 @@ jest.mock('../database/queries', () => ({
   updatePrimaryVehicle: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('../locales', () => ({
-  t: jest.fn((key) => key),
-}));
+// jest.mock('../locales', () => ({
+//   t: jest.fn((key) => key),
+// }));
 
-jest.mock('../utils/string', () => ({
-  ucfirst: jest.fn((str) => str.charAt(0).toUpperCase() + str.slice(1)),
-}));
+// jest.mock('../utils/string', () => ({
+//   ucfirst: jest.fn((str) => str.charAt(0).toUpperCase() + str.slice(1)),
+// }));
 
 // Mock the Picker component to test onValueChange
 // jest.mock('@react-native-picker/picker', () => {
