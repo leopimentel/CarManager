@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Button, TextInput, Dialog, Portal, HelperText } from 'react-native-paper';
 import {Picker} from '@react-native-picker/picker';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Alert } from 'react-native';
+import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'react-native-paper';
 import { getStyles } from './style'
