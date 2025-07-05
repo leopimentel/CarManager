@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1751738770980" clover="3.2.0">
-  <project timestamp="1751738770980" name="All files">
-    <metrics statements="1125" coveredstatements="13" conditionals="497" coveredconditionals="2" methods="293" coveredmethods="6" elements="1915" coveredelements="21" complexity="0" loc="1125" ncloc="1125" packages="10" files="29" classes="29"/>
+<coverage generated="1751739492629" clover="3.2.0">
+  <project timestamp="1751739492629" name="All files">
+    <metrics statements="1125" coveredstatements="17" conditionals="497" coveredconditionals="8" methods="293" coveredmethods="8" elements="1915" coveredelements="33" complexity="0" loc="1125" ncloc="1125" packages="10" files="29" classes="29"/>
     <package name="CarManager">
       <metrics statements="24" coveredstatements="0" conditionals="11" coveredconditionals="0" methods="7" coveredmethods="0"/>
       <file name="App.js" path="/Users/leonardopimentelferreira/Projects/CarManager/App.js">
@@ -1179,13 +1179,13 @@
       </file>
     </package>
     <package name="CarManager.utils">
-      <metrics statements="48" coveredstatements="1" conditionals="20" coveredconditionals="0" methods="15" coveredmethods="1"/>
+      <metrics statements="48" coveredstatements="5" conditionals="20" coveredconditionals="6" methods="15" coveredmethods="3"/>
       <file name="alert.js" path="/Users/leonardopimentelferreira/Projects/CarManager/utils/alert.js">
-        <metrics statements="4" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="3" coveredmethods="0"/>
-        <line num="12" count="0" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="42" count="0" type="stmt"/>
-        <line num="48" count="0" type="stmt"/>
+        <metrics statements="4" coveredstatements="4" conditionals="6" coveredconditionals="6" methods="3" coveredmethods="2"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="19" count="3" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="48" count="4" type="stmt"/>
       </file>
       <file name="csv.js" path="/Users/leonardopimentelferreira/Projects/CarManager/utils/csv.js">
         <metrics statements="14" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="6" coveredmethods="0"/>
