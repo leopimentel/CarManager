@@ -1,5 +1,5 @@
 // Unit test for VehiclePicker component
-import React from 'react';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import VehiclePicker from '../components/VehiclePicker';
 
 // Mock dependencies to avoid importing React Native or Expo modules
