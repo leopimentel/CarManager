@@ -19,6 +19,7 @@ const VehiclePicker = ({ vehicles, vehicleId, setVehicleId, style }) => {
         setVehicleId(itemValue);
         await updatePrimaryVehicle(itemValue);
       }}
+      testID="picker"
     >
       {vehicles.map(vehicle => (
         <Picker.Item
