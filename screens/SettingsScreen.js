@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Alert } from 'react-native';
+import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'react-native-paper';
 import { getStyles } from './style'
 import { t } from '../locales'
-import { databaseFilePath, databaseName, openDatabase, closeDatabase, db } from '../database'
+import { fetchVehicles, insertVehicleDb, updateVehicleDb, deleteVehicleDb } from '../database/queries'
+import { databaseFilePath, databaseName, openDatabase, closeDatabase } from '../database'
 import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system'
 import Constants from 'expo-constants';
+import { showMessageAlert, showConfirmAlert } from '../utils/alert';
 
 function SettingsScreen({ theme }) {
   const styles = getStyles(theme)
@@ -23,9 +25,7 @@ function SettingsScreen({ theme }) {
   useEffect(() => {
     setLoading(true)
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-          [])
+      let results = await fetchVehicles();
           
       if (results.length) {
         let cars = []
@@ -62,15 +62,15 @@ function SettingsScreen({ theme }) {
 
         setLoading(false)
 
-        Alert.alert(t('successRestore'));
+        showMessageAlert(t('successRestore'));
       } else {
         console.log(`Fail to upload file ${uploadedFile.canceled}`, uploadedFile, databaseName)
 
         setLoading(false)
 
-        Alert.alert(t('failRestore'));
+        showMessageAlert(t('failRestore'));
       }
-    } catch (e){}
+    } catch {}
 
     openDatabase()
   }
@@ -79,24 +79,19 @@ function SettingsScreen({ theme }) {
     closeDatabase()
     try{
       await Sharing.shareAsync(databaseFilePath);
-    } catch (e){}
+    } catch {}
     openDatabase()
   }
 
   const insertVehicle = async () => {
     setLoading(true)
-    let res = await db.runAsync(
-        `INSERT INTO Veiculo (Descricao) VALUES (?)`,
-        [description])
+    await insertVehicleDb(description);
 
     setVehicleId()
     setDescription()
     setVisibleDialog(false)
 
-    let results = await db.getAllAsync(
-      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-      [])
-
+    let results = await fetchVehicles();
     if (results.length) {
       let cars = []
       for (const row of results) {
@@ -112,67 +107,39 @@ function SettingsScreen({ theme }) {
 
   const deleteVehicle = () => {
     const confirm = async () => {
-      setLoading(true) 
-      await db.withTransactionAsync(async function(tx) {
-        await db.runAsync(
-          `DELETE FROM Veiculo WHERE CodVeiculo = ?`,
-          [vehicleId])
-        console.log('Vehicle deleted')
-        setVehicleId()
-        setDescription()
-        setVisibleDialog(false)
-        await db.runAsync(`DELETE FROM Gasto WHERE CodVeiculo = ?`, [vehicleId])
-        await db.runAsync(`DELETE FROM Abastecimento_Combustivel 
-          WHERE CodAbastecimento IN (SELECT CodAbastecimento FROM Abastecimento WHERE CodVeiculo = ?)`, [vehicleId]
-        )
-        await db.runAsync(`DELETE FROM Abastecimento WHERE CodVeiculo = ?`, [vehicleId])
-        
-        let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-          [])
-          
-        let cars = []
-          
-        if (results.length) {
-          for (const row of results) {
-            cars.push({
-              index: row.CodVeiculo,
-              value: row.Descricao
-            });
-          }
-          
+      setLoading(true)
+      await deleteVehicleDb(vehicleId);
+      console.log('Vehicle deleted');
+      setVehicleId()
+      setDescription()
+      setVisibleDialog(false)
+      
+      let results = await fetchVehicles();
+      let cars = []
+      if (results.length) {
+        for (const row of results) {
+          cars.push({
+            index: row.CodVeiculo,
+            value: row.Descricao
+          });
         }
-        setLoading(false)
-        setVehicles(cars)
-      }) 
+      }
+      setLoading(false)
+      setVehicles(cars)
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirm()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirm());
   }
 
   const updateVehicle = async () => {
     setLoading(true)
-    await db.runAsync(
-      `UPDATE Veiculo SET Descricao = ? WHERE CodVeiculo = ?`,
-      [description, vehicleId])
+    await updateVehicleDb(vehicleId, description);
       
     setVehicleId()
     setDescription()
     setVisibleDialog(false)
 
-    let results = await db.getAllAsync(
-      `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V`,
-      [])
-
+    let results = await fetchVehicles();
     if (results.length) {
       let cars = []
       for (const row of results) {

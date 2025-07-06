@@ -9,17 +9,16 @@ import { getStyles } from './style'
 import { t } from '../locales'
 import moment from 'moment';
 import { Table, Row, TableWrapper, Cell } from 'react-native-table-component';
-import { db } from '../database'
+import { fetchVehicles, fetchEarliestSpendingDate, fetchSpendingReportData } from '../database/queries'
 import { useIsFocused } from '@react-navigation/native'
 import { fromUserDateToDatabase, fromDatabaseToUserDate, choosePeriodFromIndex } from '../utils/date'
-import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons as Icon } from '@expo/vector-icons';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { exportTableToCSV } from '../utils/csv'
+import VehiclePicker from '../components/VehiclePicker';
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -62,12 +61,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
   const choosePeriod = async (index) => {
     if (index === 'all') {
-      let row = await db.getFirstAsync(`
-        SELECT MIN(G.Data) AS Data
-        FROM Gasto G
-        WHERE G.CodVeiculo = ?              
-      `,
-      [vehicleId])
+      let row = await fetchEarliestSpendingDate(vehicleId);
           
       if (!row || !row['Data'])
         return setPeriod(choosePeriodFromIndex(index))
@@ -84,11 +78,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const search = useCallback(async ()=>{
     setLoading(true)
     
-    let results = await db.getAllAsync(
-        `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V        
-        LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-        ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-        [])
+    let results = await fetchVehicles();
 
     let cars = []
             
@@ -100,23 +90,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         });
       }
 
-      results = await db.getAllAsync(`
-        SELECT
-        G.CodAbastecimento,
-        G.CodGasto,
-        G.Data,
-        G.Valor,
-        G.CodGastoTipo,
-        G.Observacao,
-        COALESCE(A.KM, G.KM) AS KM,
-        G.Oficina
-        FROM Gasto G
-        LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
-        WHERE G.CodVeiculo = ?
-        AND G.Data >= ? AND G.Data <= ?
-        ORDER BY G.Data DESC, G.KM DESC
-      `,
-      [cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate)])
+      results = await fetchSpendingReportData(cars[0].index, fromUserDateToDatabase(period.startDate), fromUserDateToDatabase(period.endDate));
 
       let totalSumAcc = 0
       let minKm = 0
@@ -172,7 +146,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
     setVehicleId(cars[0].index)
     setVehicles(cars)
-  }, [period, selectedItems, observation, vehicleId]);
+  }, [period, selectedItems, observation]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -180,7 +154,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     }
     
     search()
-  }, [isFocused, period, selectedItems, vehicleId]);
+  }, [isFocused, period, selectedItems, vehicleId, search]);
 
   const cellEditRow = (rowData) => {
     const isFuel = rowData[3] === t('fuel')
@@ -239,18 +213,13 @@ function SpendingReportScreen({ theme, route, navigation }) {
           }}
         />}
 
-        {vehicles.length > 1 &&
-        <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-          setVehicleId(itemValue)
-          await db.runAsync(
-              `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-            )
-          console.log("VehicleId updated to", itemValue)
-        }}>
-          {
-            vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-          }
-        </Picker>}
+        <VehiclePicker
+          vehicles={vehicles}
+          vehicleId={vehicleId}
+          setVehicleId={setVehicleId}
+          style={styles.picker}
+        />
+        
         <View style={{ ...styles.splitRow}}>
           <View style={{ flex: 1, marginRight: 5, marginLeft: 5 }}>
             <SectionedMultiSelect
@@ -280,7 +249,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
 
           <View style={{ flex: 1 }}>
             <Picker dropdownIconColor="#000" style={styles.picker} selectedValue={periodView} onValueChange={itemValue => {
-              if (itemValue != periodView) {
+              if (itemValue !== periodView) {
                 setPeriodView(itemValue)
                 choosePeriod(itemValue)
               }

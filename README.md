@@ -18,8 +18,11 @@ Android Play Store build (generates .aab file to upload on Android Play Store)
 
 Publish OTA
 - eas update
-- eas update --channel production --message "Testando eas update"
+- eas update --channel production --message "Testando eas update" -p android
 - expo publish (old, do not use)
+
+Show Lint
+yarn lint
 
 Updates eas
 - npm install -g eas-cli

@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Button, TextInput, Dialog, Portal } from 'react-native-paper';
+import { withTheme, Button, TextInput, Dialog, Portal, HelperText } from 'react-native-paper';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { t } from '../locales'
 import { getStyles } from './style'
-import { db } from '../database'
+import { fetchVehicles, fetchSpendingById, saveSpendingDb, deleteSpending } from '../database/queries'
 import { spendingTypes } from '../constants/fuel'
-import { HelperText } from 'react-native-paper';
-import { fromUserDateToDatabase, fromDatabaseToUserDate } from '../utils/date'
-import { ucfirst } from '../utils/string'
+import { fromDatabaseToUserDate } from '../utils/date'
 import { databaseFloatFormat, databaseIntegerFormat } from '../utils/number'
 import { Loading } from '../components/Loading'
 import Colors from '../constants/Colors';
 import { useIsFocused } from '@react-navigation/native'
+import VehiclePicker from '../components/VehiclePicker';
+import { showConfirmAlert } from '../utils/alert';
 
 function SpendingScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -44,11 +44,7 @@ function SpendingScreen({ theme, route, navigation }) {
     console.log("isFocused", isFocused)
     console.log("vehicleid", vehicleId)
     async function fetchData() {
-      let results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [])
+      let results = await fetchVehicles();
       
       let cars = []
       if (results.length) {
@@ -64,28 +60,16 @@ function SpendingScreen({ theme, route, navigation }) {
       setVehicles(cars)
     }
     fetchData()
-  }, [isFocused])
+  }, [isFocused, vehicleId])
 
   useEffect(() => {
     async function fetchData() {
       if (route.params && route.params.CodGasto) {
         console.log("codgasto, vehicleId", vehicleId)
         setLoading(true)
-        let results = await db.getAllAsync(
-            `SELECT
-             G.Data,
-             G.CodGastoTipo,
-             G.Valor,
-             G.Observacao,
-             G.KM,
-             G.CodVeiculo,
-             G.Oficina
-             FROM Gasto G
-             WHERE G.CodGasto = ?`,
-            [route.params.CodGasto])
+        let abastecimento = await fetchSpendingById(route.params.CodGasto);
         
-        if (results.length) {
-          const abastecimento = results[0]
+        if (abastecimento) {
           console.log(abastecimento)
           setPrice(''+abastecimento.Valor)
           setDate(moment(abastecimento.Data, 'YYYY-MM-DD').toDate())
@@ -102,11 +86,7 @@ function SpendingScreen({ theme, route, navigation }) {
         setLoading(false)
       } else {
         console.log("neesse else")
-        results = await db.getAllAsync(
-          `SELECT V.CodVeiculo, V.Descricao FROM Veiculo V
-          LEFT JOIN VeiculoPrincipal VP ON VP.CodVeiculo = V.CodVeiculo
-          ORDER BY VP.CodVeiculo IS NOT NULL DESC`,
-          [])
+        let results = await fetchVehicles();
           
         if (results.length) {
           let cars = []
@@ -121,14 +101,12 @@ function SpendingScreen({ theme, route, navigation }) {
       }
     }
     fetchData()
-  }, [route.params])
+  }, [route.params, vehicleId])
 
   const removeSpending = () => {
     const confirmDelete = async () => {
       setLoading(true)
-      await db.runAsync(
-          `DELETE FROM Gasto WHERE CodGasto = ?`,
-          [codGasto])
+      await deleteSpending(codGasto);
           
       console.log(`Spending ${codGasto} removed`)
       setVisibleDialog(true)
@@ -136,16 +114,7 @@ function SpendingScreen({ theme, route, navigation }) {
       clearForm()
     }
 
-    Alert.alert(
-      t('confirmDelete'),
-      '',
-      [
-        {
-          text: t('yes'), onPress: () => confirmDelete()
-        },
-        { text: t('no'), style: "cancel" }
-      ]
-    );
+    showConfirmAlert(t('confirmDelete'), '', () => confirmDelete());
   }
 
   const clearForm = () => {
@@ -166,26 +135,21 @@ function SpendingScreen({ theme, route, navigation }) {
       return false
     }
 
-    const dateSqlLite = fromUserDateToDatabase(date)
     setLoading(true)
-    if (!codGasto) {
-      let res = await db.runAsync(
-          `INSERT INTO Gasto (CodVeiculo, Data, CodGastoTipo, Valor, Observacao, CodAbastecimento, Codigo_Abastecimento_Combustivel, KM, Oficina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [vehicleId, dateSqlLite, spendingType, price, observation, null, null, km, autoRepair])
-            setLoading(false)
-            setVisibleDialog(true)
-            setCodGasto(res.lastInsertRowId)
-            console.log(`Spending ${res.lastInsertRowId} inserted `)
-    } else {
-      await db.runAsync(
-        `UPDATE Gasto
-          SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?, Oficina = ?
-          WHERE CodGasto = ?`,
-        [vehicleId, dateSqlLite, spendingType, price, observation, km, autoRepair, codGasto])
-      console.log(`Spending ${codGasto} updated`)
-      setLoading(false)
-      setVisibleDialog(true)
-    }
+    const data = {
+      vehicleId,
+      date,
+      spendingType,
+      price,
+      observation,
+      km,
+      autoRepair
+    };
+    let savedCodGasto = await saveSpendingDb(data, !!codGasto, codGasto);
+    setLoading(false)
+    setVisibleDialog(true)
+    setCodGasto(savedCodGasto)
+    console.log(`Spending ${savedCodGasto} ${codGasto ? 'updated' : 'inserted'}`)
   }
 
   if (loading) {
@@ -239,17 +203,12 @@ function SpendingScreen({ theme, route, navigation }) {
         {t('new')}
       </Button>
 
-      {vehicles.length > 1 && <Picker dropdownIconColor="#000" style={styles.picker} label={t('vehicle')} selectedValue={vehicleId} onValueChange={async itemValue => {
-        setVehicleId(itemValue)
-        await db.runAsync(
-            `UPDATE VeiculoPrincipal SET CodVeiculo = ${itemValue}`
-        )
-        console.log("VehicleId updated to", itemValue)
-      }}>
-        {
-          vehicles.map(vehicle => <Picker.Item label={ucfirst(vehicle.value)} value={vehicle.index} key={vehicle.index}/>)
-        }  
-      </Picker>}
+      <VehiclePicker
+        vehicles={vehicles}
+        vehicleId={vehicleId}
+        setVehicleId={setVehicleId}
+        style={styles.picker}
+      />
 
       <View style={styles.splitRow}>
         <View style={{ flex: 1 }}>
