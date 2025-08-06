@@ -221,7 +221,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     datasets.push({
       data: totalData,
       color: () => totalColor,
-      strokeWidth: 3,
+      strokeWidth: 0.1,
       label: t('total')
     });
     types.push(t('total'));
@@ -384,7 +384,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
         </View>
         {/* Chart Modal */}
         <Modal visible={showChart} animationType="slide" transparent={false} onRequestClose={() => setShowChart(false)}>
-          <View style={{ flex: 1, padding: 20, backgroundColor: '#fff' }}>
+          <View style={{ flex: 1, padding: 10, backgroundColor: '#fff' }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>{t('spendingTypeOverTime')}</Text>
             <ScrollView horizontal>
               <View>
@@ -394,24 +394,21 @@ function SpendingReportScreen({ theme, route, navigation }) {
                     datasets: getChartData().datasets
                   }}
                   width={Math.max(Dimensions.get('window').width, getChartData().labels.length * 60)}
-                  height={700}
+                  height={650}
                   yAxisLabel={t('currency')}
                   chartConfig={{
                     backgroundColor: "#fff",
                     backgroundGradientFrom: "#fff",
                     backgroundGradientTo: "#fff",
-                    decimalPlaces: 2,
                     color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    style: { borderRadius: 16 },
-                    propsForDots: { r: "12", strokeWidth: "0"},
+                    propsForDots: { r: "10", strokeWidth: "0"},
                   }}
-                  style={{ marginVertical: 8, borderRadius: 16 }}
                   onDataPointClick={data => {
                     setTooltip({
                       x: data.x,
                       y: data.y,
-                      value: data.value,
+                      value: Math.round(data.value * 100) / 100, // Round to 2 decimal places
                       label: getChartData().labels[data.index],
                       type: data.dataset.label
                     });
@@ -452,7 +449,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               </View>
             </ScrollView>
             {/* Legend */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {getChartData().types.map((type, idx) => (
                 <View key={type} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, marginBottom: 5 }}>
                   <View style={{
@@ -460,11 +457,9 @@ function SpendingReportScreen({ theme, route, navigation }) {
                     height: 14,
                     borderRadius: 7,
                     backgroundColor: getColorForType(type, idx),
-                    marginRight: 6,
-                    borderWidth: 1,
-                    borderColor: '#ccc'
+                    marginRight: 5,
                   }} />
-                  <Text style={{ fontSize: 14 }}>{type}</Text>
+                  <Text>{type}</Text>
                 </View>
               ))}
             </View>
