@@ -57,7 +57,7 @@ export default {
   close: 'Fechar',
   edit: 'Alterar',
   delete: 'Remover',
-  export_sheet: 'Exportar planilha',
+  export_sheet: 'Baixar planilha',
   isTwoFuels: 'Dois combustíveis',
   clearFields: 'Limpar campos', 
   mine: 'Meu',
@@ -115,5 +115,7 @@ export default {
   discount: "Descontos",
   totalWithDiscount: "Total com desconto",
   parking: "Estacionamento",
-  additivatedEthanol: "Álcool aditivado"
+  additivatedEthanol: "Álcool aditivado",
+  spendingTypeOverTime: "Gastos por tipo ao longo do tempo",
+  chart: "Gráfico",
 };
