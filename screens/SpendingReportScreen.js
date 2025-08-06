@@ -185,7 +185,8 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const chartColors = [
     "#4285F4", "#EA4335", "#FBBC05", "#34A853", "#9C27B0", "#FF9800", "#00BCD4", "#E91E63"
   ];
-  const getColorForType = (type, idx) => chartColors[idx % chartColors.length];
+  const totalColor = "#222"; // Color for total line
+  const getColorForType = (type, idx) => type === t('total') ? totalColor : chartColors[idx % chartColors.length];
 
   // Helper to group spending by type and date
   const getChartData = () => {
@@ -212,6 +213,18 @@ function SpendingReportScreen({ theme, route, navigation }) {
       strokeWidth: 2,
       label: type
     }));
+
+    // Add total dataset
+    const totalData = allDates.map(date =>
+      types.reduce((sum, type) => sum + (grouped[type][date] || 0), 0)
+    );
+    datasets.push({
+      data: totalData,
+      color: () => totalColor,
+      strokeWidth: 3,
+      label: t('total')
+    });
+    types.push(t('total'));
 
     return {
       labels: allDates,
