@@ -3893,10 +3893,10 @@ expo-file-system@~19.0.14:
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-19.0.14.tgz#1169fd9fcba8a5f1ef8e3c232ef8c62274ac4803"
   integrity sha512-0CA7O5IYhab11TlxQlJAx0Xm9pdkk/zEHNiW+Hh/T4atWi9U/J38CIp7iNYSrBvy9dC3rJbze5D1ANcKKr4mSQ==
 
-expo-file-system@~19.0.15:
-  version "19.0.15"
-  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-19.0.15.tgz#ef13ce8bea6bc683f50376749bdb42c028173111"
-  integrity sha512-sRLW+3PVJDiuoCE2LuteHhC7OxPjh1cfqLylf1YG1TDEbbQXnzwjfsKeRm6dslEPZLkMWfSLYIrVbnuq5mF7kQ==
+expo-file-system@~19.0.16:
+  version "19.0.16"
+  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-19.0.16.tgz#86010578b19d6c0b688d30c3dfee12b553c5ca3d"
+  integrity sha512-9Ee6HpcUEfO7dOet/on9yAg7ysegBua35Q0oGrJzoRc+xW6IlTxoSFbmK8QhjA3MZpkukP3DhaiYENYOzkw9SQ==
 
 expo-font@~14.0.8:
   version "14.0.8"
@@ -3979,10 +3979,10 @@ expo-updates-interface@~2.0.0:
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-2.0.0.tgz#7721cb64c37bcb46b23827b2717ef451a9378749"
   integrity sha512-pTzAIufEZdVPKql6iMi5ylVSPqV1qbEopz9G6TSECQmnNde2nwq42PxdFBaUEd8IZJ/fdJLQnOT3m6+XJ5s7jg==
 
-expo-updates@~29.0.11:
-  version "29.0.11"
-  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-29.0.11.tgz#d9bdc8676f563330461f7950fa504dd4bb48aafc"
-  integrity sha512-zD7Zxe3P61WA6fyTdKRckmTFr7h/0BaSSD+Ssr73YiOLOak7GJUb19B+ysADjJP1L0IIOUR9U/UkMLv0r8k9dA==
+expo-updates@~29.0.12:
+  version "29.0.12"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-29.0.12.tgz#cb43a20a6d32426694d414a2551f7300a4f75631"
+  integrity sha512-gE3bU6qi5g8Y1TtBzoeHac3utR0i1Wj1ufThh+zpDyFjFbegFm+gwvNLVCBagZUClYKk/4CKxh5ytnwZmPzH+g==
   dependencies:
     "@expo/code-signing-certificates" "0.0.5"
     "@expo/plist" "^0.4.7"
