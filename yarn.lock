@@ -737,20 +737,7 @@
     "@babel/parser" "^7.27.2"
     "@babel/types" "^7.27.1"
 
-"@babel/traverse--for-generate-function-map@npm:@babel/traverse@^7.25.3":
-  version "7.28.4"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.28.4.tgz#8d456101b96ab175d487249f60680221692b958b"
-  integrity sha512-YEzuboP2qvQavAcjgQNVgsvHIDv6ZpwXvcvjmyySP2DIMuByS/6ioU5G9pYrWHM6T2YDfc7xga9iNzYOs12CFQ==
-  dependencies:
-    "@babel/code-frame" "^7.27.1"
-    "@babel/generator" "^7.28.3"
-    "@babel/helper-globals" "^7.28.0"
-    "@babel/parser" "^7.28.4"
-    "@babel/template" "^7.27.2"
-    "@babel/types" "^7.28.4"
-    debug "^4.3.1"
-
-"@babel/traverse@^7.25.3", "@babel/traverse@^7.27.1", "@babel/traverse@^7.28.0", "@babel/traverse@^7.28.3", "@babel/traverse@^7.28.4":
+"@babel/traverse--for-generate-function-map@npm:@babel/traverse@^7.25.3", "@babel/traverse@^7.25.3", "@babel/traverse@^7.27.1", "@babel/traverse@^7.28.0", "@babel/traverse@^7.28.3", "@babel/traverse@^7.28.4":
   version "7.28.4"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.28.4.tgz#8d456101b96ab175d487249f60680221692b958b"
   integrity sha512-YEzuboP2qvQavAcjgQNVgsvHIDv6ZpwXvcvjmyySP2DIMuByS/6ioU5G9pYrWHM6T2YDfc7xga9iNzYOs12CFQ==
@@ -1153,22 +1140,6 @@
     "@xmldom/xmldom" "^0.8.8"
     base64-js "^1.2.3"
     xmlbuilder "^15.1.1"
-
-"@expo/prebuild-config@^54.0.3":
-  version "54.0.5"
-  resolved "https://registry.yarnpkg.com/@expo/prebuild-config/-/prebuild-config-54.0.5.tgz#81bf7e2b8641da38cade6bb7341f0d384d9bc8f4"
-  integrity sha512-eCvbVUf01j1nSrs4mG/rWwY+SfgE30LM6JcElLrnNgNnaDWzt09E/c8n3ZeTLNKENwJaQQ1KIn2VE461/4VnWQ==
-  dependencies:
-    "@expo/config" "~12.0.10"
-    "@expo/config-plugins" "~54.0.2"
-    "@expo/config-types" "^54.0.8"
-    "@expo/image-utils" "^0.8.7"
-    "@expo/json-file" "^10.0.7"
-    "@react-native/normalize-colors" "0.81.4"
-    debug "^4.3.1"
-    resolve-from "^5.0.0"
-    semver "^7.6.0"
-    xml2js "0.6.0"
 
 "@expo/prebuild-config@^54.0.6":
   version "54.0.6"
@@ -1722,11 +1693,6 @@
   version "0.81.5"
   resolved "https://registry.yarnpkg.com/@react-native/js-polyfills/-/js-polyfills-0.81.5.tgz#2ca68188c8fff9b951f507b1dec7efe928848274"
   integrity sha512-fB7M1CMOCIUudTRuj7kzxIBTVw2KXnsgbQ6+4cbqSxo8NmRRhA0Ul4ZUzZj3rFd3VznTL4Brmocv1oiN0bWZ8w==
-
-"@react-native/normalize-colors@0.81.4":
-  version "0.81.4"
-  resolved "https://registry.yarnpkg.com/@react-native/normalize-colors/-/normalize-colors-0.81.4.tgz#a0384d5aaac825aeefa5e391947189f6cee4a641"
-  integrity sha512-9nRRHO1H+tcFqjb9gAM105Urtgcanbta2tuqCVY0NATHeFPDEAB7gPyiLxCHKMi1NbhP6TH0kxgSWXKZl1cyRg==
 
 "@react-native/normalize-colors@0.81.5":
   version "0.81.5"
@@ -3819,7 +3785,7 @@ expo-constants@~18.0.10:
     "@expo/config" "~12.0.10"
     "@expo/env" "~2.0.7"
 
-expo-constants@~18.0.8, expo-constants@~18.0.9:
+expo-constants@~18.0.9:
   version "18.0.9"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-18.0.9.tgz#fcaf37e97ea2b928bd3b92f2ea9836984ab6e48b"
   integrity sha512-sqoXHAOGDcr+M9NlXzj1tGoZyd3zxYDy215W6E0Z0n8fgBaqce9FAYQE2bu5X4G629AYig5go7U6sQz7Pjcm8A==
@@ -3842,6 +3808,11 @@ expo-file-system@~19.0.17:
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-19.0.17.tgz#2555c05c26a19038d005f281b11dbda9722d0c0d"
   integrity sha512-WwaS01SUFrxBnExn87pg0sCTJjZpf2KAOzfImG0o8yhkU7fbYpihpl/oocXBEsNbj58a8hVt1Y4CVV5c1tzu/g==
 
+expo-file-system@~19.0.19:
+  version "19.0.19"
+  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-19.0.19.tgz#9f25228ec53e2ff45b75e6bde1bba1d86fad15a4"
+  integrity sha512-OrpOV4fEBFMFv+jy7PnENpPbsWoBmqWGidSwh1Ai52PLl6JIInYGfZTc6kqyPNGtFTwm7Y9mSWnE8g+dtLxu7g==
+
 expo-font@~14.0.9:
   version "14.0.9"
   resolved "https://registry.yarnpkg.com/expo-font/-/expo-font-14.0.9.tgz#552d66afc8c6efa8839f5f4063c2e0226b3edad1"
@@ -3859,12 +3830,12 @@ expo-keep-awake@~15.0.7:
   resolved "https://registry.yarnpkg.com/expo-keep-awake/-/expo-keep-awake-15.0.7.tgz#4eada556e1cca6c9c2e5aa39478fd01816cd0bc9"
   integrity sha512-CgBNcWVPnrIVII5G54QDqoE125l+zmqR4HR8q+MQaCfHet+dYpS5vX5zii/RMayzGN4jPgA4XYIQ28ePKFjHoA==
 
-expo-linking@~8.0.8:
-  version "8.0.8"
-  resolved "https://registry.yarnpkg.com/expo-linking/-/expo-linking-8.0.8.tgz#ad348c133d048043990177f67dfb6a89bf628a6e"
-  integrity sha512-MyeMcbFDKhXh4sDD1EHwd0uxFQNAc6VCrwBkNvvvufUsTYFq3glTA9Y8a+x78CPpjNqwNAamu74yIaIz7IEJyg==
+expo-linking@~8.0.9:
+  version "8.0.9"
+  resolved "https://registry.yarnpkg.com/expo-linking/-/expo-linking-8.0.9.tgz#0cea5c1395d1d757492aab56747d5e1fdbad39c6"
+  integrity sha512-a0UHhlVyfwIbn8b1PSFPoFiIDJeps2iEq109hVH3CHd0CMKuRxFfNio9Axe2BjXhiJCYWR4OV1iIyzY/GjiVkQ==
   dependencies:
-    expo-constants "~18.0.8"
+    expo-constants "~18.0.10"
     invariant "^2.2.4"
 
 expo-manifests@~1.0.8:
@@ -3903,12 +3874,12 @@ expo-sharing@~14.0.7:
   resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-14.0.7.tgz#64845ea569c725a9a32705be7ef772e556134e1c"
   integrity sha512-t/5tR8ZJNH6tMkHXlF7453UafNIfrpfTG+THN9EMLC4Wsi4bJuESPm3NdmWDg2D4LDALJI/LQo0iEnLAd5Sp4g==
 
-expo-splash-screen@~31.0.10:
-  version "31.0.10"
-  resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-31.0.10.tgz#e0edd9782715b82a8eed34d5ebde778b79f850b4"
-  integrity sha512-i6g9IK798mae4yvflstQ1HkgahIJ6exzTCTw4vEdxV0J2SwiW3Tj+CwRjf0te7Zsb+7dDQhBTmGZwdv00VER2A==
+expo-splash-screen@~31.0.11:
+  version "31.0.11"
+  resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-31.0.11.tgz#706e035d0d00dcfa882c5c1cf874db1ae5f5feb1"
+  integrity sha512-D7MQflYn/PAN3+fACSyxHO4oxZMBezllbgFdVY8roAS1gXpCy8SS6LrGHTD0VpOPEp3X4Gn7evTnXSI9nFoI5Q==
   dependencies:
-    "@expo/prebuild-config" "^54.0.3"
+    "@expo/prebuild-config" "^54.0.6"
 
 expo-sqlite@~16.0.9:
   version "16.0.9"
@@ -5034,7 +5005,7 @@ jest-environment-node@^29.7.0:
     jest-mock "^29.7.0"
     jest-util "^29.7.0"
 
-jest-expo@^54.0.13:
+jest-expo@^54.0.0:
   version "54.0.13"
   resolved "https://registry.yarnpkg.com/jest-expo/-/jest-expo-54.0.13.tgz#d9a632cc2cc54e1e034aac1f9dcdbcbaa2bb1f76"
   integrity sha512-V0xefV7VJ9RD6v6Jo64I8RzQCchgEWVn6ip5r+u4TlgsGau0DA8CAqzitn4ShoSKlmjmpuaMqcGxeCz1p9Cfvg==
@@ -7521,16 +7492,7 @@ string-length@^5.0.1:
     char-regex "^2.0.0"
     strip-ansi "^7.0.1"
 
-"string-width-cjs@npm:string-width@^4.2.0":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
-
-string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -7607,7 +7569,7 @@ string.prototype.trimstart@^1.0.8:
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -7620,13 +7582,6 @@ strip-ansi@^5.2.0:
   integrity sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==
   dependencies:
     ansi-regex "^4.1.0"
-
-strip-ansi@^6.0.0, strip-ansi@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
-  dependencies:
-    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1:
   version "7.1.2"
@@ -8252,16 +8207,7 @@ word-wrap@^1.2.5:
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.5.tgz#d2c45c6dd4fbce621a66f136cbe328afd0410b34"
   integrity sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
-  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
