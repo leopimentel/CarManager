@@ -10,7 +10,7 @@ import { ucfirst } from '../utils/string'
 import { Loading } from '../components/Loading'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import Constants from 'expo-constants';
 import { showMessageAlert, showConfirmAlert } from '../utils/alert';
 
@@ -51,7 +51,7 @@ function SettingsScreen({ theme }) {
     }
 
     try {
-      console.log("rararara")
+      console.log("rararara" + databaseFilePath)
       const uploadedFile = await DocumentPicker.getDocumentAsync()
 
       if (uploadedFile.canceled === false) {
@@ -70,7 +70,15 @@ function SettingsScreen({ theme }) {
 
         showMessageAlert(t('failRestore'));
       }
-    } catch {}
+    } catch (e) {
+        // We might want to provide this error information to an error reporting service
+        console.warn(e);
+      }
+
+
+
+
+
 
     openDatabase()
   }
@@ -79,7 +87,10 @@ function SettingsScreen({ theme }) {
     closeDatabase()
     try{
       await Sharing.shareAsync(databaseFilePath);
-    } catch {}
+    } catch (e) {
+        // We might want to provide this error information to an error reporting service
+        console.warn(e);
+      }
     openDatabase()
   }
 

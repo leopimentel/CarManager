@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system'
-
+import * as FileSystem from 'expo-file-system/legacy'
+console.log("aaaaaaaa" + SQLite.defaultDatabaseDirectory)
 const databaseName = 'carManager.db';
 
 const openDatabase = () => {
@@ -14,6 +14,10 @@ const closeDatabase = () => db.closeSync();
 
 const databaseFilePath = `${FileSystem.documentDirectory}/SQLite/${databaseName}`
 
+//const databaseFilePath = `${FileSystem.Paths.document.uri}SQLite/${databaseName}`
+//console.log('ddddd' + databaseFilePath)
+//const zzz = FileSystem.Directory(FileSystem.Paths.document, "SQLite")
+//console.log('eeeee' + zzz)
 const migrateUp = (useMock = __DEV__) => {
     let testData = ''
     let dropTablesStr = ''
