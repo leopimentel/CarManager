@@ -68,6 +68,7 @@ export default {
   seeReport: 'Ver gastos',
   spendingSaved: 'Gasto salvo',
   new: 'Novo',
+  ok: 'Ok',
   settings: 'Opções',
   retoreDatabase: 'Restaurar banco de dados',
   backupRestore: 'Backup / Restauração',
