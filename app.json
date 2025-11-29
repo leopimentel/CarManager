@@ -26,7 +26,10 @@
     "android": {
       "package": "com.webmoderna.carManager",
       "versionCode": 42,
-      "permissions": []
+      "permissions": [],
+      "adaptiveIcon": {
+        "backgroundColor": "#FFD648"
+      }
     },
     "ios": {
       "supportsTablet": true,
