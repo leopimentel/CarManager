@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.42",
+    "version": "1.0.43",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -25,10 +25,11 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 43,
+      "versionCode": 44,
       "permissions": [],
       "adaptiveIcon": {
-        "backgroundColor": "#FFD648"
+        "backgroundColor": "#FFD648",
+        "foregroundImage": "./assets/images/round-icon.png"
       }
     },
     "ios": {
