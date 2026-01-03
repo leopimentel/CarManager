@@ -97,6 +97,7 @@ export default {
   averageOfAverages3: "Média das médias c/ diesel e tanque cheio",
   averageOfAverages4: "Média das médias c/ gás natural e tanque cheio",
   averageOfAverages5: "Média das médias c/ gasolina aditivada e tanque cheio",
+  averageOfAverages6: "Média das médias c/ álcool aditivado e tanque cheio",
   totalSpentByKM: "Total gasto por KM",
   totalFuelSpentByKM: "Total gasto com combustível por KM",
   odometer: "Odômetro",
