@@ -7,7 +7,6 @@ import BottomTabNavigator from './navigation/BottomTabNavigator';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
-import ReminderScreen from './screens/ReminderScreen';
 
 import { t } from './locales'
 
@@ -41,12 +40,6 @@ export default function App(_) {
                 }}
               }/>
 
-              <Stack.Screen name="Reminder" component={ReminderScreen}
-                options={{
-                  ...getHeaderStyles(),
-                  title: t('reminder'),
-                }}
-              />
             </Stack.Navigator>
           </BellProvider>
         </NavigationContainer>
