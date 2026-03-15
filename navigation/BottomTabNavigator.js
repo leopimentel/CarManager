@@ -47,7 +47,8 @@ function BottomTabNavigator({ navigation, route }) {
       <BottomTab.Screen name="Reminders" component={RemindersScreen}
         options={{
           ...getCommonOptions('reminders'),
-          tabBarIcon: ({ focused }) => getIcon('MaterialCommunityIcons', "bell", focused),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
     </BottomTab.Navigator>
