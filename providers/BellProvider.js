@@ -21,6 +21,7 @@ const BellProvider = ({ children }) => {
                       MAX(COALESCE(A.KM, G.KM, 0)) 
                       FROM Gasto G
                       LEFT JOIN Abastecimento A ON A.CodAbastecimento = G.CodAbastecimento
+                      WHERE G.CodVeiculo = L.CodVeiculo
                   )
               )
           )
