@@ -31,6 +31,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const [fuelType, setFuelType] = useState(0)
   const [tableData, setTableData] = useState([])
   const [totalSum, setTotalSum] = useState(0)
+  const [totalDiscount, setTotalDiscount] = useState(0)
   // const [totalAverage, setTotalAverage] = useState(0)
   const [accurateAverage, setAccurateAverage] = useState(0)
   const [totalKM, setTotalKM] = useState(0)
@@ -133,6 +134,7 @@ console.log("sassss", cars)
         const callback = (nextFilling) => {
           const temp = [];
           let totalSumAcc = 0
+          let totalDiscountAcc = 0
           // let totalAverageAcc = 0
           // let totalCount = 0
           let totalCountAccurate = 0
@@ -179,6 +181,7 @@ console.log("ararara ", filling.CodCombustivel, fuels)
             ]);
 
             totalSumAcc += filling.Total - filling.Desconto
+            totalDiscountAcc += filling.Desconto
             if (average) {
               // totalAverageAcc += average
               // totalCount++
@@ -224,6 +227,7 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setTotalKM(maxKm - minKm)
           setTableData(temp)
           setTotalSum(totalSumAcc ? totalSumAcc.toFixed(2) : 0)
+          setTotalDiscount(totalDiscountAcc ? totalDiscountAcc.toFixed(2) : 0)
           // setTotalAverage(totalCount ? (totalAverageAcc/totalCount).toFixed(2) : 0)
           setAccurateAverage(totalCountAccurate ? (totalAccurate/totalCountAccurate).toFixed(2) : 0)
           setLoading(false)
@@ -247,6 +251,7 @@ console.log("ararara ", filling.CodCombustivel, fuels)
           setLoading(false)
           setTableData([])
           setTotalSum(0)
+          setTotalDiscount(0)
           // setTotalAverage(0)
           setTotalKM(0)
           setAccurateAverage(0)
@@ -419,6 +424,7 @@ console.log("cars", cars)
 
         <View style={{ flex: 1, marginTop: 5 }}>
           <Text>{t('totalSpent')}: <NumericFormat value={totalSum} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
+          <Text>{t('totalDiscount')}: <NumericFormat value={totalDiscount} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>
           {totalKM > 0 && <Text>{t('totalKM')}: <NumericFormat value={totalKM} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
           {totalKM > 0 && <Text>{t('totalFuelSpentByKM')}: <NumericFormat value={(totalSum / totalKM).toFixed(2)} displayType={'text'} isNumericString={true} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} prefix={t('currency')} renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text>}
           {/* <Text>{t('averageOfAverages')}: <NumericFormat value={totalAverage} isNumericString={true} displayType={'text'} thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} suffix=' KM/L' renderText={value => (<Text style={{fontWeight: 'bold'}}>{value}</Text>)} /></Text> */}

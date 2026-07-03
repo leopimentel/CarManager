@@ -86,6 +86,7 @@ export default {
   greatestAverageFullTank: "Maior média com tanque cheio",
   greatestAverage: "Maior média",
   totalSpent: "Total gasto",
+  totalDiscount: "Total de descontos",
   search: "Pesquisar",
   tapOrPressReturn: "Pressione retornar",
   add: "Adicionar",
