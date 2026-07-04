@@ -185,7 +185,7 @@ function ReminderScreen({ theme, route, navigation }) {
         <Dialog.Actions>
           <Button uppercase={false} mode="outlined" onPress={() => {
             setVisibleDialog(false)
-            navigation.navigate('Reminders', {CodVeiculo: vehicleId})
+            navigation.navigate('Filling', { screen: 'Reminders', params: { CodVeiculo: vehicleId } })
           }}>{t('seeReminders')}</Button>
           <Button uppercase={false} style={{marginLeft: 5}} mode="contained" onPress={() => setVisibleDialog(false)}>{t('close')}</Button>
         </Dialog.Actions>

@@ -7,8 +7,6 @@ import BottomTabNavigator from './navigation/BottomTabNavigator';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Bell from './components/Bell'
 import BellProvider from './providers/BellProvider'
-import ReminderScreen from './screens/ReminderScreen';
-import RemindersScreen from './screens/RemindersScreen';
 
 import { t } from './locales'
 
@@ -42,19 +40,6 @@ export default function App(_) {
                 }}
               }/>
 
-              <Stack.Screen name="Reminder" component={ReminderScreen}
-                options={{
-                  ...getHeaderStyles(),
-                  title: t('reminder'),
-                }}
-              />
-
-              <Stack.Screen name="Reminders" component={RemindersScreen}
-                options={{
-                  ...getHeaderStyles(),          
-                  title: t('reminders'),
-                }}
-              />
             </Stack.Navigator>
           </BellProvider>
         </NavigationContainer>
@@ -75,7 +60,7 @@ export default function App(_) {
     return {
       headerRight: () => (
         <View style={{ marginRight: 20 }}>
-          <Bell onPress={() => navigation.navigate('Reminders', { screen: 'Reminders' })} />
+          <Bell onPress={() => navigation.navigate('Filling', { screen: 'Reminders' })} />
         </View>
       ),
       headerShown: true,

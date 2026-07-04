@@ -3,6 +3,8 @@ import FillingScreen from '../screens/FillingScreen';
 import SpendingScreen from '../screens/SpendingScreen';
 import SpendingReportScreen from '../screens/SpendingReportScreen'
 import FuelConsumptionScreen from '../screens/FuelConsumptionScreen';
+import ReminderScreen from '../screens/ReminderScreen';
+import RemindersScreen from '../screens/RemindersScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { MaterialCommunityIcons, Entypo, Foundation, Feather } from '@expo/vector-icons';
 import { t } from '../locales'
@@ -41,6 +43,20 @@ function BottomTabNavigator({ navigation, route }) {
         options={{
           ...getCommonOptions('settings'),
           tabBarIcon: ({ focused }) => getIcon('Feather', "settings", focused),
+        }}
+      />
+      <BottomTab.Screen name="Reminder" component={ReminderScreen}
+        options={{
+          ...getCommonOptions('reminder'),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
+        }}
+      />
+      <BottomTab.Screen name="Reminders" component={RemindersScreen}
+        options={{
+          ...getCommonOptions('reminders'),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
     </BottomTab.Navigator>
