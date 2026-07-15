@@ -94,7 +94,7 @@ export const saveFillingDb = async (data, isUpdate = false, codAbastecimento = n
         `UPDATE Gasto
          SET CodVeiculo = ?, Data = ?, CodGastoTipo = ?, Valor = ?, Observacao = ?, KM = ?
          WHERE CodGasto = ?`,
-        [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel, observation, km, codGasto]
+        [vehicleId, fillingDateSqlLite, spendingTypes[0].index, totalFuel - discount, observation, km, codGasto]
       );
 
       if (codAbastecimentoCombustivel2) {
