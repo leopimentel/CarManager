@@ -7,15 +7,10 @@
       "android",
       "web"
     ],
-    "version": "1.0.46",
+    "version": "1.0.47",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFD648"
-    },
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/0ee1323a-4c0e-48df-8b65-d82c5f6134bb"
@@ -25,7 +20,7 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 47,
+      "versionCode": 48,
       "permissions": [],
       "adaptiveIcon": {
         "backgroundColor": "#FFD648",
@@ -53,7 +48,17 @@
         }
       ],
       "expo-font",
-      "expo-sqlite"
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFD648"
+        }
+      ]
     ]
   }
 }
