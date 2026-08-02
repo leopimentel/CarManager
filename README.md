@@ -14,7 +14,6 @@ npx expo uninstall react-native-tiny-toast
 Android Play Store build (generates .aab file to upload on Android Play Store)
 - eas build -p android --profile production
 - eas build -p android --profile preview
-- expo build:android -t app-bundle (old, do not use)
 
 Publish OTA
 - eas update
