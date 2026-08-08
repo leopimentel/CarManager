@@ -395,13 +395,16 @@ function SpendingReportScreen({ theme, route, navigation }) {
                   }}
                   width={Math.max(Dimensions.get('window').width, getChartData().labels.length * 60)}
                   height={650}
-                  yAxisLabel={t('currency')}
                   chartConfig={{
                     backgroundColor: "#fff",
                     backgroundGradientFrom: "#fff",
                     backgroundGradientTo: "#fff",
                     color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    propsForBackgroundLines: {
+                      strokeDasharray: "",
+                      strokeOpacity: 0,
+                    },
                     propsForDots: { r: "10", strokeWidth: "0"},
                   }}
                   onDataPointClick={data => {
