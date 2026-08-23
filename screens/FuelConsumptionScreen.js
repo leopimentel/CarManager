@@ -18,7 +18,7 @@ import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import VehiclePicker from '../components/VehiclePicker';
-import SpendingChart, { buildFuelAverageChartData } from '../components/SpendingChart';
+import BarChart, { buildFuelAverageChartData } from '../components/BarChart';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -410,7 +410,7 @@ console.log("cars", cars)
           </View>
         </View>
 
-        <SpendingChart
+        <BarChart
           visible={showChart}
           title={t('averageOverTime')}
           chartData={fuelAverageChartData}

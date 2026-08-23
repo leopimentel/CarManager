@@ -100,7 +100,7 @@ export const buildSpendingChartData = (tableData = [], options = {}) => {
   };
 };
 
-export const SpendingChart = ({
+export const BarChart = ({
   visible,
   title,
   chartData,
@@ -229,4 +229,4 @@ export const SpendingChart = ({
   );
 };
 
-export default SpendingChart;
+export default BarChart;

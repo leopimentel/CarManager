@@ -3,15 +3,15 @@ import { render } from '@testing-library/react-native';
 import {
   buildFuelAverageChartData,
   buildSpendingChartData,
-  SpendingChart,
-} from '../components/SpendingChart';
+  BarChart,
+} from '../components/BarChart';
 
 jest.mock('react-native-chart-kit', () => ({
   LineChart: () => null,
 }));
 import { t } from '../locales'
 
-describe('SpendingChart', () => {
+describe('BarChart', () => {
   it('keeps each fueling as a separate consumption point', () => {
     const fullTankFueling = ['1', '01/01/2024', 'Gasoline', '', '', '', '', '', '', '10.50'];
     const secondFullTankFueling = ['2', '15/01/2024', 'Gasoline', '', '', '', '', '', '', '12.00'];
@@ -61,7 +61,7 @@ describe('SpendingChart', () => {
     ], { totalLabel: 'Total' });
 
     const { getByText } = render(
-      <SpendingChart
+      <BarChart
         visible
         title="Spending over time"
         chartData={chartData}

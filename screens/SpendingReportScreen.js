@@ -19,7 +19,7 @@ import { MaterialCommunityIcons, MaterialIcons as Icon } from '@expo/vector-icon
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import { exportTableToCSV } from '../utils/csv'
 import VehiclePicker from '../components/VehiclePicker';
-import SpendingChart, { buildSpendingChartData } from '../components/SpendingChart';
+import BarChart, { buildSpendingChartData } from '../components/BarChart';
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -331,7 +331,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
               {t('chart')}
             </Button>
         </View>
-        <SpendingChart
+        <BarChart
           visible={showChart}
           title={t('spendingTypeOverTime')}
           chartData={chartData}
