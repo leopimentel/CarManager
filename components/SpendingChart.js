@@ -3,6 +3,7 @@ import { View, Text, Modal, ScrollView, TouchableOpacity, Dimensions } from 'rea
 import { LineChart } from 'react-native-chart-kit';
 import { Button } from 'react-native-paper';
 import moment from 'moment';
+import { t } from '../locales'
 
 const chartColors = [
   '#4285F4', '#EA4335', '#FBBC05', '#34A853', '#9C27B0', '#FF9800', '#00BCD4', '#E91E63'
@@ -19,7 +20,7 @@ export const buildFuelAverageChartData = (tableData = []) => {
     const average = Number.parseFloat(row[9]);
     const fuelName = row[2];
 
-    if (!fuelName || !Number.isFinite(average)) {
+    if (row[10] !== t('yes') || !fuelName || !Number.isFinite(average)) {
       return;
     }
 

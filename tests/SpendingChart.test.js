@@ -9,16 +9,31 @@ import {
 jest.mock('react-native-chart-kit', () => ({
   LineChart: () => null,
 }));
+import { t } from '../locales'
 
 describe('SpendingChart', () => {
   it('keeps each fueling as a separate consumption point', () => {
-    const result = buildFuelAverageChartData([
-      ['1', '01/01/2024', 'Gasoline', '', '', '', '', '', '', '10.50'],
-      ['2', '15/01/2024', 'Gasoline', '', '', '', '', '', '', '12.00'],
-    ]);
+    const fullTankFueling = ['1', '01/01/2024', 'Gasoline', '', '', '', '', '', '', '10.50'];
+    const secondFullTankFueling = ['2', '15/01/2024', 'Gasoline', '', '', '', '', '', '', '12.00'];
+    fullTankFueling[10] = t('yes');
+    secondFullTankFueling[10] = t('yes');
 
-    expect(result.labels).toEqual(['01/01/2024', '15/01/2024']);
+    const result = buildFuelAverageChartData([fullTankFueling, secondFullTankFueling]);
+
+    expect(result.labels).toEqual(['01/24', '01/24']);
     expect(result.datasets[0].data).toEqual([10.5, 12]);
+  });
+
+  it('excludes fuelings that are not full tank', () => {
+    const fullTankFueling = ['1', '01/01/2024', 'Gasoline', '', '', '', '', '', '', '10.50', ''];
+    const partialFueling = ['2', '15/01/2024', 'Gasoline', '', '', '', '', '', '', '12.00', ''];
+    fullTankFueling[10] = t('yes');
+    partialFueling[10] = t('no');
+
+    const result = buildFuelAverageChartData([fullTankFueling, partialFueling]);
+
+    expect(result.labels).toEqual(['01/24']);
+    expect(result.datasets[0].data).toEqual([10.5]);
   });
 
   it('builds chart datasets from spending rows', () => {
