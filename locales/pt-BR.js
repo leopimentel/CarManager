@@ -121,4 +121,5 @@ export default {
   additivatedEthanol: "Álcool aditivado",
   spendingTypeOverTime: "Gastos por tipo ao longo do tempo (R$)",
   chart: "Gráfico",
+  averageOverTime: "Média ao longo do tempo (KM/L)",
 };

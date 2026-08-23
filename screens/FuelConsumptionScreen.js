@@ -18,6 +18,7 @@ import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import VehiclePicker from '../components/VehiclePicker';
+import SpendingChart from '../components/SpendingChart';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -67,6 +68,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
+  const [showChart, setShowChart] = useState(false);
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
     {title: t('date'), style: {width: 90}},
@@ -297,6 +299,56 @@ console.log("cars", cars)
     );    
   };
 
+  const chartColors = [
+    '#4285F4', '#EA4335', '#FBBC05', '#34A853', '#9C27B0', '#FF9800', '#00BCD4', '#E91E63'
+  ];
+
+  const fuelAverageChartData = useMemo(() => {
+    const grouped = {};
+    const allDates = new Set();
+
+    tableData.forEach((row) => {
+      const average = Number.parseFloat(row[9]);
+      const fuelName = row[2];
+
+      if (!fuelName || !Number.isFinite(average)) {
+        return;
+      }
+
+      const date = moment(row[1], 'DD/MM/YYYY').format('MM/YYYY');
+      allDates.add(date);
+
+      if (!grouped[fuelName]) {
+        grouped[fuelName] = {};
+      }
+
+      if (!grouped[fuelName][date]) {
+        grouped[fuelName][date] = { sum: 0, count: 0 };
+      }
+
+      grouped[fuelName][date].sum += average;
+      grouped[fuelName][date].count += 1;
+    });
+
+    const labels = Array.from(allDates).sort();
+    const types = Object.keys(grouped);
+    const datasets = types.map((fuelName, idx) => ({
+      data: labels.map((date) => {
+        const current = grouped[fuelName][date];
+        return current ? current.sum / current.count : 0;
+      }),
+      color: () => chartColors[idx % chartColors.length],
+      strokeWidth: 2,
+      label: fuelName,
+    }));
+
+    return {
+      labels,
+      datasets,
+      types,
+    };
+  }, [tableData]);
+
   if (loading) {
     return <Loading loading={loading} />
   }
@@ -387,14 +439,31 @@ console.log("cars", cars)
           </View>
         </View>
 
-        <View style={styles.splitRow}>
-        <View style={{ flex: 1 }}>
-          <Button style={{ flex: 1, marginTop: 5, marginBottom: 0 }} labelStyle={{fontSize: 15}}
-        uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
-        {t('export_sheet')}
-        </Button>
+        <View style={{ ...styles.splitRow, marginTop: 5 }}>
+          <View style={{ flex: 1, marginRight: 5 }}>
+            <Button style={{ flex: 1, marginTop: 0, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+              uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
+              {t('export_sheet')}
+            </Button>
+          </View>
+
+          <View style={{ flex: 1, marginLeft: 5 }}>
+            <Button style={{ flex: 1, marginTop: 0, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+              uppercase={false} compact icon="chart-line" mode="contained" onPress={() => setShowChart(true)}>
+              {t('chart')}
+            </Button>
           </View>
         </View>
+
+        <SpendingChart
+          visible={showChart}
+          title={t('averageOverTime')}
+          chartData={fuelAverageChartData}
+          currency={t('currency')}
+          closeLabel={t('close')}
+          totalLabel={t('total')}
+          onClose={() => setShowChart(false)}
+        />
 
         <ScrollView horizontal>
           <View style={{marginTop: 5, marginBottom: 5}}>
