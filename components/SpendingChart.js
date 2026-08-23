@@ -12,6 +12,38 @@ const totalColor = '#222';
 const getColorForType = (type, idx, totalLabel) =>
   type === totalLabel ? totalColor : chartColors[idx % chartColors.length];
 
+export const buildFuelAverageChartData = (tableData = []) => {
+  const points = [];
+
+  tableData.forEach((row) => {
+    const average = Number.parseFloat(row[9]);
+    const fuelName = row[2];
+
+    if (!fuelName || !Number.isFinite(average)) {
+      return;
+    }
+
+    points.push({
+      date: moment(row[1], 'DD/MM/YYYY'),
+      fuelName,
+      average,
+    });
+  });
+
+  points.sort((left, right) => left.date.valueOf() - right.date.valueOf());
+
+  const labels = points.map(({ date }) => date.format('MM/YY'));
+  const types = Array.from(new Set(points.map(({ fuelName }) => fuelName)));
+  const datasets = types.map((fuelName, idx) => ({
+    data: points.map((point) => point.fuelName === fuelName ? point.average : 0),
+    color: () => chartColors[idx % chartColors.length],
+    strokeWidth: 2,
+    label: fuelName,
+  }));
+
+  return { labels, datasets, types };
+};
+
 export const buildSpendingChartData = (tableData = [], options = {}) => {
   const totalLabel = options.totalLabel || 'Total';
   const grouped = {};

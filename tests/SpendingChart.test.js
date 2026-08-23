@@ -1,12 +1,26 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { buildSpendingChartData, SpendingChart } from '../components/SpendingChart';
+import {
+  buildFuelAverageChartData,
+  buildSpendingChartData,
+  SpendingChart,
+} from '../components/SpendingChart';
 
 jest.mock('react-native-chart-kit', () => ({
   LineChart: () => null,
 }));
 
 describe('SpendingChart', () => {
+  it('keeps each fueling as a separate consumption point', () => {
+    const result = buildFuelAverageChartData([
+      ['1', '01/01/2024', 'Gasoline', '', '', '', '', '', '', '10.50'],
+      ['2', '15/01/2024', 'Gasoline', '', '', '', '', '', '', '12.00'],
+    ]);
+
+    expect(result.labels).toEqual(['01/01/2024', '15/01/2024']);
+    expect(result.datasets[0].data).toEqual([10.5, 12]);
+  });
+
   it('builds chart datasets from spending rows', () => {
     const rows = [
       ['1', '01/01/2024', '10.50', 'Fuel', '100', 'first', 'shop'],

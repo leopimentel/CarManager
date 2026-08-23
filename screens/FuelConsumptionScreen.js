@@ -18,7 +18,7 @@ import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import VehiclePicker from '../components/VehiclePicker';
-import SpendingChart from '../components/SpendingChart';
+import SpendingChart, { buildFuelAverageChartData } from '../components/SpendingChart';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -299,55 +299,10 @@ console.log("cars", cars)
     );    
   };
 
-  const chartColors = [
-    '#4285F4', '#EA4335', '#FBBC05', '#34A853', '#9C27B0', '#FF9800', '#00BCD4', '#E91E63'
-  ];
-
-  const fuelAverageChartData = useMemo(() => {
-    const grouped = {};
-    const allDates = new Set();
-
-    tableData.forEach((row) => {
-      const average = Number.parseFloat(row[9]);
-      const fuelName = row[2];
-
-      if (!fuelName || !Number.isFinite(average)) {
-        return;
-      }
-
-      const date = moment(row[1], 'DD/MM/YYYY').format('MM/YYYY');
-      allDates.add(date);
-
-      if (!grouped[fuelName]) {
-        grouped[fuelName] = {};
-      }
-
-      if (!grouped[fuelName][date]) {
-        grouped[fuelName][date] = { sum: 0, count: 0 };
-      }
-
-      grouped[fuelName][date].sum += average;
-      grouped[fuelName][date].count += 1;
-    });
-
-    const labels = Array.from(allDates).sort();
-    const types = Object.keys(grouped);
-    const datasets = types.map((fuelName, idx) => ({
-      data: labels.map((date) => {
-        const current = grouped[fuelName][date];
-        return current ? current.sum / current.count : 0;
-      }),
-      color: () => chartColors[idx % chartColors.length],
-      strokeWidth: 2,
-      label: fuelName,
-    }));
-
-    return {
-      labels,
-      datasets,
-      types,
-    };
-  }, [tableData]);
+  const fuelAverageChartData = useMemo(
+    () => buildFuelAverageChartData(tableData),
+    [tableData]
+  );
 
   if (loading) {
     return <Loading loading={loading} />
