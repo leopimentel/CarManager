@@ -16,11 +16,15 @@ const getColorForType = (type, idx, totalLabel) =>
 export const buildFuelAverageChartData = (tableData = []) => {
   const points = [];
 
-  tableData.forEach((row) => {
+  tableData.forEach((row, idx) => {
     const average = Number.parseFloat(row[9]);
     const fuelName = row[2];
 
     if (row[10] !== t('yes') || !fuelName || !Number.isFinite(average)) {
+      return;
+    }
+
+    if (idx > 0 &&  tableData[idx - 1][10] !== t('yes')) {
       return;
     }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, List, TextInput, Dialog, Portal, Button, Caption } from 'react-native-paper';
+import { withTheme, List, TextInput, Dialog, Portal, Button, Text } from 'react-native-paper';
 import { getStyles } from './style'
 import { t } from '../locales'
 import { fetchVehicles, insertVehicleDb, updateVehicleDb, deleteVehicleDb } from '../database/queries'
@@ -206,7 +206,7 @@ function SettingsScreen({ theme }) {
       </Portal>
 
       <ScrollView>
-        <Caption style={{textAlign: 'right'}}>{t('version')}: {Constants.expoConfig.version}</Caption>
+        <Text variant="bodySmall" style={{textAlign: 'right'}}>{t('version')}: {Constants.expoConfig.version}</Text>
         <List.Section>
           <List.Subheader>{t('backupRestore')}</List.Subheader>
           <List.Item

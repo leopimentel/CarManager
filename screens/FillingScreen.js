@@ -340,7 +340,7 @@ function FillingScreen({ theme, route, navigation }) {
         <DateTimePicker
           value={fillingDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowDatePicker(!showDatePicker);
             setFillingDate(selectedDate || fillingDate)              
           }}

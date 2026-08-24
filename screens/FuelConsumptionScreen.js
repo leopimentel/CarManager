@@ -315,7 +315,7 @@ console.log("cars", cars)
           <DateTimePicker
           value={fillingPeriod.startDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowStartFillingDate(!showStartFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
@@ -328,7 +328,7 @@ console.log("cars", cars)
           <DateTimePicker
           value={fillingPeriod.endDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowEndFillingDate(!showEndFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
@@ -414,7 +414,7 @@ console.log("cars", cars)
           visible={showChart}
           title={t('averageOverTime')}
           chartData={fuelAverageChartData}
-          currency={t('currency')}
+          currency={''}
           closeLabel={t('close')}
           totalLabel={t('total')}
           onClose={() => setShowChart(false)}
