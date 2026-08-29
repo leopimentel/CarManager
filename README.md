@@ -6,7 +6,6 @@ Upgrade expo SDK
 - npx expo install --fix && npx expo-doctor
 
 npx expo install --check #check compatibility and packages which need to be updated
-npx expo install --fix #update invalid package version
 npx expo start --reset-cache
 npx expo install react-native-simple-toast
 npx expo uninstall react-native-tiny-toast
@@ -18,7 +17,6 @@ Android Play Store build (generates .aab file to upload on Android Play Store)
 Publish OTA
 - eas update
 - eas update --channel production --message "Testando eas update" -p android
-- expo publish (old, do not use)
 
 Show Lint
 yarn lint

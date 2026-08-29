@@ -119,6 +119,7 @@ export default {
   totalWithDiscount: "Total com desconto",
   parking: "Estacionamento",
   additivatedEthanol: "Álcool aditivado",
-  spendingTypeOverTime: "Gastos por tipo ao longo do tempo",
+  spendingTypeOverTime: "Gastos por tipo ao longo do tempo (R$)",
   chart: "Gráfico",
+  averageOverTime: "Média ao longo do tempo (KM/L)",
 };

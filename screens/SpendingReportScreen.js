@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Modal, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -19,7 +19,7 @@ import { MaterialCommunityIcons, MaterialIcons as Icon } from '@expo/vector-icon
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import { exportTableToCSV } from '../utils/csv'
 import VehiclePicker from '../components/VehiclePicker';
-import { LineChart } from 'react-native-chart-kit';
+import BarChart, { buildSpendingChartData } from '../components/BarChart';
 
 function SpendingReportScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -41,7 +41,6 @@ function SpendingReportScreen({ theme, route, navigation }) {
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
   const [showChart, setShowChart] = useState(false);
-  const [tooltip, setTooltip] = useState(null); // {x, y, value, label, type}
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
     {title: t('date'), style: {width: 90}},
@@ -181,57 +180,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
     </TouchableOpacity>
   )};
 
-  // Helper to assign a color per spending type
-  const chartColors = [
-    "#4285F4", "#EA4335", "#FBBC05", "#34A853", "#9C27B0", "#FF9800", "#00BCD4", "#E91E63"
-  ];
-  const totalColor = "#222"; // Color for total line
-  const getColorForType = (type, idx) => type === t('total') ? totalColor : chartColors[idx % chartColors.length];
-
-  // Helper to group spending by type and date
-  const getChartData = () => {
-    // Group by spending type and date (MM/YYYY)
-    const grouped = {};
-    tableData.forEach(row => {
-      const type = row[3];
-      const date = moment(row[1], 'DD/MM/YYYY').format('MM/YYYY');
-      if (!grouped[type]) grouped[type] = {};
-      if (!grouped[type][date]) grouped[type][date] = 0;
-      grouped[type][date] += parseFloat(row[2]);
-    });
-
-    // Get all unique dates sorted
-    const allDates = Array.from(new Set(
-      Object.values(grouped).flatMap(typeObj => Object.keys(typeObj))
-    )).sort();
-
-    // Prepare datasets for chart-kit
-    const types = Object.keys(grouped);
-    const datasets = types.map((type, idx) => ({
-      data: allDates.map(date => grouped[type][date] || 0),
-      color: () => getColorForType(type, idx),
-      strokeWidth: 2,
-      label: type
-    }));
-
-    // Add total dataset
-    const totalData = allDates.map(date =>
-      types.reduce((sum, type) => sum + (grouped[type][date] || 0), 0)
-    );
-    datasets.push({
-      data: totalData,
-      color: () => totalColor,
-      strokeWidth: 0.1,
-      label: t('total')
-    });
-    types.push(t('total'));
-
-    return {
-      labels: allDates,
-      datasets: datasets,
-      types: types
-    };
-  };
+  const chartData = buildSpendingChartData(tableData, { totalLabel: t('total') });
 
   if (loading) {
     return <Loading loading={loading} />
@@ -246,7 +195,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           <DateTimePicker
           value={period.startDate}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowStartDate(!showStartDate);
             setPeriod({
               ...period,
@@ -259,7 +208,7 @@ function SpendingReportScreen({ theme, route, navigation }) {
           <DateTimePicker
           value={period.endDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowEndDate(!showEndDate);
             setPeriod({
               ...period,
@@ -382,92 +331,15 @@ function SpendingReportScreen({ theme, route, navigation }) {
               {t('chart')}
             </Button>
         </View>
-        {/* Chart Modal */}
-        <Modal visible={showChart} animationType="slide" transparent={false} onRequestClose={() => setShowChart(false)}>
-          <View style={{ flex: 1, padding: 10, backgroundColor: '#fff' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>{t('spendingTypeOverTime')}</Text>
-            <ScrollView horizontal>
-              <View>
-                <LineChart
-                  data={{
-                    labels: getChartData().labels,
-                    datasets: getChartData().datasets
-                  }}
-                  width={Math.max(Dimensions.get('window').width, getChartData().labels.length * 60)}
-                  height={650}
-                  yAxisLabel={t('currency')}
-                  chartConfig={{
-                    backgroundColor: "#fff",
-                    backgroundGradientFrom: "#fff",
-                    backgroundGradientTo: "#fff",
-                    color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    propsForDots: { r: "10", strokeWidth: "0"},
-                  }}
-                  onDataPointClick={data => {
-                    setTooltip({
-                      x: data.x,
-                      y: data.y,
-                      value: Math.round(data.value * 100) / 100, // Round to 2 decimal places
-                      label: getChartData().labels[data.index],
-                      type: data.dataset.label
-                    });
-                  }}
-                />
-                {/* Tooltip */}
-                {tooltip && (
-                  <View
-                    pointerEvents="box-none"
-                    style={{
-                      position: 'absolute',
-                      left: Math.max(tooltip.x - 60, 10),
-                      top: Math.max(tooltip.y + 30, 10),
-                      backgroundColor: '#fff',
-                      borderRadius: 8,
-                      padding: 8,
-                      borderWidth: 1,
-                      borderColor: '#ccc',
-                      elevation: 3,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.2,
-                      shadowRadius: 2,
-                      minWidth: 100,
-                      zIndex: 999
-                    }}
-                  >
-                    <Text style={{ fontWeight: 'bold', color: getColorForType(tooltip.type, getChartData().types.indexOf(tooltip.type)) }}>
-                      {tooltip.type}
-                    </Text>
-                    <Text>{tooltip.label}</Text>
-                    <Text>{t('currency')}{tooltip.value} </Text>
-                    <TouchableOpacity onPress={() => setTooltip(null)} style={{alignSelf: 'flex-end', marginTop: 4}}>
-                      <Text style={{color: Colors.primary, fontSize: 12}}>{t('close')}</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-            {/* Legend */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {getChartData().types.map((type, idx) => (
-                <View key={type} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, marginBottom: 5 }}>
-                  <View style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: 7,
-                    backgroundColor: getColorForType(type, idx),
-                    marginRight: 5,
-                  }} />
-                  <Text>{type}</Text>
-                </View>
-              ))}
-            </View>
-            <Button mode="contained" style={{marginTop: 10}} onPress={() => { setShowChart(false); setTooltip(null); }}>
-              {t('close')}
-            </Button>
-          </View>
-        </Modal>
+        <BarChart
+          visible={showChart}
+          title={t('spendingTypeOverTime')}
+          chartData={chartData}
+          currency={t('currency')}
+          closeLabel={t('close')}
+          totalLabel={t('total')}
+          onClose={() => setShowChart(false)}
+        />
 
         {mode === TABLE_MODE &&
         <ScrollView horizontal>

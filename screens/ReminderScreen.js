@@ -198,7 +198,7 @@ function ReminderScreen({ theme, route, navigation }) {
           value={date}
           minimumDate={new Date()}
           mode="date"
-          onChange={(_, selectedDateTime) => {
+          onValueChange={(_, selectedDateTime) => {
             setShowDatePicker(!showDatePicker);
             setSelectedDate(selectedDateTime)
             setDate(selectedDateTime || date)              

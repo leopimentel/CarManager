@@ -193,7 +193,7 @@ function SpendingScreen({ theme, route, navigation }) {
         <DateTimePicker
           value={date}
           mode="date"
-          onChange={(event, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowDatePicker(!showDatePicker);
             setDate(selectedDate || date)              
           }}

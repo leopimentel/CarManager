@@ -18,6 +18,7 @@ import { NumericFormat } from 'react-number-format';
 import Colors from '../constants/Colors'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import VehiclePicker from '../components/VehiclePicker';
+import BarChart, { buildFuelAverageChartData } from '../components/BarChart';
 
 function FuelConsumptionScreen({ theme, route, navigation }) {
   const styles = getStyles(theme)
@@ -67,6 +68,7 @@ function FuelConsumptionScreen({ theme, route, navigation }) {
   const timeOptions = timeFilter;
   const [periodView, setPeriodView] = useState(timeOptions[0].index)
   const [loading, setLoading] = useState(false)
+  const [showChart, setShowChart] = useState(false);
   const tableHead = [
     {title: t('edit'), style: {width: 50}},
     {title: t('date'), style: {width: 90}},
@@ -297,6 +299,11 @@ console.log("cars", cars)
     );    
   };
 
+  const fuelAverageChartData = useMemo(
+    () => buildFuelAverageChartData(tableData),
+    [tableData]
+  );
+
   if (loading) {
     return <Loading loading={loading} />
   }
@@ -308,7 +315,7 @@ console.log("cars", cars)
           <DateTimePicker
           value={fillingPeriod.startDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowStartFillingDate(!showStartFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
@@ -321,7 +328,7 @@ console.log("cars", cars)
           <DateTimePicker
           value={fillingPeriod.endDate}
           mode="date"
-          onChange={(_, selectedDate) => {
+          onValueChange={(_, selectedDate) => {
             setShowEndFillingDate(!showEndFillingDate);
             setFillingPeriod({
               ...fillingPeriod,
@@ -387,14 +394,31 @@ console.log("cars", cars)
           </View>
         </View>
 
-        <View style={styles.splitRow}>
-        <View style={{ flex: 1 }}>
-          <Button style={{ flex: 1, marginTop: 5, marginBottom: 0 }} labelStyle={{fontSize: 15}}
-        uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
-        {t('export_sheet')}
-        </Button>
+        <View style={{ ...styles.splitRow, marginTop: 5 }}>
+          <View style={{ flex: 1, marginRight: 5 }}>
+            <Button style={{ flex: 1, marginTop: 0, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+              uppercase={false} compact icon="google-spreadsheet" mode="contained" onPress={() => exportTable()}>
+              {t('export_sheet')}
+            </Button>
+          </View>
+
+          <View style={{ flex: 1, marginLeft: 5 }}>
+            <Button style={{ flex: 1, marginTop: 0, marginBottom: 0 }} labelStyle={{fontSize: 15}}
+              uppercase={false} compact icon="chart-line" mode="contained" onPress={() => setShowChart(true)}>
+              {t('chart')}
+            </Button>
           </View>
         </View>
+
+        <BarChart
+          visible={showChart}
+          title={t('averageOverTime')}
+          chartData={fuelAverageChartData}
+          currency={''}
+          closeLabel={t('close')}
+          totalLabel={t('total')}
+          onClose={() => setShowChart(false)}
+        />
 
         <ScrollView horizontal>
           <View style={{marginTop: 5, marginBottom: 5}}>
