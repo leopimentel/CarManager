@@ -2,13 +2,6 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { Alert } from 'react-native';
 import { showConfirmAlert, showMessageAlert } from '../utils/alert';
 
-// Mock the Alert module
-jest.mock('react-native', () => ({
-  Alert: {
-    alert: jest.fn(),
-  },
-}));
-
 // // Mock the translation function
 jest.mock('../locales', () => ({
   t: jest.fn((key) => key),
@@ -16,6 +9,7 @@ jest.mock('../locales', () => ({
 
 describe('Alert Utility Functions', () => {
   beforeEach(() => {
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     jest.clearAllMocks();
   });
 

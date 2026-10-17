@@ -9,6 +9,9 @@
     ],
     "version": "1.0.48",
     "orientation": "portrait",
+    "experiments": {
+      "reactCompiler": true
+    },
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "updates": {
