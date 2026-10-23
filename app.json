@@ -7,8 +7,11 @@
       "android",
       "web"
     ],
-    "version": "1.0.48",
+    "version": "1.0.49",
     "orientation": "portrait",
+    "experiments": {
+      "reactCompiler": true
+    },
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "updates": {
@@ -20,7 +23,7 @@
     ],
     "android": {
       "package": "com.webmoderna.carManager",
-      "versionCode": 49,
+      "versionCode": 50,
       "permissions": [],
       "adaptiveIcon": {
         "backgroundColor": "#FFD648",
