@@ -4068,7 +4068,7 @@ expo-updates@~58.0.17:
     nullthrows "^1.1.1"
     resolve-from "^5.0.0"
 
-expo@^58.0.14:
+expo@^58.0.17:
   version "58.0.17"
   resolved "https://registry.yarnpkg.com/expo/-/expo-58.0.17.tgz#44b2bf40afc4c4005be55a8e8bab639befc6154d"
   integrity sha512-IFH8ExamRC2m7La8q/RiBaZ3dcHga2fuMPQzRXsagS7w2sLDwwExEpZWT9Mr+30A13xEuXAHxZD3zmtgetzvHw==
